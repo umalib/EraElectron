@@ -6,6 +6,6 @@
 
 <script>
 export default {
-  name: "Copy-right",
+  name: 'game-copyright',
 };
 </script>
