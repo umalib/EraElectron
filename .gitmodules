@@ -1,0 +1,3 @@
+[submodule "test-case"]
+	path = test-case
+	url = https://github.com/ShichijouTakatoshi/EraUma.git
