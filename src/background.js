@@ -6,6 +6,7 @@ const { join } = require('path');
 const { homedir } = require('os');
 const { readdirSync, readFileSync } = require('fs');
 const log4js = require('log4js');
+const createEra = require('@/era-electron');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -48,37 +49,7 @@ async function createWindow() {
     win.webContents.send('connector', request);
   }
 
-  const era = {
-    __unused() {},
-    button(str, num, isButton) {
-      connect({
-        action: 'button',
-        data: {
-          str,
-          num,
-          isButton,
-        },
-      });
-    },
-    clear() {
-      connect({ action: 'clear' });
-    },
-    drawLine() {
-      connect({ action: 'drawLine' });
-    },
-    log(info) {
-      connect({ action: 'log', data: info });
-    },
-    print(str) {
-      connect({ action: 'print', data: str });
-    },
-    println() {
-      connect({ action: 'println' });
-    },
-    setAlign(align) {
-      connect({ action: 'setAlign', data: align });
-    },
-  };
+  const era = createEra(connect);
 
   era.__unused();
 
@@ -92,6 +63,11 @@ async function createWindow() {
       '',
     );
     eval(code);
+
+    let csv = readFileSync(
+      join(__dirname, '../example/CSV/Chara/Chara1001 特别周.csv'),
+    ).toString('utf-8');
+    connect({ action: 'parse', data: csv });
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

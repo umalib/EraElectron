@@ -4,13 +4,18 @@
       <el-divider v-if="line.type === lineType.divider" />
       <el-row v-else :style="{ textAlign: line.textAlign || defaultAlign }">
         <el-col :span="line.width || 24">
-          <el-button v-if="line.type === lineType.button && line.isButton">
-            {{ line.content }}
-          </el-button>
-          <el-link v-if="line.type === lineType.button && !line.isButton">
-            {{ line.content }}
-          </el-link>
-          <p v-if="line.type === lineType.text">{{ line.content }}</p>
+          <span v-if="line.type === lineType.button">
+            <el-button v-if="line.isButton">
+              {{ line.content }}
+            </el-button>
+            <el-link v-else>
+              {{ line.content }}
+            </el-link>
+          </span>
+          <span v-if="line.type === lineType.text">
+            <p v-if="line.isParagraph">{{ line.content }}</p>
+            <span v-else>{{ line.content }}</span>
+          </span>
         </el-col>
       </el-row>
       <br v-if="line.type === lineType.lineUp" />
@@ -19,8 +24,9 @@
 </template>
 
 <script>
-import connector from '@/renderer/utils/connector';
 import embeddedData from '@/renderer/utils/data';
+import connector from '@/renderer/utils/connector';
+import csv from '@/renderer/utils/csv-utils';
 
 export default {
   name: 'GameMain',
@@ -39,11 +45,12 @@ export default {
     connector.register('drawLine', () => {
       this.lines.push({ type: this.lineType.divider });
     });
-    connector.register('print', (str) => {
+    connector.register('print', (data) => {
       this.lines.push({
-        content: str,
+        content: data.content,
         textAlign: this.defaultAlign,
         type: this.lineType.text,
+        isParagraph: data.isParagraph,
       });
     });
     connector.register('println', () => {
@@ -51,6 +58,9 @@ export default {
     });
     connector.register('setAlign', (align) => {
       this.defaultAlign = align;
+    });
+    connector.register('parse', (content) => {
+      console.log(csv.parse(content));
     });
     connector.ready();
   },
