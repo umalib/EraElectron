@@ -14,4 +14,10 @@ export default {
   register(action, handler) {
     registry[action] = handler;
   },
+  reload() {
+    window['ipc'].reload();
+  },
+  returnInput(key, val) {
+    window['ipc'].returnInput(key, val);
+  },
 };

@@ -1,9 +1,10 @@
 module.exports = {
-  button() {},
   clear() {},
   drawLine() {},
+  input() {},
   log() {},
   print() {},
+  printButton() {},
   println() {},
   setAlign() {},
 };

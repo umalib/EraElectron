@@ -4,7 +4,7 @@ const { app, BrowserWindow, protocol, session, ipcMain } = require('electron');
 const { createProtocol } = require('vue-cli-plugin-electron-builder/lib');
 const { join } = require('path');
 const { homedir } = require('os');
-const { readdirSync, readFileSync } = require('fs');
+const { readdirSync } = require('fs');
 const log4js = require('log4js');
 const createEra = require('@/era-electron');
 
@@ -49,25 +49,26 @@ async function createWindow() {
     win.webContents.send('connector', request);
   }
 
-  const era = createEra(connect);
+  function listen(key, cb) {
+    ipcMain.on(key, cb);
+  }
 
-  era.__unused();
+  function cleanListener(key) {
+    ipcMain.removeAllListeners(key);
+  }
+
+  const era = createEra(
+    join(__dirname, '../example'),
+    connect,
+    listen,
+    cleanListener,
+    logger,
+  );
 
   ipcMain.removeAllListeners();
-  ipcMain.on('electron', () => {
-    let code = readFileSync(join(__dirname, '../example/ERE/main.js')).toString(
-      'utf-8',
-    );
-    code = code.replace(
-      /(const|var|let)?\s+\S+\s*=\s*require\s*\(\s*('|")(.\/)?era-electron(\.js)?('|");?\s*\)\s*;/g,
-      '',
-    );
-    eval(code);
 
-    let csv = readFileSync(
-      join(__dirname, '../example/CSV/Chara/Chara1001 特别周.csv'),
-    ).toString('utf-8');
-    connect({ action: 'parse', data: csv });
+  ipcMain.on('electron', (_, isRestart) => {
+    isRestart ? era.restart() : era.start();
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

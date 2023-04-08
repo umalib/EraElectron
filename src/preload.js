@@ -9,6 +9,12 @@ contextBridge.exposeInMainWorld('ipc', {
     ipcRenderer.on('connector', (_, res) => cb(res));
   },
   ready() {
-    ipcRenderer.send('electron');
+    ipcRenderer.send('electron', false);
+  },
+  reload() {
+    ipcRenderer.send('electron', true);
+  },
+  returnInput(key, val) {
+    ipcRenderer.send(key, val);
   },
 });

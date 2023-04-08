@@ -2,7 +2,8 @@ export default {
   lineType: {
     button: 1,
     divider: 2,
-    lineUp: 3,
-    text: 4,
+    input: 3,
+    lineUp: 4,
+    text: 5,
   },
 };
