@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { ElAlert, ElMessage } from 'element-plus';
+import { ElMessage, ElNotification } from 'element-plus';
 
 import embeddedData from '@/renderer/utils/data';
 import connector from '@/renderer/utils/connector';
@@ -49,7 +49,13 @@ export default {
     connector.register('drawLine', () =>
       this.lines.push({ type: this.lineType.divider }),
     );
-    connector.register('error', (message) => ElAlert(message));
+    connector.register('error', (message) =>
+      ElNotification({
+        title: '脚本错误',
+        message,
+        duration: 0,
+      }),
+    );
     connector.register('input', (data) => {
       this.input.val = '';
       this.input.key = data.inputKey;
@@ -101,7 +107,7 @@ export default {
     },
     returnInput() {
       if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
-        ElMessage(`输入不合法！输入规范：${this.input.rule.source}`);
+        ElMessage.error(`输入不合法！输入规范：${this.input.rule.source}`);
         return;
       }
       connector.returnInput(this.input.key, this.input.val);
