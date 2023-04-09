@@ -4,9 +4,9 @@ const init_game = require('./init_game');
 module.exports = async () => {
   era.log('era init');
 
-  let titleFlag = true;
+  let flagTitle = true;
 
-  while (titleFlag) {
+  while (flagTitle) {
     era.clear();
 
     era.setAlign('center');
@@ -15,11 +15,13 @@ module.exports = async () => {
     era.print('Takatoshi');
     era.drawLine();
 
-    era.printButton('[0] 开始新游戏', 0, true);
+    era.printButton('[0] 开始新游戏', 0);
     era.printButton('[1] 加载存档', 1);
     era.printButton('[2] 自建角色', 2);
     era.printButton('[3] 帮助说明', 3);
     era.drawLine();
+
+    era.setAlign('left');
 
     let ret = await era.input('[0-3]');
     switch (Number(ret)) {
