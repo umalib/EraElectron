@@ -8,21 +8,33 @@
           :style="{ textAlign: line.textAlign || defaultAlign }"
         >
           <span v-if="line.type === lineType.button">
-            <el-button v-if="line.isButton">
+            <el-button v-if="line.isButton" @click="returnFromButton(line.num)">
               {{ line.content }}
             </el-button>
-            <el-link v-else>
+            <el-link v-else @click="returnFromButton(line.num)">
               {{ line.content }}
             </el-link>
           </span>
+
           <span v-if="line.type === lineType.text">
-            <p v-if="line.isParagraph">{{ line.content }}</p>
-            <span v-else>{{ line.content }}</span>
+            <p v-if="line.isParagraph">
+              <span v-for="(content, i) in line.contents" :key="content">
+                <br v-if="i !== 0" />
+                {{ content }}
+              </span>
+            </p>
+            <span v-else>
+              <span v-for="(content, i) in line.contents" :key="content">
+                <br v-if="i !== 0" />
+                {{ content }}
+              </span>
+            </span>
           </span>
+
           <el-input
             v-if="line.type === lineType.input"
             v-model="input.val"
-            @change="returnInput"
+            @change="returnInput()"
           />
         </el-col>
       </el-row>
@@ -30,7 +42,7 @@
     </span>
     <el-row>
       <el-col style="text-align: center">
-        <el-button type="primary" @click="reload">Reload</el-button>
+        <el-button type="primary" @click="reload()">Reload</el-button>
       </el-col>
     </el-row>
   </div>
@@ -45,7 +57,14 @@ import csv from '@/renderer/utils/csv-utils';
 
 export default {
   mounted() {
-    connector.register('clear', () => (this.lines = []));
+    connector.register('clear', (count) => {
+      const lineCount = Number(count);
+      if (isNaN(lineCount) || lineCount > this.lines.length) {
+        this.lines = [];
+      } else if (lineCount > 0) {
+        this.lines.slice(this.lines.length - lineCount, lineCount);
+      }
+    });
     connector.register('drawLine', () =>
       this.lines.push({ type: this.lineType.divider }),
     );
@@ -68,15 +87,15 @@ export default {
     connector.register('log', (info) => console.log(info));
     connector.register('print', (data) =>
       this.lines.push({
-        content: data.content,
-        textAlign: this.defaultAlign,
+        contents: data.content.split('\n'),
+        textAlign: data.config.align || this.defaultAlign,
         type: this.lineType.text,
-        isParagraph: data.isParagraph,
+        isParagraph: data.config['paragraph'] || data.config.p,
       }),
     );
     connector.register('printButton', (data) =>
       this.lines.push({
-        accelerator: data.num,
+        num: data.num,
         content: data.str,
         isButton: data.isButton,
         textAlign: this.defaultAlign,
@@ -117,6 +136,12 @@ export default {
         return;
       }
       connector.returnInput(this.input.key, this.input.val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      this.lines.pop();
+    },
+    returnFromButton(val) {
+      connector.returnInput(this.input.key, val);
       this.input.rule = undefined;
       this.input.val = '';
       this.lines.pop();

@@ -1,7 +1,8 @@
 module.exports = {
   clear() {},
   drawLine() {},
-  input() {},
+  async input() {},
+  async inputAny() {},
   log() {},
   print() {},
   printButton() {},

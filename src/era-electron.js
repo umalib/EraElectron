@@ -26,12 +26,20 @@ module.exports = (path, connect, listen, cleanListener) => {
     });
   }
 
+  async function inputAny() {
+    print('按任意键继续……', {
+      p: false,
+      align: 'left',
+    });
+    await input();
+  }
+
   function log(info) {
     connect({ action: 'log', data: info });
   }
 
-  function print(str, isParagraph) {
-    connect({ action: 'print', data: { content: str, isParagraph } });
+  function print(str, config) {
+    connect({ action: 'print', data: { content: str, config: config || {} } });
   }
 
   function printButton(str, num, isButton) {
