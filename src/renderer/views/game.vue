@@ -54,13 +54,14 @@ export default {
         title: '脚本错误',
         message,
         duration: 0,
+        type: 'error',
       }),
     );
     connector.register('input', (data) => {
       this.input.val = '';
       this.input.key = data.inputKey;
       if (data.rule) {
-        this.input.rule = new RegExp(data.rule);
+        this.input.rule = new RegExp(`^${data.rule}$`);
       }
       this.lines.push({ type: this.lineType.input });
     });
@@ -107,7 +108,12 @@ export default {
     },
     returnInput() {
       if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
-        ElMessage.error(`输入不合法！输入规范：${this.input.rule.source}`);
+        ElMessage.error(
+          `输入不合法！输入规范：${this.input.rule.source.substring(
+            1,
+            this.input.rule.source.length - 1,
+          )}`,
+        );
         return;
       }
       connector.returnInput(this.input.key, this.input.val);

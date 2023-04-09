@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const { join } = require('path');
 
 module.exports = (path, connect, listen, cleanListener) => {
@@ -56,7 +55,6 @@ module.exports = (path, connect, listen, cleanListener) => {
 
   return {
     api: {
-      __unused() {},
       clear,
       drawLine,
       input,
@@ -68,20 +66,42 @@ module.exports = (path, connect, listen, cleanListener) => {
     },
     data: {},
     start() {
-      const era = this.api;
-      era.__unused();
+      // const files = readdirSync(join(path, './ERE'));
+      // if (files.filter((x) => x === 'main.js').length === 0) {
+      //   error('找不到入口脚本！');
+      //   return;
+      // }
+      // const inputMatch = /era.input\(/;
+      // files
+      //   .filter((x) => x !== 'main.js' && x !== 'era-electron.js')
+      //   .forEach((script) => {
+      //     let code = readFileSync(join(path, `./ERE/${script}`)).toString(
+      //       'utf-8',
+      //     );
+      //     code = code.replace(
+      //       /(const|var|let)?\s+\S+\s*=\s*require\s*\(\s*['|"](.\/)?era-electron(\.js)?['|"];?\s*\)\s*;/g,
+      //       '',
+      //     );
+      //     if (inputMatch.exec(code) !== null) {
+      //       code = code.replace(/era\.input\(/g, 'await era.input(');
+      //     }
+      //   });
 
-      let code = readFileSync(join(path, './ERE/main.js')).toString('utf-8');
-      code = code.replace(
-        /(const|var|let)?\s+\S+\s*=\s*require\s*\(\s*['|"](.\/)?era-electron(\.js)?['|"];?\s*\)\s*;/g,
-        '',
-      );
-      code = `async function task(){${code.replace(
-        /era\.input\(/g,
-        'await era.input(',
-      )}}\ntask().then()`;
       try {
-        eval(code);
+        let gameMain;
+        let eraModule;
+
+        // clear cache, load game main and find era
+        eval(`Object.keys(require.cache)
+          .filter(x => x.startsWith('${path}'))
+          .forEach(x => delete require.cache[x]);
+        gameMain = require('${join(path, './ERE/main.js')}');
+        eraModule = require.cache[Object.keys(require.cache)
+          .filter(x=>x.startsWith('${path}') && x.endsWith('era-electron.js'))]`);
+        Object.keys(this.api).forEach(
+          (k) => (eraModule.exports[k] = this.api[k]),
+        );
+        gameMain();
       } catch (e) {
         error(e.message);
       }

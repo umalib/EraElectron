@@ -58,7 +58,7 @@ async function createWindow() {
   }
 
   const era = createEra(
-    join(__dirname, '../example'),
+    join(process.cwd(), './example'),
     connect,
     listen,
     cleanListener,
