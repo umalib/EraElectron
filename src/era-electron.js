@@ -27,7 +27,7 @@ module.exports = (path, connect, listen, cleanListener) => {
   }
 
   async function inputAny() {
-    print('按任意键继续……', {
+    print('输入任意键继续……', {
       p: false,
       align: 'left',
     });
@@ -66,6 +66,7 @@ module.exports = (path, connect, listen, cleanListener) => {
       clear,
       drawLine,
       input,
+      inputAny,
       log,
       print,
       printButton,

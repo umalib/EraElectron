@@ -37,6 +37,5 @@ module.exports = async () => {
       continue;
     }
     await era.inputAny();
-    await era.input();
   }
 };
