@@ -6,7 +6,7 @@ const { join } = require('path');
 const { homedir } = require('os');
 const { readdirSync } = require('fs');
 const log4js = require('log4js');
-const createEra = require('@/era-electron');
+const createEra = require('@/era/era-electron');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 

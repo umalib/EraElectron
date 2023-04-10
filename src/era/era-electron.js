@@ -1,4 +1,6 @@
+const { readdirSync, readFileSync, statSync } = require('fs');
 const { join } = require('path');
+const parseCSV = require('@/era/csv-utils');
 
 module.exports = (path, connect, listen, cleanListener) => {
   function clear() {
@@ -73,43 +75,50 @@ module.exports = (path, connect, listen, cleanListener) => {
       println,
       setAlign,
     },
+    staticData: {},
     data: {},
-    start() {
-      // const files = readdirSync(join(path, './ERE'));
-      // if (files.filter((x) => x === 'main.js').length === 0) {
-      //   error('找不到入口脚本！');
-      //   return;
-      // }
-      // const inputMatch = /era.input\(/;
-      // files
-      //   .filter((x) => x !== 'main.js' && x !== 'era-electron.js')
-      //   .forEach((script) => {
-      //     let code = readFileSync(join(path, `./ERE/${script}`)).toString(
-      //       'utf-8',
-      //     );
-      //     code = code.replace(
-      //       /(const|var|let)?\s+\S+\s*=\s*require\s*\(\s*['|"](.\/)?era-electron(\.js)?['|"];?\s*\)\s*;/g,
-      //       '',
-      //     );
-      //     if (inputMatch.exec(code) !== null) {
-      //       code = code.replace(/era\.input\(/g, 'await era.input(');
-      //     }
-      //   });
+    async start() {
+      const _this = this;
 
+      // load CSV
+      function loadFile(_path, fileName, obj) {
+        if (statSync(_path).isDirectory()) {
+          obj[fileName] = {};
+          readdirSync(_path).forEach((f) =>
+            loadFile(join(_path, `./${f}`), f, obj[fileName]),
+          );
+        } else if (_path.endsWith('.csv') || _path.endsWith('.CSV')) {
+          print(`loading ${fileName} ...`);
+          const content = readFileSync(_path).toString('utf-8');
+          obj[fileName.substring(0, fileName.length - 4)] = parseCSV(content);
+        }
+      }
+
+      this.api.clear();
+      const csvPath = join(path, './CSV');
+      const fileList = readdirSync(csvPath);
+      fileList.forEach((f) =>
+        loadFile(join(csvPath, `./${f}`), f, _this.staticData),
+      );
+
+      // load ERE
+      let gameMain;
+      let eraModule;
       try {
-        let gameMain;
-        let eraModule;
-
-        // clear cache, load game main and find era
+        const gameMainPath = join(path, './ERE/main.js');
+        print(`loading game from ${gameMainPath} ...`);
+        // clear cache, load game, and inject era
         eval(`Object.keys(require.cache)
           .filter(x => x.startsWith('${path}'))
           .forEach(x => delete require.cache[x]);
-        gameMain = require('${join(path, './ERE/main.js')}');
+        gameMain = require('${gameMainPath}');
         eraModule = require.cache[Object.keys(require.cache)
           .filter(x=>x.startsWith('${path}') && x.endsWith('era-electron.js'))]`);
+
         Object.keys(this.api).forEach(
-          (k) => (eraModule.exports[k] = this.api[k]),
+          (k) => (eraModule.exports[k] = _this.api[k]),
         );
+        await this.api.inputAny();
         gameMain();
       } catch (e) {
         error(e.message);

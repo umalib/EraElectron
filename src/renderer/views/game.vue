@@ -53,9 +53,46 @@ import { ElMessage, ElNotification } from 'element-plus';
 
 import embeddedData from '@/renderer/utils/data';
 import connector from '@/renderer/utils/connector';
-import csv from '@/renderer/utils/csv-utils';
 
 export default {
+  data() {
+    return {
+      defaultAlign: 'left',
+      lineType: embeddedData.lineType,
+      lines: [],
+      input: {
+        key: '',
+        rule: undefined,
+        val: '',
+      },
+    };
+  },
+  methods: {
+    reload() {
+      connector.reload();
+    },
+    returnInput() {
+      if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
+        ElMessage.error(
+          `输入不合法！输入规范：${this.input.rule.source.substring(
+            1,
+            this.input.rule.source.length - 1,
+          )}`,
+        );
+        return;
+      }
+      connector.returnInput(this.input.key, this.input.val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      this.lines.pop();
+    },
+    returnFromButton(val) {
+      connector.returnInput(this.input.key, val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      this.lines.pop();
+    },
+  },
   mounted() {
     connector.register('clear', (count) => {
       const lineCount = Number(count);
@@ -106,46 +143,7 @@ export default {
       this.lines.push({ type: this.lineType.lineUp }),
     );
     connector.register('setAlign', (align) => (this.defaultAlign = align));
-    connector.register('parse', (content) => console.log(csv.parse(content)));
     connector.ready();
-  },
-  data() {
-    return {
-      defaultAlign: 'left',
-      lineType: embeddedData.lineType,
-      lines: [],
-      input: {
-        key: '',
-        rule: undefined,
-        val: '',
-      },
-    };
-  },
-  methods: {
-    reload() {
-      connector.reload();
-    },
-    returnInput() {
-      if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
-        ElMessage.error(
-          `输入不合法！输入规范：${this.input.rule.source.substring(
-            1,
-            this.input.rule.source.length - 1,
-          )}`,
-        );
-        return;
-      }
-      connector.returnInput(this.input.key, this.input.val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      this.lines.pop();
-    },
-    returnFromButton(val) {
-      connector.returnInput(this.input.key, val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      this.lines.pop();
-    },
   },
   name: 'GameMain',
 };
