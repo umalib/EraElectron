@@ -1,6 +1,9 @@
 const { readdirSync, readFileSync, statSync } = require('fs');
 const { join } = require('path');
 const parseCSV = require('@/era/csv-utils');
+const { safeUndefinedCheck } = require('@/era/value-utils');
+
+const baseNameMap = require('@/era/base-name.json');
 
 module.exports = (path, connect, listen, cleanListener) => {
   function clear() {
@@ -68,7 +71,10 @@ module.exports = (path, connect, listen, cleanListener) => {
     connect({ action: 'setTitle', data: title });
   }
 
-  return {
+  const era = {
+    staticData: {},
+    names: {},
+    data: {},
     api: {
       clear,
       drawLine,
@@ -81,11 +87,10 @@ module.exports = (path, connect, listen, cleanListener) => {
       setAlign,
       setTitle,
     },
-    staticData: {},
-    data: {},
     async start() {
       // load CSV
       const fileList = {};
+
       function loadPath(_path) {
         const l = readdirSync(_path);
         l.forEach((f) => {
@@ -97,10 +102,10 @@ module.exports = (path, connect, listen, cleanListener) => {
           }
         });
       }
-      loadPath(join(path, './csv'));
 
       this.api.clear();
       this.api.print('loading csv files ...');
+      loadPath(join(path, './csv'));
       Object.keys(fileList)
         .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
         .forEach((p) => {
@@ -114,9 +119,23 @@ module.exports = (path, connect, listen, cleanListener) => {
               k.startsWith('_replace') ||
               k.startsWith('gamebase')
             ) {
-              csv.forEach((a) => (this.staticData[k][a[0]] = a[1]));
+              csv.forEach(
+                (a) => (this.staticData[k][a[0].toLowerCase()] = a[1]),
+              );
+            } else if (k.startsWith('item')) {
+              this.staticData.item = { name: {}, price: {} };
+              this.names = {};
+              csv.forEach((a) => {
+                this.staticData.item.name[a[1]] = a[0];
+                this.staticData.item.price[a[0]] = a[2];
+                this.names[a[0]] = a[1];
+              });
             } else {
-              csv.forEach((a) => (this.staticData[k][a[1]] = a[0]));
+              this.names[k] = {};
+              csv.forEach((a) => {
+                this.staticData[k][a[1]] = a[0];
+                this.names[k][a[0]] = a[1];
+              });
             }
           }
         });
@@ -129,16 +148,28 @@ module.exports = (path, connect, listen, cleanListener) => {
           const k = fileList[p];
           this.api.print(`loading ${k}`);
           const tmp = {};
+          let tableName, valueIndex, value;
           parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
             switch (a.length) {
               case 2:
-                tmp[a[0]] = a[1];
+                tableName = a[0];
+                value = a[1];
+                tmp[tableName] = value;
                 break;
               case 3:
-                if (!tmp[a[0]]) {
-                  tmp[a[0]] = {};
+                tableName = safeUndefinedCheck(
+                  baseNameMap[a[0]],
+                  a[0].toLowerCase(),
+                );
+                valueIndex = safeUndefinedCheck(
+                  this.staticData[tableName][a[1]],
+                  a[1],
+                );
+                value = a[2];
+                if (!tmp[tableName]) {
+                  tmp[tableName] = {};
                 }
-                tmp[a[0]][a[1]] = a[2];
+                tmp[tableName][valueIndex] = value;
                 break;
               default:
                 break;
@@ -146,8 +177,10 @@ module.exports = (path, connect, listen, cleanListener) => {
           });
           this.staticData.chara[tmp['番号']] = tmp;
         });
+
       this.api.setTitle(this.staticData['gamebase']['タイトル']);
       this.api.log(this.staticData);
+      this.api.log(this.names);
 
       // load ERE
       let gameMain;
@@ -179,4 +212,53 @@ module.exports = (path, connect, listen, cleanListener) => {
       this.start().then();
     },
   };
+
+  era.api.set = (key, val) => {
+    const keyArr = key.split(':').map((x) => x.toLocaleLowerCase());
+    let tableName, charaIndex, valueIndex;
+    switch (keyArr.length) {
+      case 2:
+        tableName = keyArr[0];
+        valueIndex = keyArr[1];
+        if (tableName.endsWith('name')) {
+          tableName = tableName.substring(0, tableName.length - 4);
+          if (era.names[tableName]) {
+            return era.names[tableName][valueIndex];
+          }
+        }
+        break;
+      case 3:
+        tableName = keyArr[0];
+        charaIndex = keyArr[1];
+        valueIndex = keyArr[2];
+        if (
+          tableName.startsWith('maxbase') ||
+          era.staticData.chara[charaIndex]
+        ) {
+          return era.staticData.chara[charaIndex]['base'][
+            safeUndefinedCheck(era.staticData['base'][valueIndex], valueIndex)
+          ];
+        }
+        if (era.data[tableName] && era.data[tableName][charaIndex]) {
+          valueIndex = safeUndefinedCheck(
+            era.staticData[tableName][valueIndex],
+            valueIndex,
+          );
+          if (val !== undefined) {
+            era.data[tableName][charaIndex][valueIndex] = val;
+          }
+          return era.data[tableName][charaIndex][valueIndex];
+        }
+        break;
+      default:
+        break;
+    }
+    return undefined;
+  };
+
+  era.api.get = (key) => {
+    return era.api.set(key);
+  };
+
+  return era;
 };

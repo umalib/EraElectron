@@ -51,7 +51,7 @@
 <script>
 import { ElMessage, ElNotification } from 'element-plus';
 
-import embeddedData from '@/renderer/utils/data';
+import embeddedData from '@/renderer/utils/embedded.json';
 import connector from '@/renderer/utils/connector';
 
 export default {
