@@ -34,8 +34,8 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 880,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -67,8 +67,18 @@ async function createWindow() {
 
   ipcMain.removeAllListeners();
 
-  ipcMain.on('electron', (_, isRestart) => {
-    isRestart ? era.restart() : era.start();
+  ipcMain.on('electron', (_, action) => {
+    switch (action) {
+      case 'ready':
+        era.start();
+        break;
+      case 'reload':
+        era.reload();
+        break;
+      case 'restart':
+        era.restart();
+        break;
+    }
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

@@ -23,7 +23,7 @@ module.exports = async () => {
 
     era.setAlign('left');
 
-    let ret = await era.input('[0-3]');
+    let ret = await era.input({ rule: '[0-3]' });
     switch (Number(ret)) {
       case 0:
         await init_game();

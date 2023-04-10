@@ -20,9 +20,9 @@ module.exports = (path, connect, listen, cleanListener) => {
 
   let inputKey = undefined;
 
-  async function input(rule) {
+  async function input(config) {
     inputKey = new Date().getTime().toString();
-    connect({ action: 'input', data: { rule, inputKey } });
+    connect({ action: 'input', data: { config, inputKey } });
     return new Promise((resolve) => {
       listen(inputKey, (_, ret) => {
         cleanListener(inputKey);
@@ -33,11 +33,15 @@ module.exports = (path, connect, listen, cleanListener) => {
   }
 
   async function inputAny() {
-    print('输入任意键继续……', {
-      p: false,
+    print('按确定键继续……', {
       align: 'left',
     });
-    await input();
+    printButton('确定', 0, {
+      isButton: true,
+      type: 'success',
+      align: 'center',
+    });
+    await input({ hidden: true });
   }
 
   function log(info) {
@@ -48,13 +52,13 @@ module.exports = (path, connect, listen, cleanListener) => {
     connect({ action: 'print', data: { content: str, config: config || {} } });
   }
 
-  function printButton(str, num, isButton) {
+  function printButton(str, num, config) {
     connect({
       action: 'printButton',
       data: {
         str,
         num,
-        isButton,
+        config,
       },
     });
   }
@@ -71,10 +75,8 @@ module.exports = (path, connect, listen, cleanListener) => {
     connect({ action: 'setTitle', data: title });
   }
 
+  let gameMain = () => {};
   const era = {
-    staticData: {},
-    names: {},
-    data: {},
     api: {
       clear,
       drawLine,
@@ -86,6 +88,20 @@ module.exports = (path, connect, listen, cleanListener) => {
       println,
       setAlign,
       setTitle,
+    },
+    data: {},
+    names: {},
+    reload() {
+      if (!inputKey) {
+        cleanListener(inputKey);
+      }
+      this.start().then();
+    },
+    restart() {
+      if (!inputKey) {
+        cleanListener(inputKey);
+      }
+      gameMain();
     },
     async start() {
       // load CSV
@@ -183,11 +199,10 @@ module.exports = (path, connect, listen, cleanListener) => {
       this.api.log(this.names);
 
       // load ERE
-      let gameMain;
       let eraModule;
       try {
         const gameMainPath = join(path, './ERE/main.js');
-        print(`\nloading game from ${gameMainPath} ...`);
+        print(`\nloading game: ${path} ...`);
         // clear cache, load game, and inject era
         eval(`Object.keys(require.cache)
           .filter(x => x.startsWith('${path}'))
@@ -205,12 +220,7 @@ module.exports = (path, connect, listen, cleanListener) => {
         error(e.message);
       }
     },
-    restart() {
-      if (!inputKey) {
-        cleanListener(inputKey);
-      }
-      this.start().then();
-    },
+    staticData: {},
   };
 
   era.api.set = (key, val) => {

@@ -8,7 +8,11 @@
           :style="{ textAlign: line.textAlign || defaultAlign }"
         >
           <span v-if="line.type === lineType.button">
-            <el-button v-if="line.isButton" @click="returnFromButton(line.num)">
+            <el-button
+              v-if="line.isButton"
+              @click="returnFromButton(line.num)"
+              :type="line.buttonType"
+            >
               {{ line.content }}
             </el-button>
             <el-link v-else @click="returnFromButton(line.num)">
@@ -35,6 +39,8 @@
             v-if="line.type === lineType.input"
             v-model="input.val"
             @change="returnInput()"
+            :style="{ display: line.hidden ? 'none' : '' }"
+            autofocus
           />
         </el-col>
       </el-row>
@@ -114,12 +120,18 @@ export default {
       }),
     );
     connector.register('input', (data) => {
+      const tmp = {
+        type: this.lineType.input,
+      };
       this.input.val = '';
       this.input.key = data.inputKey;
-      if (data.rule) {
-        this.input.rule = new RegExp(`^${data.rule}$`);
+      if (data.config) {
+        if (data.config.rule) {
+          this.input.rule = new RegExp(`^${data.config.rule}$`);
+        }
+        tmp.hidden = data.config.hidden;
       }
-      this.lines.push({ type: this.lineType.input });
+      this.lines.push(tmp);
     });
     connector.register('log', (info) => console.log(info));
     connector.register('print', (data) =>
@@ -134,8 +146,11 @@ export default {
       this.lines.push({
         num: data.num,
         content: data.str,
-        isButton: data.isButton,
-        textAlign: this.defaultAlign,
+        buttonType: data.config ? data.config.type : '',
+        isButton: data.config ? data.config.isButton : false,
+        textAlign: data.config
+          ? data.config.align || this.defaultAlign
+          : this.defaultAlign,
         type: this.lineType.button,
       }),
     );
