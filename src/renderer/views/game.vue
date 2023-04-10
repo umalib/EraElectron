@@ -143,6 +143,9 @@ export default {
       this.lines.push({ type: this.lineType.lineUp }),
     );
     connector.register('setAlign', (align) => (this.defaultAlign = align));
+    connector.register('setTitle', (title) => {
+      document.title = title;
+    });
     connector.ready();
   },
   name: 'GameMain',

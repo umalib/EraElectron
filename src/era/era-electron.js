@@ -16,6 +16,7 @@ module.exports = (path, connect, listen, cleanListener) => {
   }
 
   let inputKey = undefined;
+
   async function input(rule) {
     inputKey = new Date().getTime().toString();
     connect({ action: 'input', data: { rule, inputKey } });
@@ -63,6 +64,10 @@ module.exports = (path, connect, listen, cleanListener) => {
     connect({ action: 'setAlign', data: align });
   }
 
+  function setTitle(title) {
+    connect({ action: 'setTitle', data: title });
+  }
+
   return {
     api: {
       clear,
@@ -74,49 +79,92 @@ module.exports = (path, connect, listen, cleanListener) => {
       printButton,
       println,
       setAlign,
+      setTitle,
     },
     staticData: {},
     data: {},
     async start() {
-      const _this = this;
-
       // load CSV
-      function loadFile(_path, fileName, obj) {
-        if (statSync(_path).isDirectory()) {
-          obj[fileName] = {};
-          readdirSync(_path).forEach((f) =>
-            loadFile(join(_path, `./${f}`), f, obj[fileName]),
-          );
-        } else if (_path.endsWith('.csv') || _path.endsWith('.CSV')) {
-          print(`loading ${fileName} ...`);
-          const content = readFileSync(_path).toString('utf-8');
-          obj[fileName.substring(0, fileName.length - 4)] = parseCSV(content);
-        }
+      const fileList = {};
+      function loadPath(_path) {
+        const l = readdirSync(_path);
+        l.forEach((f) => {
+          const filePath = join(_path, `./${f}`);
+          if (statSync(filePath).isDirectory()) {
+            loadPath(filePath);
+          } else if (filePath.toLocaleLowerCase().endsWith('.csv')) {
+            fileList[filePath] = f.replace(/\..*$/, '');
+          }
+        });
       }
+      loadPath(join(path, './csv'));
 
       this.api.clear();
-      const csvPath = join(path, './CSV');
-      const fileList = readdirSync(csvPath);
-      fileList.forEach((f) =>
-        loadFile(join(csvPath, `./${f}`), f, _this.staticData),
-      );
+      this.api.print('loading csv files ...');
+      Object.keys(fileList)
+        .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
+        .forEach((p) => {
+          const k = fileList[p].toLowerCase();
+          if (!k.startsWith('variablesize')) {
+            this.api.print(`loading ${k}`);
+            this.staticData[k] = {};
+            const csv = parseCSV(readFileSync(p).toString('utf-8'));
+            if (
+              k.startsWith('_rename') ||
+              k.startsWith('_replace') ||
+              k.startsWith('gamebase')
+            ) {
+              csv.forEach((a) => (this.staticData[k][a[0]] = a[1]));
+            } else {
+              csv.forEach((a) => (this.staticData[k][a[1]] = a[0]));
+            }
+          }
+        });
+
+      this.api.print('\nloading chara files ...');
+      this.staticData.chara = {};
+      Object.keys(fileList)
+        .filter((x) => x.toLocaleLowerCase().indexOf('chara') !== -1)
+        .forEach((p) => {
+          const k = fileList[p];
+          this.api.print(`loading ${k}`);
+          const tmp = {};
+          parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
+            switch (a.length) {
+              case 2:
+                tmp[a[0]] = a[1];
+                break;
+              case 3:
+                if (!tmp[a[0]]) {
+                  tmp[a[0]] = {};
+                }
+                tmp[a[0]][a[1]] = a[2];
+                break;
+              default:
+                break;
+            }
+          });
+          this.staticData.chara[tmp['番号']] = tmp;
+        });
+      this.api.setTitle(this.staticData['gamebase']['タイトル']);
+      this.api.log(this.staticData);
 
       // load ERE
       let gameMain;
       let eraModule;
       try {
         const gameMainPath = join(path, './ERE/main.js');
-        print(`loading game from ${gameMainPath} ...`);
+        print(`\nloading game from ${gameMainPath} ...`);
         // clear cache, load game, and inject era
         eval(`Object.keys(require.cache)
           .filter(x => x.startsWith('${path}'))
           .forEach(x => delete require.cache[x]);
         gameMain = require('${gameMainPath}');
         eraModule = require.cache[Object.keys(require.cache)
-          .filter(x=>x.startsWith('${path}') && x.endsWith('era-electron.js'))]`);
+          .filter(x => x.startsWith('${path}') && x.endsWith('era-electron.js'))]`);
 
         Object.keys(this.api).forEach(
-          (k) => (eraModule.exports[k] = _this.api[k]),
+          (k) => (eraModule.exports[k] = this.api[k]),
         );
         await this.api.inputAny();
         gameMain();
@@ -128,7 +176,7 @@ module.exports = (path, connect, listen, cleanListener) => {
       if (!inputKey) {
         cleanListener(inputKey);
       }
-      this.start();
+      this.start().then();
     },
   };
 };
