@@ -218,15 +218,19 @@ module.exports = (path, connect, listen, cleanListener) => {
       // load ERE
       let eraModule;
       try {
-        const gameMainPath = join(path, './ERE/main.js');
+        const gameMainPath = join(path, './ERE/main.js').replace(/\\/g, '\\\\');
         print(`\nloading game: ${path} ...`);
+
         // clear cache, load game, and inject era
         eval(`Object.keys(require.cache)
-          .filter(x => x.startsWith('${path}'))
-          .forEach(x => delete require.cache[x]);
-        gameMain = require('${gameMainPath}');
-        eraModule = require.cache[Object.keys(require.cache)
-          .filter(x => x.startsWith('${path}') && x.endsWith('era-electron.js'))]`);
+                    .filter(x => x.startsWith('${path}'))
+                    .forEach(x => delete require.cache[x]);
+                gameMain = require('${gameMainPath}');
+                eraModule = require.cache[Object.keys(require.cache)
+                    .filter(x => x.startsWith('${path.replace(
+                      /\\/g,
+                      '\\\\',
+                    )}') && x.endsWith('era-electron.js'))]`);
 
         Object.keys(this.api).forEach(
           (k) => (eraModule.exports[k] = this.api[k]),
@@ -234,6 +238,7 @@ module.exports = (path, connect, listen, cleanListener) => {
         await this.api.inputAny();
         gameMain();
       } catch (e) {
+        console.log(e.message);
         error(e.message);
       }
     },
