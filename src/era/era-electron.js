@@ -107,6 +107,7 @@ module.exports = (path, connect, listen, cleanListener) => {
       mark: {},
       talent: {},
     },
+    global: {},
     names: {},
     reload() {
       if (!inputKey) {
@@ -215,6 +216,16 @@ module.exports = (path, connect, listen, cleanListener) => {
       this.api.log(this.staticData);
       this.api.log(this.names);
 
+      // load global
+      const globalPath = join(path, './sav/global.sav');
+      if (existsSync(globalPath)) {
+        try {
+          this.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
+        } catch (_) {
+          // eslint-disable-next-line no-empty
+        }
+      }
+
       // load ERE
       let eraModule;
       try {
@@ -257,6 +268,11 @@ module.exports = (path, connect, listen, cleanListener) => {
           if (era.names[tableName]) {
             return era.names[tableName][valueIndex];
           }
+        } else if (tableName === 'global') {
+          if (val !== undefined) {
+            era.global[valueIndex] = val;
+          }
+          return era.global[valueIndex];
         }
         break;
       case 3:
@@ -297,9 +313,15 @@ module.exports = (path, connect, listen, cleanListener) => {
     if (!existsSync(savDirPath)) {
       mkdirSync(savDirPath);
     }
-    const savPath = join(savDirPath, `./save${savId}.sav`);
     try {
-      writeFileSync(savPath, JSON.stringify(era.data));
+      writeFileSync(
+        join(savDirPath, `./save${savId}.sav`),
+        JSON.stringify(era.data),
+      );
+      writeFileSync(
+        join(savDirPath, './global.sav'),
+        JSON.stringify(era.global),
+      );
       return true;
     } catch (e) {
       error(e.message);
