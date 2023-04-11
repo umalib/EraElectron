@@ -39,13 +39,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     });
   }
 
-  async function waitAnyKey() {
-    print('按确定键继续……', {
-      align: 'left',
-    });
-    await input({ any: true });
-  }
-
   function log(info) {
     connect({ action: 'log', data: info });
   }
@@ -73,8 +66,23 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'setAlign', data: align });
   }
 
+  function setOffset(offset) {
+    connect({ action: 'setOffset', data: offset });
+  }
+
   function setTitle(title) {
     connect({ action: 'setTitle', data: title });
+  }
+
+  function setWidth(width) {
+    connect({ action: 'setWidth', data: width });
+  }
+
+  async function waitAnyKey() {
+    print('按确定键继续……', {
+      align: 'left',
+    });
+    await input({ any: true });
   }
 
   let gameMain = () => {};
@@ -88,7 +96,9 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       printButton,
       println,
       setAlign,
+      setOffset,
       setTitle,
+      setWidth,
       waitAnyKey,
     },
     data: {
@@ -246,7 +256,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         Object.keys(this.api).forEach(
           (k) => (eraModule.exports[k] = this.api[k]),
         );
-        await this.api.inputAny();
+        await this.api.waitAnyKey();
         gameMain();
       } catch (e) {
         logger.error(e.message);
