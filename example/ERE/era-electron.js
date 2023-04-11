@@ -1,7 +1,10 @@
 module.exports = {
   clear() {},
   drawLine() {},
+  get() {},
   async input() {},
+  load() {},
+  loadGlobal() {},
   log() {},
   print() {},
   printButton() {},
@@ -9,7 +12,14 @@ module.exports = {
    * @deprecated
    */
   println() {},
+  resetAllExceptGlobal() {},
+  resetGlobal() {},
+  save() {},
+  saveGlobal() {},
+  set() {},
   setAlign() {},
+  setOffset() {},
   setTitle() {},
+  setWidth() {},
   async waitAnyKey() {},
 };

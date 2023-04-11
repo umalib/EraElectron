@@ -5,9 +5,9 @@
       <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
       <el-row v-else>
         <el-col
-          :offset="line.offset || defaultColOffset"
-          :span="line.width || defaultColWidth"
-          :style="{ textAlign: line.textAlign || defaultTextAlign }"
+          :offset="line.offset || defaultSetting.colOffset"
+          :span="line.width || defaultSetting.colWidth"
+          :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
         >
           <el-button
             v-if="line.type === lineType.button"
@@ -37,7 +37,7 @@
           <el-input
             v-if="line.type === lineType.input"
             v-model="input.val"
-            @change="returnInput()"
+            @change="returnFromInput()"
             autofocus
           />
         </el-col>
@@ -63,16 +63,19 @@ export default {
   data() {
     return {
       buttonValCount: 0,
-      defaultTextAlign: 'left',
-      defaultColWidth: 24,
-      defaultColOffset: 0,
-      lineType: embeddedData.lineType,
-      lines: [],
+      defaultSetting: {
+        colOffset: 0,
+        colWidth: 24,
+        textAlign: 'left',
+      },
       input: {
+        disableBefore: false,
         key: '',
         rule: undefined,
         val: '',
       },
+      lineType: embeddedData.lineType,
+      lines: [],
     };
   },
   methods: {
@@ -91,38 +94,72 @@ export default {
         content: data.str,
         isButton: data.config.isButton,
         num: data.num,
-        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
-        textAlign: safeUndefinedCheck(data.config.align, this.defaultTextAlign),
+        offset: safeUndefinedCheck(
+          data.config.offset,
+          this.defaultSetting.colOffset,
+        ),
+        textAlign: safeUndefinedCheck(
+          data.config.align,
+          this.defaultSetting.textAlign,
+        ),
         type: this.lineType.button,
         valCount: this.buttonValCount,
-        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
+        width: safeUndefinedCheck(
+          data.config.width,
+          this.defaultSetting.colWidth,
+        ),
       };
     },
     getInputObject(data) {
       this.input.val = '';
       this.input.key = data.inputKey;
+      this.input.disableBefore = data.disableBefore;
       if (data.config.rule) {
         this.input.rule = new RegExp(`^${data.config.rule}$`);
       }
       return {
         any: data.config.any,
-        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
+        offset: safeUndefinedCheck(
+          data.config.offset,
+          this.defaultSetting.colOffset,
+        ),
         type: this.lineType.input,
-        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
+        width: safeUndefinedCheck(
+          data.config.width,
+          this.defaultSetting.colWidth,
+        ),
       };
     },
     getTextObject(data) {
       return {
         contents: data.content.split('\n'),
         isParagraph: data.config.isParagraph || data.config.p,
-        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
-        textAlign: safeUndefinedCheck(data.config.align, this.defaultTextAlign),
+        offset: safeUndefinedCheck(
+          data.config.offset,
+          this.defaultSetting.colOffset,
+        ),
+        textAlign: safeUndefinedCheck(
+          data.config.align,
+          this.defaultSetting.textAlign,
+        ),
         type: this.lineType.text,
-        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
+        width: safeUndefinedCheck(
+          data.config.width,
+          this.defaultSetting.colWidth,
+        ),
       };
     },
     reload() {
       connector.reload();
+    },
+    returnInput(val) {
+      connector.returnInput(this.input.key, val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      if (this.input.disableBefore) {
+        this.buttonValCount++;
+      }
+      this.lines.pop();
     },
     returnFromButton(val) {
       connector.returnInput(this.input.key, val);
@@ -130,7 +167,7 @@ export default {
       this.input.val = '';
       this.lines.pop();
     },
-    returnInput() {
+    returnFromInput() {
       if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
         ElMessage.error(
           `输入不合法！输入规范：${this.input.rule.source.substring(
@@ -148,13 +185,13 @@ export default {
     setOffset(offset) {
       const _offset = Number(offset);
       if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
-        this.defaultColOffset = _offset;
+        this.defaultSetting.colOffset = _offset;
       }
     },
     setWidth(width) {
       const _width = Number(width);
       if (!isNaN(_width) && _width >= 1 && _width <= 24) {
-        this.defaultColWidth = _width;
+        this.defaultSetting.colWidth = _width;
       }
     },
     throwError(message) {
@@ -185,7 +222,10 @@ export default {
     connector.register('println', () =>
       this.lines.push({ type: this.lineType['lineUp'] }),
     );
-    connector.register('setAlign', (align) => (this.defaultTextAlign = align));
+    connector.register(
+      'setAlign',
+      (align) => (this.defaultSetting.textAlign = align),
+    );
     connector.register('setOffset', this.setOffset);
     connector.register('setWidth', this.setWidth);
     connector.register('setTitle', (title) => (document.title = title));

@@ -221,14 +221,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       this.api.setTitle(this.staticData['gamebase']['タイトル']);
 
       // load global
-      const globalPath = join(path, './sav/global.sav');
-      if (existsSync(globalPath)) {
-        try {
-          this.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
-        } catch (_) {
-          // eslint-disable-next-line no-empty
-        }
-      }
+      this.api.loadGlobal();
 
       this.api.log({
         static: this.staticData,
@@ -335,10 +328,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         join(savDirPath, `./save${savId}.sav`),
         JSON.stringify(era.data),
       );
-      writeFileSync(
-        join(savDirPath, './global.sav'),
-        JSON.stringify(era.global),
-      );
       return true;
     } catch (e) {
       error(e.message);
@@ -355,6 +344,44 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       error(e.message);
       return false;
     }
+  };
+
+  era.api.saveGlobal = () => {
+    const savDirPath = join(path, './sav');
+    if (!existsSync(savDirPath)) {
+      mkdirSync(savDirPath);
+    }
+    try {
+      writeFileSync(
+        join(savDirPath, './global.sav'),
+        JSON.stringify(era.global),
+      );
+      return true;
+    } catch (e) {
+      error(e.message);
+      return false;
+    }
+  };
+
+  era.api.loadGlobal = () => {
+    const globalPath = join(path, './sav/global.sav');
+    if (existsSync(globalPath)) {
+      try {
+        era.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
+      } catch (_) {
+        // eslint-disable-next-line no-empty
+      }
+    }
+  };
+
+  era.api.resetGlobal = () => {
+    era.global = {};
+    return true;
+  };
+
+  era.api.resetAllExceptGlobal = () => {
+    Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
+    return true;
   };
 
   return era;
