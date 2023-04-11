@@ -158,6 +158,7 @@ export default {
       this.input.val = '';
       if (this.input.disableBefore) {
         this.buttonValCount++;
+        this.input.disableBefore = false;
       }
       this.lines.pop();
     },
