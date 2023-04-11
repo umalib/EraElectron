@@ -1,4 +1,11 @@
-const { readdirSync, readFileSync, statSync } = require('fs');
+const {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} = require('fs');
 const { join } = require('path');
 const parseCSV = require('@/era/csv-utils');
 const { safeUndefinedCheck } = require('@/era/value-utils');
@@ -89,7 +96,17 @@ module.exports = (path, connect, listen, cleanListener) => {
       setAlign,
       setTitle,
     },
-    data: {},
+    data: {
+      abl: {},
+      base: {},
+      cflag: {},
+      cstr: {},
+      equip: {},
+      exp: {},
+      juel: {},
+      mark: {},
+      talent: {},
+    },
     names: {},
     reload() {
       if (!inputKey) {
@@ -268,6 +285,32 @@ module.exports = (path, connect, listen, cleanListener) => {
 
   era.api.get = (key) => {
     return era.api.set(key);
+  };
+
+  era.api.save = (savId) => {
+    const savDirPath = join(path, './sav');
+    if (!existsSync(savDirPath)) {
+      mkdirSync(savDirPath);
+    }
+    const savPath = join(savDirPath, `./save${savId}.sav`);
+    try {
+      writeFileSync(savPath, JSON.stringify(era.data));
+      return true;
+    } catch (e) {
+      error(e.message);
+      return false;
+    }
+  };
+
+  era.api.load = (savId) => {
+    const savPath = join(path, `./sav/save${savId}.sav`);
+    try {
+      era.data = JSON.parse(readFileSync(savPath).toString('utf-8'));
+      return true;
+    } catch (e) {
+      error(e.message);
+      return false;
+    }
   };
 
   return era;
