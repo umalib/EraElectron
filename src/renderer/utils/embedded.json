@@ -4,6 +4,7 @@
     "divider": 2,
     "input": 3,
     "lineUp": 4,
-    "text": 5
+    "multiCol": 5,
+    "text": 6
   }
 }

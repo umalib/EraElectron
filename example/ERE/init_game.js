@@ -1,5 +1,5 @@
 const era = require('./era-electron.js');
-const { genderArr } = require('./data/const');
+const { genderArr } = require('./data/const.json');
 
 module.exports = async () => {
   era.log('init game');

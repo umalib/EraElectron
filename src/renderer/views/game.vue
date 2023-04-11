@@ -1,7 +1,8 @@
 <template>
   <div>
     <span v-for="(line, i) in lines" :key="i">
-      <el-divider v-if="line.type === lineType.divider" />
+      <el-divider v-if="line.type === lineType['divider']" />
+      <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
       <el-row v-else>
         <el-col
           :span="line.width || 24"
@@ -44,7 +45,7 @@
           />
         </el-col>
       </el-row>
-      <br v-if="line.type === lineType.lineUp" />
+      <br v-if="line.type === lineType['lineUp']" />
     </span>
     <el-row>
       <el-col style="text-align: center">
@@ -109,7 +110,7 @@ export default {
       }
     });
     connector.register('drawLine', () =>
-      this.lines.push({ type: this.lineType.divider }),
+      this.lines.push({ type: this.lineType['divider'] }),
     );
     connector.register('error', (message) =>
       ElNotification({
@@ -155,7 +156,7 @@ export default {
       }),
     );
     connector.register('println', () =>
-      this.lines.push({ type: this.lineType.lineUp }),
+      this.lines.push({ type: this.lineType['lineUp'] }),
     );
     connector.register('setAlign', (align) => (this.defaultAlign = align));
     connector.register('setTitle', (title) => {
