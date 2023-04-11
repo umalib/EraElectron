@@ -12,7 +12,7 @@ const { safeUndefinedCheck } = require('@/era/value-utils');
 
 const baseNameMap = require('@/era/base-name.json');
 
-module.exports = (path, connect, listen, cleanListener) => {
+module.exports = (path, connect, listen, cleanListener, logger) => {
   function clear() {
     connect({ action: 'clear' });
   }
@@ -39,16 +39,11 @@ module.exports = (path, connect, listen, cleanListener) => {
     });
   }
 
-  async function inputAny() {
+  async function waitAnyKey() {
     print('按确定键继续……', {
       align: 'left',
     });
-    printButton('确定', 0, {
-      isButton: true,
-      type: 'success',
-      align: 'center',
-    });
-    await input({ hidden: true });
+    await input({ any: true });
   }
 
   function log(info) {
@@ -88,13 +83,13 @@ module.exports = (path, connect, listen, cleanListener) => {
       clear,
       drawLine,
       input,
-      inputAny,
       log,
       print,
       printButton,
       println,
       setAlign,
       setTitle,
+      waitAnyKey,
     },
     data: {
       abl: {},
@@ -213,8 +208,6 @@ module.exports = (path, connect, listen, cleanListener) => {
         });
 
       this.api.setTitle(this.staticData['gamebase']['タイトル']);
-      this.api.log(this.staticData);
-      this.api.log(this.names);
 
       // load global
       const globalPath = join(path, './sav/global.sav');
@@ -225,6 +218,13 @@ module.exports = (path, connect, listen, cleanListener) => {
           // eslint-disable-next-line no-empty
         }
       }
+
+      this.api.log({
+        static: this.staticData,
+        names: this.names,
+        data: this.data,
+        global: this.global,
+      });
 
       // load ERE
       let eraModule;
@@ -249,7 +249,7 @@ module.exports = (path, connect, listen, cleanListener) => {
         await this.api.inputAny();
         gameMain();
       } catch (e) {
-        console.log(e.message);
+        logger.error(e.message);
         error(e.message);
       }
     },

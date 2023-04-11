@@ -2,11 +2,14 @@ module.exports = {
   clear() {},
   drawLine() {},
   async input() {},
-  async inputAny() {},
   log() {},
   print() {},
   printButton() {},
+  /**
+   * @deprecated
+   */
   println() {},
   setAlign() {},
   setTitle() {},
+  async waitAnyKey() {},
 };

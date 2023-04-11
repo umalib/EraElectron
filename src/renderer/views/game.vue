@@ -5,7 +5,8 @@
       <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
       <el-row v-else>
         <el-col
-          :span="line.width || 24"
+          :offset="line.offset || defaultOffset"
+          :span="line.width || defaultColWidth"
           :style="{ textAlign: line.textAlign || defaultAlign }"
         >
           <span v-if="line.type === lineType.button">
@@ -65,6 +66,8 @@ export default {
   data() {
     return {
       defaultAlign: 'left',
+      defaultColWidth: 24,
+      defaultOffset: 0,
       lineType: embeddedData.lineType,
       lines: [],
       input: {
@@ -75,8 +78,63 @@ export default {
     };
   },
   methods: {
+    clear(count) {
+      const lineCount = Number(count);
+      if (isNaN(lineCount) || lineCount > this.lines.length) {
+        this.lines = [];
+      } else if (lineCount > 0) {
+        this.lines.slice(this.lines.length - lineCount, lineCount);
+      }
+    },
+    getButtonObject(data) {
+      const tmp = {
+        num: data.num,
+        content: data.str,
+        type: this.lineType.button,
+      };
+      if (data.config) {
+        tmp.buttonType = data.config.type;
+        tmp.isButton = data.config.isButton;
+        tmp.textAlign = data.config.align;
+      }
+      return tmp;
+    },
+    getInputObject(data) {
+      const tmp = {
+        type: this.lineType.input,
+      };
+      this.input.val = '';
+      this.input.key = data.inputKey;
+      if (data.config) {
+        if (data.config.rule) {
+          this.input.rule = new RegExp(`^${data.config.rule}$`);
+        }
+        tmp.hidden = data.config.hidden;
+      }
+      return tmp;
+    },
+    getLineUpObject() {
+      return { type: this.lineType['lineUp'] };
+    },
+    getTextObject(data) {
+      const tmp = {
+        contents: data.content.split('\n'),
+        type: this.lineType.text,
+      };
+      if (data.config) {
+        tmp.textAlign = data.config.align;
+        tmp.isParagraph = data.config.isParagraph || data.config.p;
+      }
+      return tmp;
+    },
     reload() {
       connector.reload();
+    },
+    returnFromButton(val) {
+      connector.returnInput(this.input.key, val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      this.lines.pop();
     },
     returnInput() {
       if (this.input.rule && !this.input.rule.test(this.input.val.toString())) {
@@ -93,75 +151,50 @@ export default {
       this.input.val = '';
       this.lines.pop();
     },
-    returnFromButton(val) {
-      connector.returnInput(this.input.key, val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      this.lines.pop();
-    },
-  },
-  mounted() {
-    connector.register('clear', (count) => {
-      const lineCount = Number(count);
-      if (isNaN(lineCount) || lineCount > this.lines.length) {
-        this.lines = [];
-      } else if (lineCount > 0) {
-        this.lines.slice(this.lines.length - lineCount, lineCount);
+    setOffset(offset) {
+      const _offset = Number(offset);
+      if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
+        this.defaultOffset = _offset;
       }
-    });
-    connector.register('drawLine', () =>
-      this.lines.push({ type: this.lineType['divider'] }),
-    );
-    connector.register('error', (message) =>
+    },
+    setWidth(width) {
+      const _width = Number(width);
+      if (!isNaN(_width) && _width >= 1 && _width <= 24) {
+        this.defaultColWidth = _width;
+      }
+    },
+    throwError(message) {
       ElNotification({
         title: '脚本错误',
         message,
         duration: 0,
         type: 'error',
-      }),
+      });
+    },
+  },
+  mounted() {
+    connector.register('clear', this.clear);
+    connector.register('drawLine', () =>
+      this.lines.push({ type: this.lineType['divider'] }),
     );
-    connector.register('input', (data) => {
-      const tmp = {
-        type: this.lineType.input,
-      };
-      this.input.val = '';
-      this.input.key = data.inputKey;
-      if (data.config) {
-        if (data.config.rule) {
-          this.input.rule = new RegExp(`^${data.config.rule}$`);
-        }
-        tmp.hidden = data.config.hidden;
-      }
-      this.lines.push(tmp);
-    });
-    connector.register('log', (info) => console.log(info));
+    connector.register('error', this.throwError);
+    connector.register('input', (data) =>
+      this.lines.push(this.getInputObject(data)),
+    );
+    connector.register('log', console.log);
     connector.register('print', (data) =>
-      this.lines.push({
-        contents: data.content.split('\n'),
-        textAlign: data.config.align || this.defaultAlign,
-        type: this.lineType.text,
-        isParagraph: data.config['paragraph'] || data.config.p,
-      }),
+      this.lines.push(this.getTextObject(data)),
     );
     connector.register('printButton', (data) =>
-      this.lines.push({
-        num: data.num,
-        content: data.str,
-        buttonType: data.config ? data.config.type : '',
-        isButton: data.config ? data.config.isButton : false,
-        textAlign: data.config
-          ? data.config.align || this.defaultAlign
-          : this.defaultAlign,
-        type: this.lineType.button,
-      }),
+      this.lines.push(this.getButtonObject(data)),
     );
     connector.register('println', () =>
-      this.lines.push({ type: this.lineType['lineUp'] }),
+      this.lines.push(this.getLineUpObject()),
     );
     connector.register('setAlign', (align) => (this.defaultAlign = align));
-    connector.register('setTitle', (title) => {
-      document.title = title;
-    });
+    connector.register('setOffset', this.setOffset);
+    connector.register('setWidth', this.setWidth);
+    connector.register('setTitle', (title) => (document.title = title));
     connector.ready();
   },
   name: 'GameMain',

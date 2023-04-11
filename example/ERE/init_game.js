@@ -16,9 +16,8 @@ module.exports = async () => {
     );
     era.drawLine();
     era.print(
-      '聘书\n…………\n…………\n…………\n…………\n…………\n…………\n…………兹聘请贵方担任我校训练员一职。',
+      '聘书\n…………\n…………\n…………\n…………\n…………\n…………\n…………兹聘请贵方担任我校训练员一职。\n',
     );
-    era.println();
     era.print('日本中央特雷森学院理事长\n秋川弥生', {
       align: 'right',
     });
@@ -33,6 +32,6 @@ module.exports = async () => {
       playerName = await era.input();
       continue;
     }
-    await era.inputAny();
+    await era.waitAnyKey();
   }
 };
