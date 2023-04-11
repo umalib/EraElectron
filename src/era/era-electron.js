@@ -79,7 +79,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
   }
 
   async function waitAnyKey() {
-    print('按确定键继续……', {
+    print('按任意键继续……', {
       align: 'left',
     });
     await input({ any: true });
@@ -101,31 +101,51 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       setWidth,
       waitAnyKey,
     },
-    data: {
-      abl: {},
-      base: {},
-      cflag: {},
-      cstr: {},
-      equip: {},
-      exp: {},
-      flag: {},
-      juel: {},
-      mark: {},
-      talent: {},
-    },
+    data: {},
+    filedNames: {},
     global: {},
-    names: {},
     reload() {
       if (!inputKey) {
         cleanListener(inputKey);
       }
       this.start().then();
     },
+    resetData() {
+      this.data = {
+        abl: {},
+        amour: {},
+        base: {},
+        callname: {},
+        cflag: {},
+        cstr: {},
+        equip: {},
+        exp: {},
+        flag: {},
+        juel: {},
+        mark: {},
+        relation: {},
+        talent: {},
+      };
+    },
     restart() {
       if (!inputKey) {
         cleanListener(inputKey);
       }
-      gameMain();
+      this.api.setTitle(this.staticData['gamebase']['タイトル']);
+      this.api.clear();
+      this.resetData();
+      this.api.loadGlobal();
+
+      this.api.log({
+        data: this.data,
+        global: this.global,
+      });
+      try {
+        gameMain();
+      } catch (e) {
+        logger.error(e.message);
+        error(e.message);
+      }
     },
     async start() {
       // load CSV
@@ -164,17 +184,17 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
               );
             } else if (k.startsWith('item')) {
               this.staticData.item = { name: {}, price: {} };
-              this.names = {};
+              this.filedNames = {};
               csv.forEach((a) => {
                 this.staticData.item.name[a[1]] = a[0];
                 this.staticData.item.price[a[0]] = a[2];
-                this.names[a[0]] = a[1];
+                this.filedNames[a[0]] = a[1];
               });
             } else {
-              this.names[k] = {};
+              this.filedNames[k] = {};
               csv.forEach((a) => {
                 this.staticData[k][a[1]] = a[0];
-                this.names[k][a[0]] = a[1];
+                this.filedNames[k][a[0]] = a[1];
               });
             }
           }
@@ -192,7 +212,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
             switch (a.length) {
               case 2:
-                tableName = a[0];
+                tableName = safeUndefinedCheck(baseNameMap[a[0]], a[0]);
                 value = a[1];
                 tmp[tableName] = value;
                 break;
@@ -201,33 +221,33 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
                   baseNameMap[a[0]],
                   a[0].toLowerCase(),
                 );
-                valueIndex = safeUndefinedCheck(
-                  this.staticData[tableName][a[1]],
-                  a[1],
-                );
+                valueIndex = a[1];
                 value = a[2];
-                if (!tmp[tableName]) {
-                  tmp[tableName] = {};
+                if (tableName === 'relation' || tableName === 'call') {
+                  this.staticData.relationship[tableName][
+                    `${tmp['id']}|${valueIndex}`
+                  ] = value;
+                } else {
+                  valueIndex = safeUndefinedCheck(
+                    this.staticData[tableName][valueIndex],
+                    a[1],
+                  );
+                  if (!tmp[tableName]) {
+                    tmp[tableName] = {};
+                  }
+                  tmp[tableName][valueIndex] = value;
                 }
-                tmp[tableName][valueIndex] = value;
                 break;
               default:
                 break;
             }
           });
-          this.staticData.chara[tmp['番号']] = tmp;
+          this.staticData.chara[tmp['id']] = tmp;
         });
-
-      this.api.setTitle(this.staticData['gamebase']['タイトル']);
-
-      // load global
-      this.api.loadGlobal();
 
       this.api.log({
         static: this.staticData,
-        names: this.names,
-        data: this.data,
-        global: this.global,
+        names: this.filedNames,
       });
 
       // load ERE
@@ -238,26 +258,31 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
 
         // clear cache, load game, and inject era
         eval(`Object.keys(require.cache)
-                    .filter(x => x.startsWith('${path}'))
-                    .forEach(x => delete require.cache[x]);
-                gameMain = require('${gameMainPath}');
-                eraModule = require.cache[Object.keys(require.cache)
-                    .filter(x => x.startsWith('${path.replace(
-                      /\\/g,
-                      '\\\\',
-                    )}') && x.endsWith('era-electron.js'))]`);
+          .filter(x => x.startsWith('${path}'))
+          .forEach(x => delete require.cache[x]);
+        gameMain = require('${gameMainPath}');
+        eraModule = require.cache[Object.keys(require.cache)
+          .filter(x => x.startsWith('${path.replace(
+            /\\/g,
+            '\\\\',
+          )}') && x.endsWith('era-electron.js'))]`);
 
         Object.keys(this.api).forEach(
           (k) => (eraModule.exports[k] = this.api[k]),
         );
         await this.api.waitAnyKey();
-        gameMain();
       } catch (e) {
         logger.error(e.message);
         error(e.message);
       }
+      this.restart();
     },
-    staticData: {},
+    staticData: {
+      relationship: {
+        call: {},
+        relation: {},
+      },
+    },
   };
 
   era.api.set = (key, val) => {
@@ -267,16 +292,23 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       case 2:
         tableName = keyArr[0];
         valueIndex = keyArr[1];
-        if (tableName.endsWith('name')) {
-          tableName = tableName.substring(0, tableName.length - 4);
-          if (era.names[tableName]) {
-            return era.names[tableName][valueIndex];
-          }
-        } else if (tableName === 'global') {
+        if (tableName === 'global') {
           if (val !== undefined) {
             era.global[valueIndex] = val;
           }
           return era.global[valueIndex];
+        }
+        if (tableName === 'amour') {
+          if (val !== undefined) {
+            era.data[tableName][valueIndex] = val;
+          }
+          return era.data[tableName][valueIndex];
+        }
+        if (tableName.endsWith('name')) {
+          tableName = tableName.substring(0, tableName.length - 4);
+          if (era.filedNames[tableName]) {
+            return era.filedNames[tableName][valueIndex];
+          }
         } else {
           valueIndex = era.staticData[tableName][valueIndex] || valueIndex;
           if (val !== undefined) {
@@ -290,12 +322,21 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         charaIndex = keyArr[1];
         valueIndex = keyArr[2];
         if (
-          tableName.startsWith('maxbase') ||
+          tableName.startsWith('maxbase') &&
           era.staticData.chara[charaIndex]
         ) {
           return era.staticData.chara[charaIndex]['base'][
             safeUndefinedCheck(era.staticData['base'][valueIndex], valueIndex)
           ];
+        }
+        if (tableName === 'callname' || tableName === 'relation') {
+          if (val !== undefined) {
+            era.data[tableName][charaIndex][valueIndex] = val;
+          }
+          return (
+            era.data[tableName][charaIndex][valueIndex] ||
+            era.staticData.chara[valueIndex][tableName]
+          );
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
           valueIndex = safeUndefinedCheck(
@@ -369,7 +410,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       try {
         era.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
       } catch (_) {
-        // eslint-disable-next-line no-empty
+        era.global = {};
       }
     }
   };

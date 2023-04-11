@@ -1,5 +1,4 @@
 const era = require('./era-electron');
-const init_game = require('./init_game');
 
 module.exports = async () => {
   era.log('era init');
@@ -26,7 +25,7 @@ module.exports = async () => {
     let ret = await era.input({ rule: '[0-3]' });
     switch (Number(ret)) {
       case 0:
-        await init_game();
+        await require('./init_game')();
         break;
       case 1:
         break;
