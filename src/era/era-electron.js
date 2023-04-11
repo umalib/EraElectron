@@ -8,7 +8,7 @@ const {
 } = require('fs');
 const { join } = require('path');
 const parseCSV = require('@/era/csv-utils');
-const { safeUndefinedCheck } = require('@/era/value-utils');
+const { safeUndefinedCheck } = require('@/renderer/utils/value-utils');
 
 const baseNameMap = require('@/era/base-name.json');
 
@@ -29,7 +29,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
 
   async function input(config) {
     inputKey = new Date().getTime().toString();
-    connect({ action: 'input', data: { config, inputKey } });
+    connect({ action: 'input', data: { config: config || {}, inputKey } });
     return new Promise((resolve) => {
       listen(inputKey, (_, ret) => {
         cleanListener(inputKey);
@@ -53,7 +53,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       data: {
         str,
         num,
-        config,
+        config: config || {},
       },
     });
   }
@@ -108,6 +108,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       cstr: {},
       equip: {},
       exp: {},
+      flag: {},
       juel: {},
       mark: {},
       talent: {},
@@ -283,6 +284,12 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
             era.global[valueIndex] = val;
           }
           return era.global[valueIndex];
+        } else {
+          valueIndex = era.staticData[tableName][valueIndex] || valueIndex;
+          if (val !== undefined) {
+            era.data[tableName][valueIndex] = val;
+          }
+          return era.data[tableName][valueIndex];
         }
         break;
       case 3:

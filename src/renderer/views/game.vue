@@ -5,22 +5,19 @@
       <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
       <el-row v-else>
         <el-col
-          :offset="line.offset || defaultOffset"
+          :offset="line.offset || defaultColOffset"
           :span="line.width || defaultColWidth"
-          :style="{ textAlign: line.textAlign || defaultAlign }"
+          :style="{ textAlign: line.textAlign || defaultTextAlign }"
         >
-          <span v-if="line.type === lineType.button">
-            <el-button
-              v-if="line.isButton"
-              @click="returnFromButton(line.num)"
-              :type="line.buttonType"
-            >
-              {{ line.content }}
-            </el-button>
-            <el-link v-else @click="returnFromButton(line.num)">
-              {{ line.content }}
-            </el-link>
-          </span>
+          <el-button
+            v-if="line.type === lineType.button"
+            @click="returnFromButton(line.num)"
+            :disabled="line.valCount < buttonValCount"
+            :type="line.buttonType"
+            :link="!line.isButton"
+          >
+            {{ line.content }}
+          </el-button>
 
           <span v-if="line.type === lineType.text">
             <p v-if="line.isParagraph">
@@ -41,7 +38,6 @@
             v-if="line.type === lineType.input"
             v-model="input.val"
             @change="returnInput()"
-            :style="{ display: line.hidden ? 'none' : '' }"
             autofocus
           />
         </el-col>
@@ -59,15 +55,17 @@
 <script>
 import { ElMessage, ElNotification } from 'element-plus';
 
-import embeddedData from '@/renderer/utils/embedded.json';
 import connector from '@/renderer/utils/connector';
+import embeddedData from '@/renderer/utils/embedded.json';
+import { safeUndefinedCheck } from '@/renderer/utils/value-utils';
 
 export default {
   data() {
     return {
-      defaultAlign: 'left',
+      buttonValCount: 0,
+      defaultTextAlign: 'left',
       defaultColWidth: 24,
-      defaultOffset: 0,
+      defaultColOffset: 0,
       lineType: embeddedData.lineType,
       lines: [],
       input: {
@@ -82,50 +80,46 @@ export default {
       const lineCount = Number(count);
       if (isNaN(lineCount) || lineCount > this.lines.length) {
         this.lines = [];
+        this.buttonValCount = 0;
       } else if (lineCount > 0) {
         this.lines.slice(this.lines.length - lineCount, lineCount);
       }
     },
     getButtonObject(data) {
-      const tmp = {
-        num: data.num,
+      return {
+        buttonType: safeUndefinedCheck(data.config.type, 'primary'),
         content: data.str,
+        isButton: data.config.isButton,
+        num: data.num,
+        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
+        textAlign: safeUndefinedCheck(data.config.align, this.defaultTextAlign),
         type: this.lineType.button,
+        valCount: this.buttonValCount,
+        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
       };
-      if (data.config) {
-        tmp.buttonType = data.config.type;
-        tmp.isButton = data.config.isButton;
-        tmp.textAlign = data.config.align;
-      }
-      return tmp;
     },
     getInputObject(data) {
-      const tmp = {
-        type: this.lineType.input,
-      };
       this.input.val = '';
       this.input.key = data.inputKey;
-      if (data.config) {
-        if (data.config.rule) {
-          this.input.rule = new RegExp(`^${data.config.rule}$`);
-        }
-        tmp.hidden = data.config.hidden;
+      if (data.config.rule) {
+        this.input.rule = new RegExp(`^${data.config.rule}$`);
       }
-      return tmp;
-    },
-    getLineUpObject() {
-      return { type: this.lineType['lineUp'] };
+      return {
+        any: data.config.any,
+        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
+        type: this.lineType.input,
+        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
+      };
     },
     getTextObject(data) {
-      const tmp = {
+      return {
         contents: data.content.split('\n'),
+        isParagraph: data.config.isParagraph || data.config.p,
+        offset: safeUndefinedCheck(data.config.offset, this.defaultColOffset),
+        textAlign: safeUndefinedCheck(data.config.align, this.defaultTextAlign),
         type: this.lineType.text,
+        width: safeUndefinedCheck(data.config.width, this.defaultColWidth),
       };
-      if (data.config) {
-        tmp.textAlign = data.config.align;
-        tmp.isParagraph = data.config.isParagraph || data.config.p;
-      }
-      return tmp;
     },
     reload() {
       connector.reload();
@@ -154,7 +148,7 @@ export default {
     setOffset(offset) {
       const _offset = Number(offset);
       if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
-        this.defaultOffset = _offset;
+        this.defaultColOffset = _offset;
       }
     },
     setWidth(width) {
@@ -189,9 +183,9 @@ export default {
       this.lines.push(this.getButtonObject(data)),
     );
     connector.register('println', () =>
-      this.lines.push(this.getLineUpObject()),
+      this.lines.push({ type: this.lineType['lineUp'] }),
     );
-    connector.register('setAlign', (align) => (this.defaultAlign = align));
+    connector.register('setAlign', (align) => (this.defaultTextAlign = align));
     connector.register('setOffset', this.setOffset);
     connector.register('setWidth', this.setWidth);
     connector.register('setTitle', (title) => (document.title = title));
