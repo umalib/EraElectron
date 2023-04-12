@@ -1,9 +1,8 @@
 <template>
-  <el-scrollbar>
+  <el-scrollbar @click="!input.any || returnFromInput()">
     <el-row v-for="(line, i) in lines" :key="i">
-      <el-divider v-if="line.type === lineType['divider']" />
+      <div v-if="line.type === lineType['multiCol']"></div>
       <br v-else-if="line.type === lineType['lineUp']" />
-      <div v-else-if="line.type === lineType['multiCol']"></div>
       <el-col
         v-else
         :offset="line.offset || defaultSetting.colOffset"
@@ -19,6 +18,17 @@
         >
           {{ line.content }}
         </el-button>
+        <el-divider v-if="line.type === lineType['divider']" />
+        <div v-if="line.type === lineType['progress']">
+          <el-progress
+            :color="line.color"
+            :stroke-width="line.height"
+            :text-inside="true"
+          >
+            <span>{{ line.inContent }}</span>
+          </el-progress>
+          <span>{{ line.outContent }}</span>
+        </div>
         <div v-if="line.type === lineType.text">
           <p v-if="line.isParagraph">
             <span v-for="(content, i) in line.contents" :key="content">
@@ -112,6 +122,16 @@ export default {
           data.config.width,
           this.defaultSetting.colWidth,
         ),
+      };
+    },
+    getProgressObject(data) {
+      return {
+        type: this.lineType.progress,
+        inContent: data['in'],
+        outContent: data['out'],
+        color: data.color,
+        height: data.config.height || 24,
+        width: Math.floor(24 * data.config.width),
       };
     },
     getTextObject(data) {
@@ -229,6 +249,9 @@ export default {
     );
     connector.register('println', () =>
       this.lines.push({ type: this.lineType['lineUp'] }),
+    );
+    connector.register('printProgress', (data) =>
+      this.lines.push(this.getProgressObject(data)),
     );
     connector.register(
       'setAlign',

@@ -4,6 +4,7 @@
     "divider": 2,
     "lineUp": 3,
     "multiCol": 4,
-    "text": 5
+    "progress": 5,
+    "text": 6
   }
 }
