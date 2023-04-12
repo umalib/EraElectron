@@ -88,7 +88,9 @@ export default {
       }
     },
     focusInput() {
-      this.$refs.elInput.focus();
+      if (this.$refs.elInput) {
+        this.$refs.elInput.focus();
+      }
     },
     getButtonObject(data) {
       return {
@@ -137,14 +139,14 @@ export default {
       connector.reload();
     },
     resetData() {
-      this.data.buttonValCount = 0;
-      this.data.defaultSetting = {
+      this.buttonValCount = 0;
+      this.defaultSetting = {
         colOffset: 0,
         colWidth: 24,
         maxHeight: 880,
         textAlign: 'left',
       };
-      this.data.input = {
+      this.input = {
         any: false,
         disableBefore: false,
         key: '',
