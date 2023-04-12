@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span v-for="(line, i) in lines" :key="i">
+    <div v-for="(line, i) in lines" :key="i">
       <el-divider v-if="line.type === lineType['divider']" />
       <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
       <el-row v-else>
@@ -33,17 +33,19 @@
               </span>
             </span>
           </span>
-
-          <el-input
-            v-if="line.type === lineType.input"
-            v-model="input.val"
-            @change="returnFromInput()"
-            autofocus
-          />
         </el-col>
       </el-row>
       <br v-if="line.type === lineType['lineUp']" />
-    </span>
+    </div>
+    <el-input
+      v-if="input.key"
+      v-model="input.val"
+      ref="elInput"
+      @change="returnFromInput()"
+      @blur="focusInput()"
+      @input="!input.any || returnFromInput()"
+      autofocus
+    />
     <el-row>
       <el-col style="text-align: center">
         <el-button type="primary" @click="reload()">Reload</el-button>
@@ -69,6 +71,7 @@ export default {
         textAlign: 'left',
       },
       input: {
+        any: false,
         disableBefore: false,
         key: '',
         rule: undefined,
@@ -88,6 +91,9 @@ export default {
         this.lines.slice(this.lines.length - lineCount, lineCount);
       }
     },
+    focusInput() {
+      this.$refs.elInput.focus();
+    },
     getButtonObject(data) {
       return {
         buttonType: safeUndefinedCheck(data.config.type, 'primary'),
@@ -104,26 +110,6 @@ export default {
         ),
         type: this.lineType.button,
         valCount: this.buttonValCount,
-        width: safeUndefinedCheck(
-          data.config.width,
-          this.defaultSetting.colWidth,
-        ),
-      };
-    },
-    getInputObject(data) {
-      this.input.val = '';
-      this.input.key = data.inputKey;
-      this.input.disableBefore = data.disableBefore;
-      if (data.config.rule) {
-        this.input.rule = new RegExp(`^${data.config.rule}$`);
-      }
-      return {
-        any: data.config.any,
-        offset: safeUndefinedCheck(
-          data.config.offset,
-          this.defaultSetting.colOffset,
-        ),
-        type: this.lineType.input,
         width: safeUndefinedCheck(
           data.config.width,
           this.defaultSetting.colWidth,
@@ -152,16 +138,6 @@ export default {
     reload() {
       connector.reload();
     },
-    returnInput(val) {
-      connector.returnInput(this.input.key, val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      if (this.input.disableBefore) {
-        this.buttonValCount++;
-        this.input.disableBefore = false;
-      }
-      this.lines.pop();
-    },
     returnFromButton(val) {
       connector.returnInput(this.input.key, val);
       this.input.rule = undefined;
@@ -183,6 +159,16 @@ export default {
       this.input.val = '';
       this.lines.pop();
     },
+    returnInput(val) {
+      connector.returnInput(this.input.key, val);
+      this.input.rule = undefined;
+      this.input.val = '';
+      if (this.input.disableBefore) {
+        this.buttonValCount++;
+        this.input.disableBefore = false;
+      }
+      this.lines.pop();
+    },
     setOffset(offset) {
       const _offset = Number(offset);
       if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
@@ -194,6 +180,15 @@ export default {
       if (!isNaN(_width) && _width >= 1 && _width <= 24) {
         this.defaultSetting.colWidth = _width;
       }
+    },
+    showInput(data) {
+      this.input.val = '';
+      this.input.key = data.inputKey;
+      this.input.disableBefore = data.disableBefore;
+      if (data.config.rule) {
+        this.input.rule = new RegExp(`^${data.config.rule}$`);
+      }
+      this.input.any = data.config.any;
     },
     throwError(message) {
       ElNotification({
@@ -210,9 +205,7 @@ export default {
       this.lines.push({ type: this.lineType['divider'] }),
     );
     connector.register('error', this.throwError);
-    connector.register('input', (data) =>
-      this.lines.push(this.getInputObject(data)),
-    );
+    connector.register('input', this.showInput);
     connector.register('log', console.log);
     connector.register('print', (data) =>
       this.lines.push(this.getTextObject(data)),
