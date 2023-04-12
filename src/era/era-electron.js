@@ -132,7 +132,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         cleanListener(inputKey);
       }
       this.api.setTitle(this.staticData['gamebase']['タイトル']);
-      this.api.clear();
       this.resetData();
       this.api.loadGlobal();
 

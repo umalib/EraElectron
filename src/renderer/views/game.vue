@@ -65,18 +65,8 @@ export default {
   data() {
     return {
       buttonValCount: 0,
-      defaultSetting: {
-        colOffset: 0,
-        colWidth: 24,
-        textAlign: 'left',
-      },
-      input: {
-        any: false,
-        disableBefore: false,
-        key: '',
-        rule: undefined,
-        val: '',
-      },
+      defaultSetting: {},
+      input: {},
       lineType: embeddedData.lineType,
       lines: [],
     };
@@ -136,7 +126,24 @@ export default {
       };
     },
     reload() {
+      this.resetData();
+      this.clear();
       connector.reload();
+    },
+    resetData() {
+      this.data.buttonValCount = 0;
+      this.data.defaultSetting = {
+        colOffset: 0,
+        colWidth: 24,
+        textAlign: 'left',
+      };
+      this.data.input = {
+        any: false,
+        disableBefore: false,
+        key: '',
+        rule: undefined,
+        val: '',
+      };
     },
     returnFromButton(val) {
       connector.returnInput(this.input.key, val);
