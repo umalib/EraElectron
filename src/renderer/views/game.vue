@@ -1,57 +1,63 @@
 <template>
-  <div>
-    <div v-for="(line, i) in lines" :key="i">
+  <el-scrollbar :max-height="`${defaultSetting.maxHeight}px`">
+    <el-row v-for="(line, i) in lines" :key="i">
       <el-divider v-if="line.type === lineType['divider']" />
-      <el-row v-else-if="line.type === lineType['multiCol']"></el-row>
-      <el-row v-else>
-        <el-col
-          :offset="line.offset || defaultSetting.colOffset"
-          :span="line.width || defaultSetting.colWidth"
-          :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
+      <br v-else-if="line.type === lineType['lineUp']" />
+      <div v-else-if="line.type === lineType['multiCol']"></div>
+      <el-col
+        v-else
+        :offset="line.offset || defaultSetting.colOffset"
+        :span="line.width || defaultSetting.colWidth"
+        :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
+      >
+        <el-button
+          v-if="line.type === lineType.button"
+          @click="returnFromButton(line.num)"
+          :disabled="line.valCount < buttonValCount"
+          :type="line.buttonType"
+          :link="!line.isButton"
         >
-          <el-button
-            v-if="line.type === lineType.button"
-            @click="returnFromButton(line.num)"
-            :disabled="line.valCount < buttonValCount"
-            :type="line.buttonType"
-            :link="!line.isButton"
-          >
-            {{ line.content }}
-          </el-button>
-
-          <span v-if="line.type === lineType.text">
-            <p v-if="line.isParagraph">
-              <span v-for="(content, i) in line.contents" :key="content">
-                <br v-if="i !== 0" />
-                {{ content }}
-              </span>
-            </p>
-            <span v-else>
-              <span v-for="(content, i) in line.contents" :key="content">
-                <br v-if="i !== 0" />
-                {{ content }}
-              </span>
+          {{ line.content }}
+        </el-button>
+        <div v-if="line.type === lineType.text">
+          <p v-if="line.isParagraph">
+            <span v-for="(content, i) in line.contents" :key="content">
+              <br v-if="i !== 0" />
+              {{ content }}
             </span>
-          </span>
-        </el-col>
-      </el-row>
-      <br v-if="line.type === lineType['lineUp']" />
-    </div>
-    <el-input
-      v-if="input.key"
-      v-model="input.val"
-      ref="elInput"
-      @change="returnFromInput()"
-      @blur="focusInput()"
-      @input="!input.any || returnFromInput()"
-      autofocus
-    />
+          </p>
+          <div v-else>
+            <span v-for="(content, i) in line.contents" :key="content">
+              <br v-if="i !== 0" />
+              {{ content }}
+            </span>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
+    <el-row v-if="input.key">
+      <el-col
+        :offset="defaultSetting.colOffset"
+        :span="defaultSetting.colWidth"
+        :style="{ textAlign: defaultSetting.textAlign }"
+      >
+        <el-input
+          v-model="input.val"
+          @change="returnFromInput()"
+          @blur="focusInput()"
+          @input="!input.any || returnFromInput()"
+          :placeholder="`${input.any ? '按任意键继续……' : ''}`"
+          autofocus
+          ref="elInput"
+        />
+      </el-col>
+    </el-row>
     <el-row>
       <el-col style="text-align: center">
         <el-button type="primary" @click="reload()">Reload</el-button>
       </el-col>
     </el-row>
-  </div>
+  </el-scrollbar>
 </template>
 
 <script>
@@ -135,6 +141,7 @@ export default {
       this.data.defaultSetting = {
         colOffset: 0,
         colWidth: 24,
+        maxHeight: 880,
         textAlign: 'left',
       };
       this.data.input = {
@@ -147,8 +154,13 @@ export default {
     },
     returnFromButton(val) {
       connector.returnInput(this.input.key, val);
+      this.input.any = false;
       this.input.rule = undefined;
       this.input.val = '';
+      if (this.input.disableBefore) {
+        this.buttonValCount++;
+        this.input.disableBefore = false;
+      }
       this.lines.pop();
     },
     returnFromInput() {
@@ -161,20 +173,13 @@ export default {
         );
         return;
       }
-      connector.returnInput(this.input.key, this.input.val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      this.lines.pop();
+      this.returnFromButton(this.input.val);
     },
-    returnInput(val) {
-      connector.returnInput(this.input.key, val);
-      this.input.rule = undefined;
-      this.input.val = '';
-      if (this.input.disableBefore) {
-        this.buttonValCount++;
-        this.input.disableBefore = false;
+    setMaxHeight(height) {
+      const _height = Number(height);
+      if (!isNaN(_height) && _height > 0) {
+        this.defaultSetting.maxHeight = height;
       }
-      this.lines.pop();
     },
     setOffset(offset) {
       const _offset = Number(offset);
@@ -227,6 +232,7 @@ export default {
       'setAlign',
       (align) => (this.defaultSetting.textAlign = align),
     );
+    connector.register('setMaxHeight', this.setMaxHeight);
     connector.register('setOffset', this.setOffset);
     connector.register('setWidth', this.setWidth);
     connector.register('setTitle', (title) => (document.title = title));

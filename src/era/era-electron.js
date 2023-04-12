@@ -66,6 +66,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'setAlign', data: align });
   }
 
+  function setMaxHeight(height) {
+    connect({ action: 'setMaxHeight', data: height });
+  }
+
   function setOffset(offset) {
     connect({ action: 'setOffset', data: offset });
   }
@@ -79,9 +83,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
   }
 
   async function waitAnyKey() {
-    print('按任意键继续……', {
-      align: 'left',
-    });
     await input({ any: true });
   }
 
@@ -96,6 +97,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       printButton,
       println,
       setAlign,
+      setMaxHeight,
       setOffset,
       setTitle,
       setWidth,

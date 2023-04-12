@@ -18,6 +18,7 @@ module.exports = {
   saveGlobal() {},
   set() {},
   setAlign() {},
+  setMaxHeight() {},
   setOffset() {},
   setTitle() {},
   setWidth() {},
