@@ -1,11 +1,13 @@
 module.exports = {
+  addCharacter() {},
   clear() {},
   drawLine() {},
   get() {},
+  getAddedCharacters() {},
+  getAllCharacters() {},
   async input() {},
   load() {},
   loadGlobal() {},
-  log() {},
   print() {},
   printButton() {},
   /**
@@ -13,12 +15,12 @@ module.exports = {
    */
   println() {},
   resetAllExceptGlobal() {},
+  resetCharacter() {},
   resetGlobal() {},
   save() {},
   saveGlobal() {},
   set() {},
   setAlign() {},
-  setMaxHeight() {},
   setOffset() {},
   setTitle() {},
   setWidth() {},

@@ -1,5 +1,5 @@
 <template>
-  <el-scrollbar :max-height="`${defaultSetting.maxHeight}px`">
+  <el-scrollbar>
     <el-row v-for="(line, i) in lines" :key="i">
       <el-divider v-if="line.type === lineType['divider']" />
       <br v-else-if="line.type === lineType['lineUp']" />
@@ -143,7 +143,7 @@ export default {
       this.defaultSetting = {
         colOffset: 0,
         colWidth: 24,
-        maxHeight: 880,
+        // maxHeight: 880,
         textAlign: 'left',
       };
       this.input = {
@@ -177,12 +177,12 @@ export default {
       }
       this.returnFromButton(this.input.val);
     },
-    setMaxHeight(height) {
-      const _height = Number(height);
-      if (!isNaN(_height) && _height > 0) {
-        this.defaultSetting.maxHeight = height;
-      }
-    },
+    // setMaxHeight(height) {
+    //   const _height = Number(height);
+    //   if (!isNaN(_height) && _height > 0) {
+    //     this.defaultSetting.maxHeight = height;
+    //   }
+    // },
     setOffset(offset) {
       const _offset = Number(offset);
       if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
@@ -234,7 +234,7 @@ export default {
       'setAlign',
       (align) => (this.defaultSetting.textAlign = align),
     );
-    connector.register('setMaxHeight', this.setMaxHeight);
+    // connector.register('setMaxHeight', this.setMaxHeight);
     connector.register('setOffset', this.setOffset);
     connector.register('setWidth', this.setWidth);
     connector.register('setTitle', (title) => (document.title = title));

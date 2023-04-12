@@ -66,9 +66,9 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'setAlign', data: align });
   }
 
-  function setMaxHeight(height) {
-    connect({ action: 'setMaxHeight', data: height });
-  }
+  // function setMaxHeight(height) {
+  //   connect({ action: 'setMaxHeight', data: height });
+  // }
 
   function setOffset(offset) {
     connect({ action: 'setOffset', data: offset });
@@ -97,7 +97,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       printButton,
       println,
       setAlign,
-      setMaxHeight,
+      // setMaxHeight,
       setOffset,
       setTitle,
       setWidth,
@@ -117,6 +117,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         abl: {},
         amour: {},
         base: {},
+        maxbase: {},
         callname: {},
         cflag: {},
         cstr: {},
@@ -125,6 +126,8 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         flag: {},
         juel: {},
         mark: {},
+        newCharaIndex: 0,
+        no: {},
         relation: {},
         talent: {},
       };
@@ -137,10 +140,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       this.resetData();
       this.api.loadGlobal();
 
-      this.api.log({
-        data: this.data,
-        global: this.global,
-      });
+      // this.api.log({
+      //   data: this.data,
+      //   global: this.global,
+      // });
       try {
         gameMain();
       } catch (e) {
@@ -171,7 +174,11 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
         .forEach((p) => {
           const k = fileList[p].toLowerCase();
-          if (!k.startsWith('variablesize')) {
+          if (
+            !k.startsWith('variablesize') &&
+            !k.startsWith('str') &&
+            !k.startsWith('strname')
+          ) {
             this.api.print(`loading ${k}`);
             this.staticData[k] = {};
             const csv = parseCSV(readFileSync(p).toString('utf-8'));
@@ -224,7 +231,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
                 );
                 valueIndex = a[1];
                 value = a[2];
-                if (tableName === 'relation' || tableName === 'call') {
+                if (tableName === 'relation' || tableName === 'callname') {
                   this.staticData.relationship[tableName][
                     `${tmp['id']}|${valueIndex}`
                   ] = value;
@@ -246,10 +253,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           this.staticData.chara[tmp['id']] = tmp;
         });
 
-      this.api.log({
-        static: this.staticData,
-        names: this.filedNames,
-      });
+      // this.api.log({
+      //   static: this.staticData,
+      //   names: this.filedNames,
+      // });
 
       // load ERE
       let eraModule;
@@ -280,30 +287,36 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     },
     staticData: {
       relationship: {
-        call: {},
+        callname: {},
         relation: {},
       },
     },
   };
 
   era.api.set = (key, val) => {
+    if (!key) {
+      return undefined;
+    }
     const keyArr = key.split(':').map((x) => x.toLocaleLowerCase());
     let tableName, charaIndex, valueIndex;
     switch (keyArr.length) {
       case 2:
         tableName = keyArr[0];
         valueIndex = keyArr[1];
+        if (tableName === 'amour') {
+          if (val !== undefined) {
+            era.data[tableName][valueIndex] = val;
+          }
+          return era.data[tableName][valueIndex];
+        }
         if (tableName === 'global') {
           if (val !== undefined) {
             era.global[valueIndex] = val;
           }
           return era.global[valueIndex];
         }
-        if (tableName === 'amour') {
-          if (val !== undefined) {
-            era.data[tableName][valueIndex] = val;
-          }
-          return era.data[tableName][valueIndex];
+        if (tableName === 'str') {
+          return era.staticData[tableName][valueIndex];
         }
         if (tableName.endsWith('name')) {
           tableName = tableName.substring(0, tableName.length - 4);
@@ -322,14 +335,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         tableName = keyArr[0];
         charaIndex = keyArr[1];
         valueIndex = keyArr[2];
-        if (
-          tableName.startsWith('maxbase') &&
-          era.staticData.chara[charaIndex]
-        ) {
-          return era.staticData.chara[charaIndex]['base'][
-            safeUndefinedCheck(era.staticData['base'][valueIndex], valueIndex)
-          ];
-        }
         if (tableName === 'callname' || tableName === 'relation') {
           if (val !== undefined) {
             era.data[tableName][charaIndex][valueIndex] = val;
@@ -425,6 +430,65 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
     return true;
   };
+
+  era.api.addCharacter = era.api.resetCharacter = (charaId) => {
+    if (!era.staticData.chara[charaId]) {
+      return;
+    }
+    era.data.no[era.data.newCharaIndex] = charaId;
+    era.data.newCharaIndex++;
+    era.data.maxbase[charaId] = {};
+    era.data.base[charaId] = {};
+    era.data.abl[charaId] = {};
+    era.data.talent[charaId] = {};
+    era.data.cflag[charaId] = {};
+    era.data.cstr[charaId] = {};
+    era.data.equip[charaId] = {};
+    era.data.mark[charaId] = {};
+    era.data.exp[charaId] = {};
+    era.data.juel[charaId] = {};
+    era.data.callname[charaId] = {};
+    era.data.relation[charaId] = {};
+
+    // init
+    Object.keys(era.staticData.chara[charaId])
+      .filter(
+        (table) => typeof era.staticData.chara[charaId][table] === 'object',
+      )
+      .forEach((table) =>
+        Object.keys(era.staticData.chara[charaId][table]).forEach(
+          (k) =>
+            (era.data[table][charaId][k] =
+              era.staticData.chara[charaId][table][k]),
+        ),
+      );
+    Object.keys(era.data.base[charaId]).forEach(
+      (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
+    );
+    era.data.callname[charaId][-2] = era.data.callname[charaId][-1] =
+      era.staticData.chara[charaId].name;
+    ['relation', 'callname'].forEach((tableName) =>
+      Object.keys(era.staticData.relationship[tableName])
+        .filter((x) => x.startsWith(`${charaId}|`) || x.endsWith(`|${charaId}`))
+        .forEach((ids) => {
+          const idArr = ids.split('|');
+          if (era.data[tableName][idArr[0]]) {
+            era.data[tableName][idArr[0]][idArr[1]] =
+              era.staticData.relationship[tableName][ids];
+          }
+        }),
+    );
+  };
+
+  era.api.getAllCharacters = () => {
+    return Object.keys(era.staticData.chara);
+  };
+
+  era.api.getAddedCharacters = () => {
+    return Object.values(era.data.base);
+  };
+
+  logger.info(Object.keys(era.api));
 
   return era;
 };

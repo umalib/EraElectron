@@ -5,7 +5,7 @@
   "姓名": "name",
   "呼び名": "callname",
   "默认称呼": "callname",
-  "称呼": "call",
+  "称呼": "callname",
   "基础属性": "base",
   "基礎": "base",
   "技能": "abl",
