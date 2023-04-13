@@ -11,7 +11,7 @@ module.exports = async () => {
     era.print('招募？');
     era.drawLine();
 
-    for (let ind = 0; ind < 1; ind++) {
+    for (let ind = 0; ind < 3; ind++) {
       let index = require('../system/sys_get_avail_chara')('RandomRecruit');
 
       if (index != -1) {

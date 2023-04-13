@@ -528,7 +528,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
   };
 
   era.api.getAddedCharacters = () => {
-    return Object.values(era.data.base);
+    return Object.keys(era.data.base);
   };
 
   logger.info(Object.keys(era.api));

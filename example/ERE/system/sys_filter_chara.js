@@ -4,13 +4,10 @@
 
 module.exports = (table, key, value) => {
   let list_cur = era.getAddedCharacters();
-  let list_ret = [];
 
-  for (let ind of list_cur) {
-    if (era.get(`${table}:${ind}:${key}`) == value) {
-      list_ret.push(ind);
-    }
+  if (value) {
+    return list_cur.filter((item) => (era.get(`${table}:${item}:${key}`) == value));
+  } else {
+    return list_cur.filter((item) => (!era.get(`${table}:${item}:${key}`)));
   }
-
-  return list_ret;
 }
