@@ -134,7 +134,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       waitAnyKey,
     },
     data: {},
-    filedNames: {},
+    fieldNames: {},
     global: {},
     reload() {
       if (!inputKey) {
@@ -169,6 +169,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       this.api.setTitle(this.staticData['gamebase']['タイトル']);
       this.resetData();
       this.api.loadGlobal();
+
+      this.api.addCharacter(0);
+      this.api.set('callname:0:-1', '你');
+      this.api.set('callname:0:-2', '我');
 
       log({
         data: this.data,
@@ -222,17 +226,17 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
               );
             } else if (k.startsWith('item')) {
               this.staticData.item = { name: {}, price: {} };
-              this.filedNames = {};
+              this.fieldNames = {};
               csv.forEach((a) => {
                 this.staticData.item.name[a[1]] = a[0];
                 this.staticData.item.price[a[0]] = a[2];
-                this.filedNames[a[0]] = a[1];
+                this.fieldNames[a[0]] = a[1];
               });
             } else {
-              this.filedNames[k] = {};
+              this.fieldNames[k] = {};
               csv.forEach((a) => {
                 this.staticData[k][a[1]] = a[0];
-                this.filedNames[k][a[0]] = a[1];
+                this.fieldNames[k][a[0]] = a[1];
               });
             }
           }
@@ -285,7 +289,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
 
       log({
         static: this.staticData,
-        names: this.filedNames,
+        names: this.fieldNames,
       });
 
       // load ERE
@@ -350,13 +354,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           }
           return era.global[valueIndex];
         }
-        if (tableName === 'str') {
-          return era.staticData[tableName][valueIndex];
-        }
         if (tableName.endsWith('name')) {
           tableName = tableName.substring(0, tableName.length - 4);
-          if (era.filedNames[tableName]) {
-            return era.filedNames[tableName][valueIndex];
+          if (era.fieldNames[tableName]) {
+            return era.fieldNames[tableName][valueIndex];
           }
         } else {
           valueIndex = safeUndefinedCheck(
@@ -379,7 +380,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           }
           return safeUndefinedCheck(
             era.data[tableName][charaIndex][valueIndex],
-            era.staticData.chara[valueIndex][tableName],
+            era.staticData.chara[charaIndex][tableName],
           );
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
