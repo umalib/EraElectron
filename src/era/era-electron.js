@@ -43,16 +43,16 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'log', data: info });
   }
 
-  function print(str, config) {
-    connect({ action: 'print', data: { content: str, config: config || {} } });
+  function print(content, config) {
+    connect({ action: 'print', data: { content, config: config || {} } });
   }
 
-  function printButton(str, num, config) {
+  function printButton(content, accelerator, config) {
     connect({
       action: 'printButton',
       data: {
-        str,
-        num,
+        content,
+        accelerator,
         config: config || {},
       },
     });
@@ -74,8 +74,8 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     });
   }
 
-  function setAlign(align) {
-    connect({ action: 'setAlign', data: align });
+  function setAlign(textAlign) {
+    connect({ action: 'setAlign', data: textAlign });
   }
 
   // function setMaxHeight(height) {

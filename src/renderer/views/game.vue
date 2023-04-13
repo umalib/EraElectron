@@ -11,7 +11,7 @@
       >
         <el-button
           v-if="line.type === lineType.button"
-          @click="returnFromButton(line.num)"
+          @click="returnFromButton(line.accelerator)"
           :disabled="line.valCount < buttonValCount"
           :type="line.buttonType"
           :link="!line.isButton"
@@ -123,10 +123,10 @@ export default {
     },
     getButtonObject(data) {
       return {
+        accelerator: data.accelerator,
         buttonType: safeUndefinedCheck(data.config.type, 'primary'),
-        content: data.str,
+        content: data.content,
         isButton: data.config.isButton,
-        num: data.num,
         offset: this.getValidOffset(data.config.offset),
         textAlign: safeUndefinedCheck(
           data.config.align,

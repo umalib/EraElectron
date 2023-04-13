@@ -2,8 +2,6 @@ const era = require('./era-electron.js');
 const { genderArr } = require('./data/const.json');
 
 module.exports = async () => {
-  era.log('init game');
-
   let flagNewGame = true;
   let playerName = '';
   let playerGender = 3;

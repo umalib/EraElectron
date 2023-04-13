@@ -1,8 +1,6 @@
 const era = require('./era-electron');
 
 module.exports = async () => {
-  era.log('era init');
-
   let flagTitle = true;
 
   while (flagTitle) {
