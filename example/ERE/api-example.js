@@ -14,12 +14,11 @@ module.exports = async function () {
   era.clear();
   era.clear(5);
   era.drawLine();
-  let ret;
-  ret = era.get('maxbase:1:体力');
-  ret = era.getAddedCharacters();
-  ret = era.getAllCharacters();
-  ret = await era.input({ rule: '[0-3]' });
-  ret = era.load(1);
+  console.log(era.get('maxbase:1:体力'));
+  console.log(era.getAddedCharacters());
+  console.log(era.getAllCharacters());
+  console.log(await era.input({ rule: '[0-3]' }));
+  console.log(era.loadData(1));
   era.loadGlobal();
   // config.p和config.isParagraph的作用完全相同
   // 控制输出的文本是否包含在<p>标签里
@@ -51,7 +50,7 @@ module.exports = async function () {
   era.resetAllExceptGlobal();
   era.resetCharacter(1);
   era.resetGlobal();
-  era.save(1);
+  era.saveData(1);
   era.saveGlobal();
   era.set('callname:2:1', '斯佩酱');
   // 以下三个set都是设置默认显示效果，即默认文本对齐方式、默认偏移量、默认宽度
@@ -65,6 +64,4 @@ module.exports = async function () {
   // 设置默认宽度，是element-plus布局的设定，即1-24的整数值
   era.setWidth(14);
   await era.waitAnyKey();
-
-  console.log(ret);
 };

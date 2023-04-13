@@ -1,14 +1,14 @@
 module.exports = {
   /**
    * add a character
-   * @param {integer} charaId REQUIRED id of the character defined in chara*.csv
+   * @param {number} charaId REQUIRED id of the character defined in chara*.csv
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
   addCharacter(charaId) {},
   /**
    * clear printed lines
-   * @param {integer} [lineCount] how many lines to be cleared, leave undefined to clear all
+   * @param {number} [lineCount] how many lines to be cleared, leave undefined to clear all
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -27,12 +27,12 @@ module.exports = {
   get(varName) {},
   /**
    * get all added characters
-   * @returns {array<integer>} the list of added characters' ids
+   * @returns {array<number>} the list of added characters' ids
    */
   getAddedCharacters() {},
   /**
    * get all characters
-   * @returns {array<integer>} the list of all characters' ids
+   * @returns {array<number>} the list of all characters' ids
    */
   getAllCharacters() {},
   /**
@@ -44,7 +44,7 @@ module.exports = {
   async input(config) {},
   /**
    * load a save file
-   * @param {integer} savIndex REQUIRED the index of the save file
+   * @param {number} savIndex REQUIRED the index of the save file
    * @returns {boolean} if the loading succeeds
    */
   // eslint-disable-next-line no-unused-vars
@@ -57,7 +57,7 @@ module.exports = {
   /**
    * print some text
    * @param {string} content REQUIRED the text to be printed
-   * @param {{align: string, isParagraph: boolean, offset: integer, p: boolean, width: integer}} [config] the config of the printed line
+   * @param {{p: boolean, offset: number, width: number, isParagraph: boolean, align: string}} [config] the config of the printed line
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -65,7 +65,7 @@ module.exports = {
   /**
    * print some text and wait any key from user
    * @param {string} content REQUIRED the text to be printed
-   * @param {{align: string, isParagraph: boolean, offset: integer, p: boolean, width: integer}} [config] the config of the printed line
+   * @param {{align: string, isParagraph: boolean, offset: number, p: boolean, width: number}} [config] the config of the printed line
    * @returns {Promise<void>} the same with waitAnyKey, please use await
    */
   // eslint-disable-next-line no-unused-vars
@@ -73,8 +73,8 @@ module.exports = {
   /**
    * print a button
    * @param {string} content REQUIRED the text of the button
-   * @param {integer} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{align: string, inTextAlign: string, isButton: boolean, type: string, offset: integer, width: integer}} [config] the config of the printed button
+   * @param {number} accelerator REQUIRED the accelerator key of the button used in the input
+   * @param {{isButton: boolean, offset: number, width: number, type: string, align: string}} [config] the config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -86,10 +86,10 @@ module.exports = {
   println() {},
   /**
    * print a progress bar
-   * @param {float} percentage REQUIRED the percentage of the progress bar, 0-100
+   * @param {number} percentage REQUIRED the percentage of the progress bar, float, 0-100
    * @param {string} inContent REQUIRED the text shown in the progress bar
    * @param {string} outContent REQUIRED the text shown next to the progress bar
-   * @param {{align: string, barRatio: float, color: string, fontColor: string, height: integer, offset: integer, width: integer}} [config] the config of the printed progress
+   * @param {{barRatio: number, color: string, offset: number, width: number, align: string, fontColor: string, height: number}} [config] the config of the printed progress
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -101,7 +101,7 @@ module.exports = {
   resetAllExceptGlobal() {},
   /**
    * reset the data of a character
-   * @param {integer} charaId REQUIRED id of the character defined in chara*.csv
+   * @param {number} charaId REQUIRED id of the character defined in chara*.csv
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -113,7 +113,7 @@ module.exports = {
   resetGlobal() {},
   /**
    * save data into a save file
-   * @param {integer} savIndex REQUIRED the index of the save file
+   * @param {number} savIndex REQUIRED the index of the save file
    * @param {string} [comment] the comment of the save
    * @returns {boolean} if the saving succeeds
    */
@@ -141,7 +141,7 @@ module.exports = {
   setAlign(textAlign) {},
   /**
    * set default offset
-   * @param {integer} offset REQUIRED an integer between 0 and 23
+   * @param {number} offset REQUIRED an integer between 0 and 23
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -155,7 +155,7 @@ module.exports = {
   setTitle(title) {},
   /**
    * set default width
-   * @param {integer} width REQUIRED an integer between 1 and 24
+   * @param {number} width REQUIRED an integer between 1 and 24
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
