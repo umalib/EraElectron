@@ -170,10 +170,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       this.resetData();
       this.api.loadGlobal();
 
-      // this.api.log({
-      //   data: this.data,
-      //   global: this.global,
-      // });
+      log({
+        data: this.data,
+        global: this.global,
+      });
       try {
         gameMain();
       } catch (e) {
@@ -283,10 +283,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           this.staticData.chara[tmp['id']] = tmp;
         });
 
-      // this.api.log({
-      //   static: this.staticData,
-      //   names: this.filedNames,
-      // });
+      log({
+        static: this.staticData,
+        names: this.filedNames,
+      });
 
       // load ERE
       let eraModule;
@@ -432,8 +432,8 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       return true;
     } catch (e) {
       error(e.message);
-      return false;
     }
+    return false;
   };
 
   era.api.saveGlobal = () => {
@@ -449,8 +449,8 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       return true;
     } catch (e) {
       error(e.message);
-      return false;
     }
+    return false;
   };
 
   era.api.loadGlobal = () => {
@@ -458,14 +458,17 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     if (existsSync(globalPath)) {
       try {
         era.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
+        return true;
       } catch (_) {
-        era.global = {};
+        // eslint-disable-next-line no-empty
       }
     }
+    return era.api.resetGlobal();
   };
 
   era.api.resetGlobal = () => {
     era.global = {};
+    Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
     return true;
   };
 
