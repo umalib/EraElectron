@@ -10,13 +10,16 @@ export default {
         console.log(e.message);
       }
     });
-    window['ipc'].ready();
+    this.reload();
   },
   register(action, handler) {
     registry[action] = handler;
   },
+  registerMenu(cb) {
+    window['ipc'].registerMenu(cb);
+  },
   reload() {
-    window['ipc'].reload();
+    window['ipc'].load();
   },
   restart() {
     window['ipc'].restart();

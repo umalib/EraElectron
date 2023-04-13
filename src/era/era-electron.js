@@ -136,12 +136,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     data: {},
     fieldNames: {},
     global: {},
-    reload() {
-      if (!inputKey) {
-        cleanListener(inputKey);
-      }
-      this.start().then();
-    },
     resetData() {
       this.data = {
         abl: {},
@@ -163,6 +157,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       };
     },
     restart() {
+      if (!gameMain) {
+        this.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+        return;
+      }
       if (!inputKey) {
         cleanListener(inputKey);
       }
@@ -182,6 +180,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       }
     },
     async start() {
+      if (!existsSync(path)) {
+        this.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+        return;
+      }
       // load CSV
       const fileList = {};
 
@@ -199,7 +201,14 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
 
       this.api.clear();
       this.api.print('loading csv files ...');
-      loadPath(join(path, './csv'));
+      const csvPath = join(path, './csv');
+      existsSync(csvPath) &&
+        statSync(csvPath).isDirectory() &&
+        loadPath(csvPath);
+      if (Object.keys(fileList).length === 0) {
+        this.api.print(`文件夹${csvPath}不存在！游戏数据载入失败！`);
+        return;
+      }
       Object.keys(fileList)
         .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
         .forEach((p) => {

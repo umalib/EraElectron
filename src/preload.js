@@ -6,16 +6,16 @@ contextBridge.exposeInMainWorld('test', {
 
 contextBridge.exposeInMainWorld('ipc', {
   listen(cb) {
-    ipcRenderer.on('connector', (_, res) => cb(res));
+    ipcRenderer.on('connector', (_, msg) => cb(msg));
   },
-  ready() {
-    ipcRenderer.send('electron', 'ready');
+  registerMenu(cb) {
+    ipcRenderer.on('engine', (_, msg) => cb(msg));
   },
-  reload() {
-    ipcRenderer.send('electron', 'reload');
+  load() {
+    ipcRenderer.send('engine', 'load');
   },
   restart() {
-    ipcRenderer.send('electron', 'restart');
+    ipcRenderer.send('engine', 'restart');
   },
   returnInput(key, val) {
     ipcRenderer.send(key, val);

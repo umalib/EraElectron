@@ -1,6 +1,13 @@
 'use strict';
 
-const { app, BrowserWindow, protocol, session, ipcMain } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  protocol,
+  session,
+  ipcMain,
+  Menu,
+} = require('electron');
 const { createProtocol } = require('vue-cli-plugin-electron-builder/lib');
 const { join } = require('path');
 const { homedir } = require('os');
@@ -67,19 +74,47 @@ async function createWindow() {
 
   ipcMain.removeAllListeners();
 
-  ipcMain.on('electron', (_, action) => {
+  ipcMain.on('engine', (_, action) => {
     switch (action) {
-      case 'ready':
+      case 'load':
         era.start();
-        break;
-      case 'reload':
-        era.reload();
         break;
       case 'restart':
         era.restart();
         break;
     }
   });
+
+  const template = [];
+  if (process.platform === 'darwin') {
+    template.push({
+      role: 'appMenu',
+    });
+  }
+  template.push({
+    label: '游戏',
+    submenu: [
+      {
+        label: '返回标题',
+        accelerator: 'CmdOrCtrl+T',
+        click() {
+          win.webContents.send('engine', 'restart');
+        },
+      },
+      {
+        label: '重新载入',
+        accelerator: 'CmdOrCtrl+R',
+        click() {
+          win.webContents.send('engine', 'reload');
+        },
+      },
+      {
+        label: '退出',
+        role: 'quit',
+      },
+    ],
+  });
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode

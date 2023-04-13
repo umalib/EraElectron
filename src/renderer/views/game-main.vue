@@ -141,14 +141,6 @@
         />
       </el-col>
     </el-row>
-    <el-row>
-      <el-col style="text-align: center">
-        <el-button-group>
-          <el-button type="warning" @click="restart()">Restart</el-button>
-          <el-button type="danger" @click="reload()">Reload</el-button>
-        </el-button-group>
-      </el-col>
-    </el-row>
   </el-scrollbar>
 </template>
 
@@ -273,16 +265,6 @@ function getTextObject(data) {
   };
 }
 
-function reload() {
-  resetData();
-  connector.reload();
-}
-
-function restart() {
-  resetData();
-  connector.restart();
-}
-
 function resetData() {
   buttonValCount.value = 0;
   defaultSetting.value = {
@@ -364,6 +346,20 @@ function throwError(message) {
 }
 
 resetData();
+connector.registerMenu((action) => {
+  switch (action) {
+    case 'reload':
+      resetData();
+      connector.reload();
+      break;
+    case 'restart':
+      resetData();
+      connector.restart();
+      break;
+    default:
+      break;
+  }
+});
 connector.register('clear', clear);
 connector.register('drawLine', () =>
   lines.value.push({ type: lineType['divider'] }),
