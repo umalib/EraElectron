@@ -297,10 +297,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         names: this.fieldNames,
       });
 
-      // load ERE
+      // load ere
       let eraModule;
       try {
-        const gameMainPath = join(path, './ERE/main.js').replace(/\\/g, '\\\\');
+        const gameMainPath = join(path, './ere/main.js').replace(/\\/g, '\\\\');
         print(`\nloading game: ${path} ...`);
 
         // clear cache, load game, and find era module
