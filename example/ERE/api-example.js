@@ -31,6 +31,7 @@ module.exports = async function () {
     p: true,
     width: 12,
   });
+  await era.printAndWait('Hello and wait for your any key');
   era.printButton('[0] 新的游戏', 0, {
     isButton: false,
     type: 'success',

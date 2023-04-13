@@ -74,6 +74,11 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     });
   }
 
+  async function printAndWait(content, config) {
+    print(content, config);
+    await waitAnyKey();
+  }
+
   function setAlign(textAlign) {
     connect({ action: 'setAlign', data: textAlign });
   }
@@ -106,9 +111,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       input,
       log,
       print,
+      printAndWait,
       printButton,
-      println,
       printProgress,
+      println,
       setAlign,
       // setMaxHeight,
       setOffset,
@@ -379,7 +385,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     return era.api.set(key);
   };
 
-  era.api.save = (savId) => {
+  era.api.saveData = (savId, comment) => {
     const savDirPath = join(path, './sav');
     if (!existsSync(savDirPath)) {
       mkdirSync(savDirPath);
@@ -389,6 +395,11 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         join(savDirPath, `./save${savId}.sav`),
         JSON.stringify(era.data),
       );
+      if (!era.global.saveComments) {
+        era.global.saveComments = {};
+      }
+      era.global.saveComments[savId] = comment;
+      era.api.saveGlobal();
       return true;
     } catch (e) {
       error(e.message);
@@ -396,7 +407,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     }
   };
 
-  era.api.load = (savId) => {
+  era.api.loadData = (savId) => {
     const savPath = join(path, `./sav/save${savId}.sav`);
     try {
       era.data = JSON.parse(readFileSync(savPath).toString('utf-8'));

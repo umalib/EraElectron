@@ -16,7 +16,15 @@
           :type="line.buttonType"
           :link="!line.isButton"
         >
-          {{ line.content }}
+          <span :style="{ textAlign: line.inTextAlign }">
+            <template
+              v-for="(content, index) in line.contents"
+              :key="`button-${index}`"
+            >
+              <br v-if="index !== 0" />
+              {{ content }}
+            </template>
+          </span>
         </el-button>
         <el-divider v-if="line.type === lineType['divider']" />
         <el-row v-if="line.type === lineType['progress']">
@@ -124,7 +132,8 @@ function getButtonObject(data) {
   return {
     accelerator: data.accelerator,
     buttonType: safeUndefinedCheck(data.config.type, 'primary'),
-    content: data.content,
+    contents: data.content.split('\n'),
+    inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
     offset: getValidOffset(data.config.offset),
     textAlign: safeUndefinedCheck(

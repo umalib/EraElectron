@@ -48,7 +48,7 @@ module.exports = {
    * @returns {boolean} if the loading succeeds
    */
   // eslint-disable-next-line no-unused-vars
-  load(savIndex) {},
+  loadData(savIndex) {},
   /**
    * load global variables from save file
    * @returns {boolean} if the loading succeeds
@@ -63,10 +63,18 @@ module.exports = {
   // eslint-disable-next-line no-unused-vars
   print(content, config) {},
   /**
+   * print some text and wait any key from user
+   * @param {string} content REQUIRED the text to be printed
+   * @param {{align: string, isParagraph: boolean, offset: integer, p: boolean, width: integer}} [config] the config of the printed line
+   * @returns {Promise<void>} the same with waitAnyKey, please use await
+   */
+  // eslint-disable-next-line no-unused-vars
+  async printAndWait(content, config) {},
+  /**
    * print a button
    * @param {string} content REQUIRED the text of the button
    * @param {integer} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{isButton: boolean, type: string, offset: integer, width: integer, align: string}} [config] the config of the printed button
+   * @param {{align: string, inTextAlign: string, isButton: boolean, type: string, offset: integer, width: integer}} [config] the config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -106,10 +114,11 @@ module.exports = {
   /**
    * save data into a save file
    * @param {integer} savIndex REQUIRED the index of the save file
+   * @param {string} [comment] the comment of the save
    * @returns {boolean} if the saving succeeds
    */
   // eslint-disable-next-line no-unused-vars
-  save(savIndex) {},
+  saveData(savIndex, comment) {},
   /**
    * save global variables into save file
    * @returns {boolean} if the saving succeeds
