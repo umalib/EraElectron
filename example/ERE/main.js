@@ -23,7 +23,7 @@ module.exports = async () => {
     let ret = await era.input({ rule: '[0-3]' });
     switch (Number(ret)) {
       case 0:
-        await require('./init_game')();
+        await require('./page/page_newgame')();
         break;
       case 1:
         break;
