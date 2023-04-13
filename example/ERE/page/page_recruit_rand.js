@@ -8,13 +8,16 @@ module.exports = async () => {
     require('./page_header')();
 
     era.drawLine();
-    era.print('招募？\n')
+    era.print('招募？');
     era.drawLine();
 
-    for (ind = 0; ind < 1; ind++) {
-      let ind = require('../system/sys_get_avail_chara')();
+    for (let ind = 0; ind < 1; ind++) {
+      let index = require('../system/sys_get_avail_chara')('RandomRecruit');
 
-      era.printButton('[' + ind + ']' + era.get('name:'+ind+':-1'));
+      if (index != -1) {
+        era.printButton(`[${index}]${era.get(`callname:${index}:-1`)}`);
+      }
+
     }
 
 

@@ -78,7 +78,7 @@ module.exports = async function () {
   era.resetGlobal();
   era.saveData(1);
   era.saveGlobal();
-  era.set('callname:2:1', '斯佩酱');
+  era.set('name:2:1', '斯佩酱');
   // 以下三个set都是设置默认显示效果，即默认文本对齐方式、默认偏移量、默认宽度
   // 注意默认偏移量和默认宽度是element-plus布局里的设定，即0-24的整数值
   // 设置显示后的默认文本对齐方式，left、center、right

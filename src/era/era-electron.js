@@ -170,10 +170,6 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       this.resetData();
       this.api.loadGlobal();
 
-      this.api.addCharacter(0);
-      this.api.set('callname:0:-1', '你');
-      this.api.set('callname:0:-2', '我');
-
       log({
         data: this.data,
         global: this.global,

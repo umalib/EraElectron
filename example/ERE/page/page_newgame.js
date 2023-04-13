@@ -51,8 +51,8 @@ module.exports = async () => {
           break;
         case 1:
           require('../system/sys_new_game')(playerName, playerGender);
-          await require('./page_homepage')();
           flagNewGame = false;
+          await require('./page_homepage')();
           break;
         case 10:
           playerName = '';

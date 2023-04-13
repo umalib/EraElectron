@@ -6,9 +6,9 @@ module.exports = (table, key, value) => {
   let list_cur = era.getAddedCharacters();
   let list_ret = [];
 
-  for (ind of list_cur) {
-    if (era.get(table + ':' + ind + ':' + key) == value) {
-      list_ret.push(ind)
+  for (let ind of list_cur) {
+    if (era.get(`${table}:${ind}:${key}`) == value) {
+      list_ret.push(ind);
     }
   }
 

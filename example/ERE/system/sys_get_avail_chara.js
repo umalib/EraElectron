@@ -19,10 +19,11 @@ module.exports = (command) => {
     let list_filter_comb = list_filter_recr.concat(list_filter_rand.filter((item) => list_filter_recr.indexOf(item) < 0)); 
     list_all = list_all.filter((item) => !list_filter_comb.includes(item)); //从全角色列表中筛出
 
+    era.print(`当前激活列表：${list_cur}`);
+
     if (list_all.length == 0) { //已无可选角色
       flagRecruitSingle = false;
     }
-
 
     while (flagRecruitSingle) {
       let tmp_ind = list_all[Math.floor( Math.random() * list_all.length )] //可行列表中的index随机获取一个
@@ -30,8 +31,14 @@ module.exports = (command) => {
       if (!list_cur.includes(tmp_ind)) { //若该index的角色未加载则进行加载
         era.addCharacter(tmp_ind);
       }
-      ind = tmp_ind;
+
+      if (era.get(`cflag:${tmp_ind}:随机招募`) == 1) {
+        ind = tmp_ind;
+        flagRecruitSingle = false;
+      }
+
     }
     return ind;
   }
+  return -1;
 }

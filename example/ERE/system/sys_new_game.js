@@ -1,14 +1,14 @@
 ﻿const era = require('../era-electron');
 
-module.exports = (playerName, playerGender) => {
-  //era.loadGlobal();
+module.exports = (player_name, player_gender) => {
+  era.loadGlobal();
   //era.resetAllExceptGlobal();
 
   era.addCharacter(0);
-  era.set('name:0:-1', playerName);
-  era.set('name:0:-2', '你');
+  era.set('callname:0:-1', player_name);
+  era.set('callname:0:-2', '你');
 
-  switch (playerGender) {
+  switch (player_gender) {
     case 0:
       era.set('cflag:0:阴茎尺寸', 0);
       break;
@@ -16,10 +16,10 @@ module.exports = (playerName, playerGender) => {
       era.set('cflag:0:罩杯尺寸', -1);
       break;
     default:
-      playerGender = 10;
+      player_gender = 10;
       break;
   }
-  era.set('cflag:0:性别', playerGender);
+  era.set('cflag:0:性别', player_gender);
 
   era.set('flag:当前回合数', 1);
   era.set('flag:当前年', 2000);
