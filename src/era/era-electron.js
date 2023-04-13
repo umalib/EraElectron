@@ -277,7 +277,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
         const gameMainPath = join(path, './ERE/main.js').replace(/\\/g, '\\\\');
         print(`\nloading game: ${path} ...`);
 
-        // clear cache, load game, and inject era
+        // clear cache, load game, and find era module
         eval(`Object.keys(require.cache)
           .filter(x => x.startsWith('${path}'))
           .forEach(x => delete require.cache[x]);
@@ -288,6 +288,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
             '\\\\',
           )}') && x.endsWith('era-electron.js'))]`);
 
+        // inject era.api
         Object.keys(this.api).forEach(
           (k) => (eraModule.exports[k] = this.api[k]),
         );

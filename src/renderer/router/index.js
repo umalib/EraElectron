@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import GameMain from '../views/game.vue';
+import GameMain from '../views/game-main.vue';
 
 const routes = [
   {
@@ -14,7 +14,7 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ '../views/copyright.vue'),
+      import(/* webpackChunkName: "about" */ '../views/game-copyright.vue'),
   },
 ];
 
