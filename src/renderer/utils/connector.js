@@ -7,6 +7,7 @@ export default {
         registry[res.action](res.data);
       } catch (e) {
         console.log(res);
+        console.log(e.message);
       }
     });
     window['ipc'].ready();

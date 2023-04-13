@@ -1,7 +1,69 @@
 <template>
   <el-scrollbar @click="!inputParam.any || returnFromInput()">
-    <el-row v-for="(line, i) in lines" :key="i">
-      <template v-if="line.type === lineType['multiCol']"></template>
+    <el-row
+      v-for="(line, i) in lines"
+      :key="i"
+      :justify="line.justify"
+      :align="line.align"
+    >
+      <template v-if="line.type === lineType['multiCol']">
+        <el-col
+          v-for="(col, j) in line.columns"
+          :key="`col-${i}-${j}`"
+          :offset="col.offset || defaultSetting.colOffset"
+          :span="col.width || defaultSetting.colWidth"
+          :style="{ textAlign: col.textAlign || defaultSetting.textAlign }"
+        >
+          <el-button
+            v-if="col.type === lineType.button"
+            @click="returnFromButton(col.accelerator)"
+            :disabled="col.valCount < buttonValCount"
+            :type="col.buttonType"
+            :link="!col.isButton"
+          >
+            <span :style="{ textAlign: col.inTextAlign }">
+              <template
+                v-for="(content, index) in col.contents"
+                :key="`button-${index}`"
+              >
+                <br v-if="index !== 0" />
+                {{ content }}
+              </template>
+            </span>
+          </el-button>
+          <el-row v-if="col.type === lineType['progress']">
+            <el-col :span="col.barWidth">
+              <el-progress
+                :color="col.barColor"
+                :percentage="col.percentage"
+                :stroke-width="col.height"
+                :text-inside="true"
+              >
+                <span :style="{ color: col.fontColor }">
+                  {{ col.inContent }}
+                </span>
+              </el-progress>
+            </el-col>
+            <el-col :span="24 - col.barWidth">
+              <span>{{ col.outContent }}</span>
+            </el-col>
+          </el-row>
+          <template v-if="col.type === lineType.text">
+            <p v-if="col.isParagraph">
+              <span v-for="(content, i) in col.contents" :key="content">
+                <br v-if="i !== 0" />
+                {{ content }}
+              </span>
+            </p>
+            <template v-else>
+              <template v-for="(content, i) in col.contents" :key="content">
+                <br v-if="i !== 0" />
+                {{ content }}
+              </template>
+            </template>
+          </template>
+        </el-col>
+      </template>
       <br v-else-if="line.type === lineType['lineUp']" />
       <el-col
         v-else
@@ -116,22 +178,26 @@ function clear(count) {
     lines.value.slice(lines.value.length - lineCount, lineCount);
   }
 }
+
 function focusInput() {
   const elInput = ref();
   if (elInput.value) {
     elInput.value.focus();
   }
 }
+
 function getValidOffset(offset) {
   return getValidValue(offset, 0, 23, defaultSetting.value['colOffset']);
 }
+
 function getValidWidth(width) {
   return getValidValue(width, 1, 24, defaultSetting.value['colWidth']);
 }
+
 function getButtonObject(data) {
   return {
     accelerator: data.accelerator,
-    buttonType: safeUndefinedCheck(data.config.type, 'primary'),
+    buttonType: safeUndefinedCheck(data.config.buttonType, 'primary'),
     contents: data.content.split('\n'),
     inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
@@ -145,6 +211,32 @@ function getButtonObject(data) {
     width: getValidWidth(data.config.width),
   };
 }
+
+function getMultiColumnObjects(data) {
+  return {
+    type: lineType.multiCol,
+    columns: data.columns
+      .map((x) => {
+        if (!x.config) {
+          x.config = {};
+        }
+        switch (lineType[x.type]) {
+          case lineType.button:
+            return getButtonObject(x);
+          case lineType.progress:
+            return getProgressObject(x);
+          case lineType.text:
+            return getTextObject(x);
+          default:
+            return undefined;
+        }
+      })
+      .filter((x) => x),
+    justify: data.config.justify || 'start',
+    align: data.config.align || 'top',
+  };
+}
+
 function getProgressObject(data) {
   const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
   const percentage = getValidValue(data.percentage, 0, 100, 100);
@@ -154,9 +246,9 @@ function getProgressObject(data) {
     barWidth: Math.floor(24 * ratio),
     fontColor: data.config.fontColor,
     height,
-    inContent: data['in'],
+    inContent: data.inContent,
     offset: getValidOffset(data.config.offset),
-    outContent: data['out'],
+    outContent: data.outContent,
     percentage,
     textAlign: safeUndefinedCheck(
       data.config.align,
@@ -166,6 +258,7 @@ function getProgressObject(data) {
     width: getValidWidth(data.config.width),
   };
 }
+
 function getTextObject(data) {
   return {
     contents: data.content.split('\n'),
@@ -219,6 +312,7 @@ function returnFromButton(val) {
   }
   lines.value.pop();
 }
+
 function returnFromInput() {
   if (
     inputParam.value['rule'] &&
@@ -234,18 +328,22 @@ function returnFromInput() {
   }
   returnFromButton(inputParam.value['val']);
 }
+
 // setMaxHeight(height) {
 //   const _height = Number(height);
 //   if (!isNaN(_height) && _height > 0) {
 //     defaultSetting.value['maxHeight'] = height;
 //   }
 // }
+
 function setOffset(offset) {
   defaultSetting.value.colOffset = getValidOffset(offset);
 }
+
 function setWidth(width) {
   defaultSetting.value.colWidth = getValidWidth(width);
 }
+
 function showInput(data) {
   inputParam.value.val = '';
   inputParam.value.key = data.inputKey;
@@ -255,6 +353,7 @@ function showInput(data) {
   }
   inputParam.value.any = data.config.any;
 }
+
 function throwError(message) {
   ElNotification({
     title: '脚本错误',
@@ -275,6 +374,9 @@ connector.register('log', console.log);
 connector.register('print', (data) => lines.value.push(getTextObject(data)));
 connector.register('printButton', (data) =>
   lines.value.push(getButtonObject(data)),
+);
+connector.register('printMultiCols', (data) =>
+  lines.value.push(getMultiColumnObjects(data)),
 );
 connector.register('println', () =>
   lines.value.push({ type: lineType['lineUp'] }),

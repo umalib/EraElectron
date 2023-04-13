@@ -38,6 +38,32 @@ module.exports = async function () {
     width: 10,
     align: 'right',
   });
+
+  era.printMultiColumns(
+    [
+      { content: '我爱平底锅', type: 'text', config: { width: 8 } },
+      {
+        config: {
+          p: true,
+          align: 'center',
+          width: 8,
+        },
+        content: '因为我老婆爱我',
+        type: 'text',
+      },
+      {
+        accelerator: 6,
+        content: '我是\n灰太狼',
+        type: 'button',
+        config: {
+          align: 'right',
+          width: 8,
+          inTextAlign: 'left',
+        },
+      },
+    ],
+    { align: 'middle' },
+  );
   era.printProgress(50, '50/100', '100/100', {
     align: 'right',
     barRatio: 0.8,

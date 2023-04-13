@@ -47,6 +47,11 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'print', data: { content, config: config || {} } });
   }
 
+  async function printAndWait(content, config) {
+    print(content, config);
+    await waitAnyKey();
+  }
+
   function printButton(content, accelerator, config) {
     connect({
       action: 'printButton',
@@ -58,8 +63,14 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     });
   }
 
-  function println() {
-    connect({ action: 'println' });
+  function printMultiColumns(columnObjects, config) {
+    connect({
+      action: 'printMultiCols',
+      data: {
+        columns: columnObjects,
+        config: config || {},
+      },
+    });
   }
 
   function printProgress(percentage, inContent, outContent, config) {
@@ -67,16 +78,15 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       action: 'printProgress',
       data: {
         config: config || {},
-        in: inContent,
-        out: outContent,
+        inContent,
+        outContent,
         percentage,
       },
     });
   }
 
-  async function printAndWait(content, config) {
-    print(content, config);
-    await waitAnyKey();
+  function println() {
+    connect({ action: 'println' });
   }
 
   function setAlign(textAlign) {
@@ -113,6 +123,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       print,
       printAndWait,
       printButton,
+      printMultiColumns,
       printProgress,
       println,
       setAlign,
@@ -330,6 +341,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           return era.data[tableName][valueIndex];
         }
         if (tableName === 'global') {
+          valueIndex = safeUndefinedCheck(
+            era.staticData.global[valueIndex],
+            valueIndex,
+          );
           if (val !== undefined) {
             era.global[valueIndex] = val;
           }
@@ -344,7 +359,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
             return era.filedNames[tableName][valueIndex];
           }
         } else {
-          valueIndex = era.staticData[tableName][valueIndex] || valueIndex;
+          valueIndex = safeUndefinedCheck(
+            era.staticData[tableName][valueIndex],
+            valueIndex,
+          );
           if (val !== undefined) {
             era.data[tableName][valueIndex] = val;
           }
@@ -359,9 +377,9 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           if (val !== undefined) {
             era.data[tableName][charaIndex][valueIndex] = val;
           }
-          return (
-            era.data[tableName][charaIndex][valueIndex] ||
-            era.staticData.chara[valueIndex][tableName]
+          return safeUndefinedCheck(
+            era.data[tableName][charaIndex][valueIndex],
+            era.staticData.chara[valueIndex][tableName],
           );
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {

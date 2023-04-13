@@ -74,16 +74,23 @@ module.exports = {
    * print a button
    * @param {string} content REQUIRED the text of the button
    * @param {number} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{isButton: boolean, offset: number, width: number, type: string, align: string}} [config] the config of the printed button
+   * @param {{isButton: boolean, offset: number, width: number, buttonType: 'primary'|'success'|'warning'|'danger'|'info', align: string}} [config] the config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
   printButton(content, accelerator, config) {},
   /**
-   * @deprecated print a line break, please use print('\n') to replace
+   * print multiple columns into a row, excluding inputs
+   * @param {Array<{type: 'button'|'image'|'progress'|'text', config?: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
+   * @param {{justify: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly', align: 'top'|'middle'|'bottom'}} [config] the config of the row
    * @returns {void}
+   * @see print
+   * @see printButton
+   * @see printImage
+   * @see printProgress
    */
-  println() {},
+  // eslint-disable-next-line no-unused-vars
+  printMultiColumns(columnObjects, config) {},
   /**
    * print a progress bar
    * @param {number} percentage REQUIRED the percentage of the progress bar, float, 0-100
@@ -94,6 +101,11 @@ module.exports = {
    */
   // eslint-disable-next-line no-unused-vars
   printProgress(percentage, inContent, outContent, config) {},
+  /**
+   * @deprecated print a line break, please use print('\n') to replace
+   * @returns {void}
+   */
+  println() {},
   /**
    * reset all variables except global variables
    * @returns {boolean}
