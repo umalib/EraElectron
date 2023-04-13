@@ -62,6 +62,18 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     connect({ action: 'println' });
   }
 
+  function printProgress(percentage, inContent, outContent, config) {
+    connect({
+      action: 'printProgress',
+      data: {
+        config: config || {},
+        in: inContent,
+        out: outContent,
+        percentage,
+      },
+    });
+  }
+
   function setAlign(align) {
     connect({ action: 'setAlign', data: align });
   }
@@ -96,6 +108,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       print,
       printButton,
       println,
+      printProgress,
       setAlign,
       // setMaxHeight,
       setOffset,

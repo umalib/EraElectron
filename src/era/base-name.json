@@ -16,7 +16,7 @@
   "フラグ": "cflag",
   "角色字符串": "cstr",
   "CSTR": "cstr",
-  "信赖度": "relation",
+  "信赖": "relation",
   "相性": "relation",
   "装备": "equip",
   "装着物": "equip",

@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('ipc', {
   reload() {
     ipcRenderer.send('electron', 'reload');
   },
+  restart() {
+    ipcRenderer.send('electron', 'restart');
+  },
   returnInput(key, val) {
     ipcRenderer.send(key, val);
   },

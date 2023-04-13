@@ -17,6 +17,9 @@ export default {
   reload() {
     window['ipc'].reload();
   },
+  restart() {
+    window['ipc'].restart();
+  },
   returnInput(key, val) {
     window['ipc'].returnInput(key, val);
   },

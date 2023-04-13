@@ -19,16 +19,23 @@
           {{ line.content }}
         </el-button>
         <el-divider v-if="line.type === lineType['divider']" />
-        <div v-if="line.type === lineType['progress']">
-          <el-progress
-            :color="line.color"
-            :stroke-width="line.height"
-            :text-inside="true"
-          >
-            <span>{{ line.inContent }}</span>
-          </el-progress>
-          <span>{{ line.outContent }}</span>
-        </div>
+        <el-row v-if="line.type === lineType['progress']">
+          <el-col :span="line.barWidth">
+            <el-progress
+              :color="line.barColor"
+              :percentage="line.percentage"
+              :stroke-width="line.height"
+              :text-inside="true"
+            >
+              <span :style="{ color: line.fontColor }">{{
+                line.inContent
+              }}</span>
+            </el-progress>
+          </el-col>
+          <el-col :span="24 - line.barWidth">
+            <span>{{ line.outContent }}</span>
+          </el-col>
+        </el-row>
         <div v-if="line.type === lineType.text">
           <p v-if="line.isParagraph">
             <span v-for="(content, i) in line.contents" :key="content">
@@ -64,7 +71,10 @@
     </el-row>
     <el-row>
       <el-col style="text-align: center">
-        <el-button type="primary" @click="reload()">Reload</el-button>
+        <el-button-group>
+          <el-button type="warning" @click="restart()">Restart</el-button>
+          <el-button type="danger" @click="reload()">Reload</el-button>
+        </el-button-group>
       </el-col>
     </el-row>
   </el-scrollbar>
@@ -75,7 +85,10 @@ import { ElMessage, ElNotification } from 'element-plus';
 
 import connector from '@/renderer/utils/connector';
 import embeddedData from '@/renderer/utils/embedded.json';
-import { safeUndefinedCheck } from '@/renderer/utils/value-utils';
+import {
+  getValidValue,
+  safeUndefinedCheck,
+} from '@/renderer/utils/value-utils';
 
 export default {
   data() {
@@ -102,61 +115,69 @@ export default {
         this.$refs.elInput.focus();
       }
     },
+    getValidOffset(offset) {
+      return getValidValue(offset, 0, 23, this.defaultSetting.colOffset);
+    },
+    getValidWidth(width) {
+      return getValidValue(width, 1, 24, this.defaultSetting.colWidth);
+    },
     getButtonObject(data) {
       return {
         buttonType: safeUndefinedCheck(data.config.type, 'primary'),
         content: data.str,
         isButton: data.config.isButton,
         num: data.num,
-        offset: safeUndefinedCheck(
-          data.config.offset,
-          this.defaultSetting.colOffset,
-        ),
+        offset: this.getValidOffset(data.config.offset),
         textAlign: safeUndefinedCheck(
           data.config.align,
           this.defaultSetting.textAlign,
         ),
         type: this.lineType.button,
         valCount: this.buttonValCount,
-        width: safeUndefinedCheck(
-          data.config.width,
-          this.defaultSetting.colWidth,
-        ),
+        width: this.getValidWidth(data.config.width),
       };
     },
     getProgressObject(data) {
+      const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
+      const percentage = getValidValue(data.percentage, 0, 100, 100);
+      const height = getValidValue(data.config.height, 6, 30, 6);
       return {
-        type: this.lineType.progress,
+        barColor: data.config.color,
+        barWidth: Math.floor(24 * ratio),
+        fontColor: data.config.fontColor,
+        height,
         inContent: data['in'],
+        offset: this.getValidOffset(data.config.offset),
         outContent: data['out'],
-        color: data.color,
-        height: data.config.height || 24,
-        width: Math.floor(24 * data.config.width),
+        percentage,
+        textAlign: safeUndefinedCheck(
+          data.config.align,
+          this.defaultSetting.textAlign,
+        ),
+        type: this.lineType.progress,
+        width: this.getValidWidth(data.config.width),
       };
     },
     getTextObject(data) {
       return {
         contents: data.content.split('\n'),
         isParagraph: data.config.isParagraph || data.config.p,
-        offset: safeUndefinedCheck(
-          data.config.offset,
-          this.defaultSetting.colOffset,
-        ),
+        offset: this.getValidOffset(data.config.offset),
         textAlign: safeUndefinedCheck(
           data.config.align,
           this.defaultSetting.textAlign,
         ),
         type: this.lineType.text,
-        width: safeUndefinedCheck(
-          data.config.width,
-          this.defaultSetting.colWidth,
-        ),
+        width: this.getValidWidth(data.config.width),
       };
     },
     reload() {
       this.resetData();
-      this.clear();
       connector.reload();
+    },
+    restart() {
+      this.resetData();
+      connector.restart();
     },
     resetData() {
       this.buttonValCount = 0;
@@ -173,6 +194,7 @@ export default {
         rule: undefined,
         val: '',
       };
+      this.clear();
     },
     returnFromButton(val) {
       connector.returnInput(this.input.key, val);
@@ -204,16 +226,10 @@ export default {
     //   }
     // },
     setOffset(offset) {
-      const _offset = Number(offset);
-      if (!isNaN(_offset) && _offset >= 0 && _offset <= 23) {
-        this.defaultSetting.colOffset = _offset;
-      }
+      this.defaultSetting.colOffset = this.getValidOffset(offset);
     },
     setWidth(width) {
-      const _width = Number(width);
-      if (!isNaN(_width) && _width >= 1 && _width <= 24) {
-        this.defaultSetting.colWidth = _width;
-      }
+      this.defaultSetting.colWidth = this.getValidWidth(width);
     },
     showInput(data) {
       this.input.val = '';

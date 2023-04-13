@@ -14,6 +14,7 @@ module.exports = {
    * @deprecated
    */
   println() {},
+  printProgress() {},
   resetAllExceptGlobal() {},
   resetCharacter() {},
   resetGlobal() {},
