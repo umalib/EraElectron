@@ -134,8 +134,8 @@ function getMultiColumnObjects(data) {
         }
       })
       .filter((x) => x),
-    justify: data.config.justify || 'start',
-    align: data.config.align || 'top',
+    justify: data.config.horizontalAlign || 'start',
+    align: data.config.verticalAlign || 'top',
   };
 }
 

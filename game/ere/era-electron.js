@@ -82,7 +82,7 @@ module.exports = {
   /**
    * print multiple columns into a row, excluding inputs
    * @param {Array<{type: 'button'|'image'|'progress'|'text', config?: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
-   * @param {{[align]: 'top'|'middle'|'bottom', [justify]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly'}} [config] the config of the row
+   * @param {{[verticalAlign]: 'top'|'middle'|'bottom', [horizontalAlign]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly'}} [config] the config of the row
    * @returns {void}
    * @see print
    * @see printButton
