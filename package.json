@@ -36,5 +36,5 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "version": "0.1.0"
+  "version": "0.9.0"
 }
