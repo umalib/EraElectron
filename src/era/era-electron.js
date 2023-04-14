@@ -404,6 +404,15 @@ module.exports = (
             era.staticData.chara[charaIndex][tableName],
           );
         }
+        if (tableName === 'global') {
+          if (!era[tableName][charaIndex]) {
+            return undefined;
+          }
+          if (val !== undefined) {
+            era[tableName][charaIndex][valueIndex] = val;
+          }
+          return era[tableName][charaIndex][valueIndex];
+        }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
           valueIndex = safeUndefinedCheck(
             era.staticData[tableName][valueIndex],
