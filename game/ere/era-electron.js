@@ -119,8 +119,13 @@ module.exports = {
   // eslint-disable-next-line no-unused-vars
   resetCharacter(charaId) {},
   /**
+   * reset all data of the save
+   * @returns {void}
+   */
+  resetData() {},
+  /**
    * reset global variables
-   * @returns {boolean}
+   * @returns {void}
    */
   resetGlobal() {},
   /**

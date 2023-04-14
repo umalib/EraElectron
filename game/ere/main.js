@@ -1,4 +1,5 @@
 const era = require('./era-electron');
+const homepage = require('./page/page_homepage');
 
 module.exports = async () => {
   let flagTitle = true;
@@ -23,10 +24,14 @@ module.exports = async () => {
     let ret = await era.input({ rule: '[0-3]' });
     switch (Number(ret)) {
       case 0:
-        await require('./page/page_newgame')();
+        if (await require('./page/page_newgame')()) {
+          await homepage();
+        }
         break;
       case 1:
-        await require('./page/page_loadgame')();
+        if (await require('./page/page_loadgame')()) {
+          await homepage();
+        }
         break;
       case 2:
         break;

@@ -1,5 +1,9 @@
 ﻿const era = require('../era-electron');
 
+/**
+ * load game
+ * @return {Promise<boolean>} if true, tell main.js to call homepage
+ */
 module.exports = async () => {
   let flagLoadGame = true;
   let msgNotification = '';
@@ -29,7 +33,7 @@ module.exports = async () => {
     }
 
     era.drawLine();
-    era.printButton('[99]返回上一级', 99, { align: 'right' });
+    era.printButton('[99] 返回上一级', 99, { align: 'right' });
 
     let ret = await era.input({ rule: '[0-9]|99' });
 
@@ -43,6 +47,7 @@ module.exports = async () => {
         } else {
           flagLoadGame = false;
           era.loadGlobal();
+          return true;
         }
         break;
     }

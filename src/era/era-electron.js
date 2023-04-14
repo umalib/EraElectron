@@ -152,195 +152,6 @@ module.exports = (
     data: {},
     fieldNames: {},
     global: {},
-    resetData() {
-      this.data = {
-        version: this.staticData['gamebase'].version,
-        abl: {},
-        amour: {},
-        base: {},
-        maxbase: {},
-        callname: {},
-        cflag: {},
-        cstr: {},
-        equip: {},
-        exp: {},
-        flag: {},
-        juel: {},
-        mark: {},
-        newCharaIndex: 0,
-        no: {},
-        relation: {},
-        talent: {},
-      };
-    },
-    restart() {
-      if (!gameMain) {
-        this.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
-        return;
-      }
-      if (!inputKey) {
-        cleanListener(inputKey);
-      }
-      this.resetData();
-      this.api.loadGlobal();
-
-      try {
-        gameMain();
-      } catch (e) {
-        error(e.message);
-      }
-    },
-    async start() {
-      if (!existsSync(path)) {
-        this.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
-        return;
-      }
-      // load CSV
-      const fileList = {};
-
-      function loadPath(_path) {
-        const l = readdirSync(_path);
-        l.forEach((f) => {
-          const filePath = join(_path, `./${f}`);
-          if (statSync(filePath).isDirectory()) {
-            loadPath(filePath);
-          } else if (filePath.toLocaleLowerCase().endsWith('.csv')) {
-            fileList[filePath] = f.replace(/\..*$/, '');
-          }
-        });
-      }
-
-      this.api.clear();
-      this.api.print('loading csv files ...');
-      const csvPath = join(path, './csv');
-      existsSync(csvPath) &&
-        statSync(csvPath).isDirectory() &&
-        loadPath(csvPath);
-      if (Object.keys(fileList).length === 0) {
-        this.api.print(`文件夹${csvPath}不存在！游戏数据载入失败！`);
-        return;
-      }
-      Object.keys(fileList)
-        .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
-        .forEach((p) => {
-          const k = fileList[p].toLowerCase();
-          if (
-            !k.startsWith('variablesize') &&
-            !k.startsWith('str') &&
-            !k.startsWith('strname')
-          ) {
-            this.api.print(`loading ${k}`);
-            this.staticData[k] = {};
-            const csv = parseCSV(readFileSync(p).toString('utf-8'));
-            if (
-              k.startsWith('_rename') ||
-              k.startsWith('_replace') ||
-              k.startsWith('gamebase')
-            ) {
-              csv.forEach(
-                (a) =>
-                  (this.staticData[k][
-                    nameMapping[k]
-                      ? nameMapping.gamebase[a[0]]
-                      : a[0].toLowerCase()
-                  ] = a[1]),
-              );
-            } else if (k.startsWith('item')) {
-              this.staticData.item = { name: {}, price: {} };
-              this.fieldNames = {};
-              csv.forEach((a) => {
-                this.staticData.item.name[a[1]] = a[0];
-                this.staticData.item.price[a[0]] = a[2];
-                this.fieldNames[a[0]] = a[1];
-              });
-            } else {
-              this.fieldNames[k] = {};
-              csv.forEach((a) => {
-                this.staticData[k][a[1]] = a[0];
-                this.fieldNames[k][a[0]] = a[1];
-              });
-            }
-          }
-        });
-      setGameBase(this.staticData['gamebase']);
-
-      this.api.print('\nloading chara files ...');
-      this.staticData.chara = {};
-      Object.keys(fileList)
-        .filter((x) => x.toLocaleLowerCase().indexOf('chara') !== -1)
-        .forEach((p) => {
-          const k = fileList[p];
-          this.api.print(`loading ${k}`);
-          const tmp = {};
-          let tableName, valueIndex, value;
-          parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
-            switch (a.length) {
-              case 2:
-                tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
-                value = a[1];
-                tmp[tableName] = value;
-                break;
-              case 3:
-                tableName = safeUndefinedCheck(
-                  nameMapping.chara[a[0]],
-                  a[0].toLowerCase(),
-                );
-                valueIndex = a[1];
-                value = a[2];
-                if (tableName === 'relation' || tableName === 'callname') {
-                  this.staticData.relationship[tableName][
-                    `${tmp['id']}|${valueIndex}`
-                  ] = value;
-                } else {
-                  valueIndex = safeUndefinedCheck(
-                    this.staticData[tableName][valueIndex],
-                    a[1],
-                  );
-                  if (!tmp[tableName]) {
-                    tmp[tableName] = {};
-                  }
-                  tmp[tableName][valueIndex] = value;
-                }
-                break;
-              default:
-                break;
-            }
-          });
-          this.staticData.chara[tmp['id']] = tmp;
-        });
-
-      log({
-        static: this.staticData,
-        names: this.fieldNames,
-      });
-
-      // load ere
-      let eraModule;
-      try {
-        const gameMainPath = join(path, './ere/main.js').replace(/\\/g, '\\\\');
-        print(`\nloading game: ${path} ...`);
-
-        // clear cache, load game, and find era module
-        eval(`Object.keys(require.cache)
-          .filter(x => x.startsWith('${path}'))
-          .forEach(x => delete require.cache[x]);
-        gameMain = require('${gameMainPath}');
-        eraModule = require.cache[Object.keys(require.cache)
-          .filter(x => x.startsWith('${path.replace(
-            /\\/g,
-            '\\\\',
-          )}') && x.endsWith('era-electron.js'))]`);
-
-        // inject era.api
-        Object.keys(this.api).forEach(
-          (k) => (eraModule.exports[k] = this.api[k]),
-        );
-        await this.api.waitAnyKey();
-      } catch (e) {
-        error(e.message);
-      }
-      this.restart();
-    },
     staticData: {
       relationship: {
         callname: {},
@@ -472,6 +283,28 @@ module.exports = (
     return false;
   };
 
+  era.api.resetData = () => {
+    era.data = {
+      version: era.staticData['gamebase'].version,
+      abl: {},
+      amour: {},
+      base: {},
+      maxbase: {},
+      callname: {},
+      cflag: {},
+      cstr: {},
+      equip: {},
+      exp: {},
+      flag: {},
+      juel: {},
+      mark: {},
+      newCharaIndex: 0,
+      no: {},
+      relation: {},
+      talent: {},
+    };
+  };
+
   era.api.saveGlobal = () => {
     const savDirPath = join(path, './sav');
     if (!existsSync(savDirPath)) {
@@ -516,7 +349,6 @@ module.exports = (
       saves: {},
     };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
-    return true;
   };
 
   era.api.resetAllExceptGlobal = () => {
@@ -579,6 +411,172 @@ module.exports = (
 
   era.api.getAddedCharacters = () => {
     return Object.keys(era.data.base);
+  };
+
+  era.restart = () => {
+    if (!gameMain) {
+      era.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+      return;
+    }
+    if (!inputKey) {
+      cleanListener(inputKey);
+    }
+    era.api.resetData();
+    era.api.loadGlobal();
+
+    try {
+      gameMain();
+    } catch (e) {
+      error(e.message);
+    }
+  };
+
+  era.start = async () => {
+    if (!existsSync(path)) {
+      era.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+      return;
+    }
+    // load CSV
+    const fileList = {};
+
+    function loadPath(_path) {
+      const l = readdirSync(_path);
+      l.forEach((f) => {
+        const filePath = join(_path, `./${f}`);
+        if (statSync(filePath).isDirectory()) {
+          loadPath(filePath);
+        } else if (filePath.toLocaleLowerCase().endsWith('.csv')) {
+          fileList[filePath] = f.replace(/\..*$/, '');
+        }
+      });
+    }
+
+    era.api.clear();
+    era.api.print('loading csv files ...');
+    const csvPath = join(path, './csv');
+    existsSync(csvPath) && statSync(csvPath).isDirectory() && loadPath(csvPath);
+    if (Object.keys(fileList).length === 0) {
+      era.api.print(`文件夹${csvPath}不存在！游戏数据载入失败！`);
+      return;
+    }
+    Object.keys(fileList)
+      .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
+      .forEach((p) => {
+        const k = fileList[p].toLowerCase();
+        if (
+          !k.startsWith('variablesize') &&
+          !k.startsWith('str') &&
+          !k.startsWith('strname')
+        ) {
+          era.api.print(`loading ${k}`);
+          era.staticData[k] = {};
+          const csv = parseCSV(readFileSync(p).toString('utf-8'));
+          if (
+            k.startsWith('_rename') ||
+            k.startsWith('_replace') ||
+            k.startsWith('gamebase')
+          ) {
+            csv.forEach(
+              (a) =>
+                (era.staticData[k][
+                  nameMapping[k]
+                    ? nameMapping.gamebase[a[0]]
+                    : a[0].toLowerCase()
+                ] = a[1]),
+            );
+          } else if (k.startsWith('item')) {
+            era.staticData.item = { name: {}, price: {} };
+            era.fieldNames = {};
+            csv.forEach((a) => {
+              era.staticData.item.name[a[1]] = a[0];
+              era.staticData.item.price[a[0]] = a[2];
+              era.fieldNames[a[0]] = a[1];
+            });
+          } else {
+            era.fieldNames[k] = {};
+            csv.forEach((a) => {
+              era.staticData[k][a[1]] = a[0];
+              era.fieldNames[k][a[0]] = a[1];
+            });
+          }
+        }
+      });
+    setGameBase(era.staticData['gamebase']);
+
+    era.api.print('\nloading chara files ...');
+    era.staticData.chara = {};
+    Object.keys(fileList)
+      .filter((x) => x.toLocaleLowerCase().indexOf('chara') !== -1)
+      .forEach((p) => {
+        const k = fileList[p];
+        era.api.print(`loading ${k}`);
+        const tmp = {};
+        let tableName, valueIndex, value;
+        parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
+          switch (a.length) {
+            case 2:
+              tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
+              value = a[1];
+              tmp[tableName] = value;
+              break;
+            case 3:
+              tableName = safeUndefinedCheck(
+                nameMapping.chara[a[0]],
+                a[0].toLowerCase(),
+              );
+              valueIndex = a[1];
+              value = a[2];
+              if (tableName === 'relation' || tableName === 'callname') {
+                era.staticData.relationship[tableName][
+                  `${tmp['id']}|${valueIndex}`
+                ] = value;
+              } else {
+                valueIndex = safeUndefinedCheck(
+                  era.staticData[tableName][valueIndex],
+                  a[1],
+                );
+                if (!tmp[tableName]) {
+                  tmp[tableName] = {};
+                }
+                tmp[tableName][valueIndex] = value;
+              }
+              break;
+            default:
+              break;
+          }
+        });
+        era.staticData.chara[tmp['id']] = tmp;
+      });
+
+    log({
+      static: era.staticData,
+      names: era.fieldNames,
+    });
+
+    // load ere
+    let eraModule;
+    try {
+      const gameMainPath = join(path, './ere/main.js').replace(/\\/g, '\\\\');
+      print(`\nloading game: ${path} ...`);
+
+      // clear cache, load game, and find era module
+      eval(`Object.keys(require.cache)
+        .filter(x => x.startsWith('${path}'))
+        .forEach(x => delete require.cache[x]);
+      gameMain = require('${gameMainPath}');
+      eraModule = require.cache[Object.keys(require.cache)
+        .filter(x => x.startsWith('${path.replace(
+          /\\/g,
+          '\\\\',
+        )}') && x.endsWith('era-electron.js'))]`);
+
+      // inject era.api
+      Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
+      await era.api.waitAnyKey();
+    } catch (e) {
+      error(e.message);
+    }
+    era.restart();
   };
 
   if (isDevelopment) {

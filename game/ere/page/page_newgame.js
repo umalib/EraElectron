@@ -1,11 +1,17 @@
 const era = require('../era-electron');
 
+/**
+ * start a new game, set data
+ * @return {Promise<boolean|undefined>} if true, call main.js to call homepage
+ */
 module.exports = async () => {
   const { genderArr } = require('../data/const.json');
   let flagNewGame = true;
   let playerName = '';
   let playerGender = 3;
   let flagSelectGender = false;
+
+  era.resetData();
 
   while (flagNewGame) {
     era.clear();
@@ -88,9 +94,7 @@ module.exports = async () => {
           break;
         case 1:
           require('../system/sys_new_game')(playerName, playerGender);
-          flagNewGame = false;
-          await require('./page_homepage')();
-          break;
+          return true;
         case 10:
           playerName = '';
           playerGender = 3;
