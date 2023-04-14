@@ -1,4 +1,5 @@
 ﻿const era = require('../era-electron');
+const page_savegame = require('./page_savegame');
 
 module.exports = async () => {
   let flagHomepage = true;
@@ -13,20 +14,46 @@ module.exports = async () => {
     let chara_cur_inter = era.get('flag:当前互动角色');
 
     if (!chara_cur_inter) {
-      era.println();
-      era.printButton('[100] 当前无互动对象，点击从队伍列表中选择', 100);
+      era.printButton('[100] 查看队伍列表', 100, {align: 'right'});
+      era.print('未选择互动对象', {align: 'center'});
       era.println();
     } else {
-      era.print(
-        `${era.get(`name:${era.get('flag:当前互动角色')}:-1`)} 的状态：`,
-      );
-      era.printButton('[100] 更换互动对象', 100);
-
+      era.printMultiColumns(
+        [
+          {
+            content: `${era.get(`name:${era.get('flag:当前互动角色')}:-1`)} 的状态：`,
+            type: 'text',
+            config: { width: 18 },
+          },
+          {
+            content: '[100] 查看队伍列表',
+            type: 'button',
+            accelerator: 100,
+            config: { width: 6, align: 'right'},
+          },
+        ],
+      )
       era.print('体力 ');
     }
 
     era.drawLine();
     era.printButton('[101] 招募新成员', 101);
+    era.printMultiColumns(
+      [
+        {
+          content: '[900] 保存进度',
+          type: 'button',
+          accelerator: 900,
+          config: { width: 6 },
+        },
+        {
+          content: '[901] 加载存档',
+          type: 'button',
+          accelerator: 901,
+          config: { width: 6 },
+        }
+      ],
+    );
 
     let ret = await era.input(); //TODO: add rule
 
@@ -34,8 +61,13 @@ module.exports = async () => {
       case 101:
         await recruitRand();
         break;
+      case 900:
+        await require('./page_savegame')();
+        break;
+      case 901:
+        await require('./page_loadgame')();
+        break;
     }
 
-    await era.waitAnyKey();
   }
 };

@@ -7,7 +7,7 @@ module.exports = () => {
   let cur_year = era.get('flag:当前年');
 
   if (!cur_year) {
-    era.print('\n当前未加载存档');
+    era.print('当前未加载存档');
   } else {
     era.setAlign('left');
     let cur_month = era.get('flag:当前月');
@@ -36,7 +36,6 @@ module.exports = () => {
           },
         },
       ],
-      { align: 'center' },
     );
     era.printMultiColumns(
       [
@@ -57,7 +56,6 @@ module.exports = () => {
           },
         },
       ],
-      { align: 'center' },
     );
     era.printMultiColumns(
       [
@@ -78,7 +76,6 @@ module.exports = () => {
           },
         },
       ],
-      { align: 'center' },
     );
   }
   era.drawLine();

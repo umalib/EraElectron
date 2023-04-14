@@ -54,7 +54,5 @@ module.exports = async () => {
     }
 
     flagRecruitRand = false;
-
-    await era.waitAnyKey();
   }
 };

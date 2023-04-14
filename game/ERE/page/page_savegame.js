@@ -8,17 +8,15 @@ module.exports = async () => {
     era.clear();
     require('./page_header')();
 
-    if (!msgNotification) {
-      era.drawLine();
-      era.print(msgNotification);
-      era.drawLine();
+    if (msgNotification) {
+      era.print(msgNotification, {align: 'center'});
     }
 
     era.drawLine();
     era.print('要保存至哪个栏位？');
 
     for (let ind = 0; ind < 10; ind++) {
-      let comm_disp = era.get(`global:saveComments:${ind}`);
+      let comm_disp = era.get('global:saveComments')[ind];
       if (!comm_disp) {
         comm_disp = '空存档栏位';
       }
@@ -35,7 +33,7 @@ module.exports = async () => {
         flagSaveGame = false;
         break;
       default:
-        let comment = `${era.get('callname:0:-1')} 于 ${new Date()} 保存的进度\n`;
+        let comment = `${era.get('callname:0:-1')} 于 ${new Date()} 保存的进度 `;
         comment += `( ${era.get('flag:当前年')} 年, ${era.get('flag:当前月')} 月, 第 ${era.get('flag:当前周')} 周)`;
     
         if (era.saveData(ret, comment)) {

@@ -19,13 +19,13 @@ module.exports = async () => {
 
     for (let ind = 0; ind < 10; ind++) {
       let comm_disp = era.get(`global:saveComments:${ind}`);
-      let slot_avail = true;
+      let slot_unavail = false;
 
       if (!comm_disp) {
         comm_disp = '空存档栏位';
-        slot_avail = false;
+        slot_unavail = true;
       }
-      era.printButton(`[${ind}] ${comm_disp}`, ind); //TODO: add button config: disable
+      era.printButton(`[${ind}] ${comm_disp}`, ind, {disabled: slot_unavail});
     }
 
     era.drawLine();
