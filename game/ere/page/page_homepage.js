@@ -18,7 +18,7 @@ module.exports = async () => {
       era.println();
     } else {
       era.print(
-        era.get('name:' + era.get('flag:当前互动角色') + ':-1') + ' 的状态：',
+        `${era.get(`name:${era.get('flag:当前互动角色')}:-1`)} 的状态：`,
       );
       era.printButton('[100] 更换互动对象', 100);
 

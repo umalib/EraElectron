@@ -6,7 +6,7 @@ module.exports = async () => {
   const getAvailableChara = require('../system/sys_get_avail_chara');
   const callRecruitEvent = require('../system/sys_call_recruit');
   
-  era.set('flag:今日已行动', 1);
+  era.set('flag:本回合已行动', 1);
 
   while (flagRecruitRand) {
     era.clear();
@@ -34,7 +34,7 @@ module.exports = async () => {
 
     today_rule = today_rule.slice(1,-1);
 
-    let ret = era.input({ rule: today_rule });
+    let ret = await era.input({ rule: today_rule });
 
     switch (Number(ret)) {
       case 4:

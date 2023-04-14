@@ -1,7 +1,7 @@
 ﻿const era = require('../era-electron');
 
 module.exports = async () => {
-  let flagSaveGame = true;
+  let flagLoadGame = true;
   let msgNotification = '';
 
   while (flagSaveGame) {
@@ -15,14 +15,17 @@ module.exports = async () => {
     }
 
     era.drawLine();
-    era.print('要保存至哪个栏位？');
+    era.print('要从哪个栏位读取？');
 
     for (let ind = 0; ind < 10; ind++) {
       let comm_disp = era.get(`global:saveComments:${ind}`);
+      let slot_avail = true;
+
       if (!comm_disp) {
         comm_disp = '空存档栏位';
+        slot_avail = false;
       }
-      era.printButton(`[${ind}] ${comm_disp}`, ind);
+      era.printButton(`[${ind}] ${comm_disp}`, ind); //TODO: add button config: disable
     }
 
     era.drawLine();
@@ -32,14 +35,14 @@ module.exports = async () => {
 
     switch (ret) {
       case 99:
-        flagSaveGame = false;
+        flagLoadGame = false;
         break;
       default:
-        let comment = `${era.get('callname:0:-1')} 于 ${new Date()} 保存的进度\n`;
-        comment += `( ${era.get('flag:当前年')} 年, ${era.get('flag:当前月')} 月, 第 ${era.get('flag:当前周')} 周)`;
-    
-        if (era.saveData(ret, comment)) {
-          msgNotification = `已成功保存至 ${ret} 号栏位`;
+        if (!era.loadData(ret)) {
+          msgNotification = `未能成功读取 ${ret} 号栏位的存档`;
+        } else {
+          flagLoadGame = false;
+          era.loadGlobal();
         }
         break;
     }
