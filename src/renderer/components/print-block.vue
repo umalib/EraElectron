@@ -7,7 +7,7 @@
     <el-button
       v-if="line.type === lineType.button"
       @click="emit('value-return', line.accelerator)"
-      :disabled="line.valCount < buttonValCount"
+      :disabled="line.disabled || line.valCount < buttonValCount"
       :type="line.buttonType"
       :link="!line.isButton"
     >

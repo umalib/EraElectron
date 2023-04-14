@@ -74,7 +74,7 @@ module.exports = {
    * print a button
    * @param {string} content REQUIRED the text of the button
    * @param {number} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{[align]: string, [buttonType]: 'primary'|'success'|'warning'|'danger'|'info', [isButton]: boolean, [offset]: number, [width]: number}} [config] the config of the printed button
+   * @param {{[align]: string, [buttonType]: 'primary'|'success'|'warning'|'danger'|'info', [disabled]: boolean, [isButton]: boolean, [offset]: number, [width]: number}} [config] the config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars

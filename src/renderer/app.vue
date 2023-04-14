@@ -102,6 +102,7 @@ function getButtonObject(data) {
     contents: data.content.split('\n'),
     inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
+    disabled: data.config.disabled,
     offset: getValidOffset(data.config.offset),
     textAlign: safeUndefinedCheck(
       data.config.align,
