@@ -5,7 +5,7 @@ module.exports = async () => {
   let flagRecruitRand = true;
   const getAvailableChara = require('../system/sys_get_avail_chara');
   const callRecruitEvent = require('../system/sys_call_recruit');
-  
+
   era.set('flag:本回合已行动', 1);
 
   while (flagRecruitRand) {
@@ -30,9 +30,9 @@ module.exports = async () => {
     }
 
     era.drawLine();
-    era.printButton('[999]直接离开');
+    era.printButton('[999] 直接离开', 999);
 
-    today_rule = today_rule.slice(1,-1);
+    today_rule = today_rule.slice(1, -1);
 
     let ret = await era.input({ rule: today_rule });
 
