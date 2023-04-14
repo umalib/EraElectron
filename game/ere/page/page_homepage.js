@@ -28,7 +28,7 @@ module.exports = async () => {
     era.drawLine();
     era.printButton('[101] 招募新成员', 101);
 
-    let ret = await era.input();
+    let ret = await era.input(); //TODO: add rule
 
     switch (Number(ret)) {
       case 101:
