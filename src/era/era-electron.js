@@ -29,6 +29,7 @@ module.exports = (
   }
 
   function error(message) {
+    logger.error(message);
     connect({ action: 'error', data: message });
   }
 
@@ -153,6 +154,7 @@ module.exports = (
     global: {},
     resetData() {
       this.data = {
+        version: this.staticData['gamebase'].version,
         abl: {},
         amour: {},
         base: {},
@@ -185,7 +187,6 @@ module.exports = (
       try {
         gameMain();
       } catch (e) {
-        logger.error(e.message);
         error(e.message);
       }
     },
@@ -336,7 +337,6 @@ module.exports = (
         );
         await this.api.waitAnyKey();
       } catch (e) {
-        logger.error(e.message);
         error(e.message);
       }
       this.restart();
@@ -450,8 +450,16 @@ module.exports = (
   era.api.loadData = (savId) => {
     const savPath = join(path, `./sav/save${savId}.sav`);
     try {
-      era.data = JSON.parse(readFileSync(savPath).toString('utf-8'));
-      return true;
+      const tmp = JSON.parse(readFileSync(savPath).toString('utf-8'));
+      if (
+        !tmp.version ||
+        tmp.version < era.staticData['gamebase']['lowestVersion']
+      ) {
+        error(`save${savId}.sav版本过低（${tmp.version}）！`);
+      } else {
+        era.data = tmp;
+        return true;
+      }
     } catch (e) {
       error(e.message);
     }
@@ -479,8 +487,16 @@ module.exports = (
     const globalPath = join(path, './sav/global.sav');
     if (existsSync(globalPath)) {
       try {
-        era.global = JSON.parse(readFileSync(globalPath).toString('utf-8'));
-        return true;
+        const tmp = JSON.parse(readFileSync(globalPath).toString('utf-8'));
+        if (
+          !tmp.version ||
+          tmp.version < era.staticData['gamebase']['lowestVersion']
+        ) {
+          error(`global.sav版本过低（${tmp.version}）！已重新生成`);
+        } else {
+          era.global = tmp;
+          return true;
+        }
       } catch (_) {
         // eslint-disable-next-line no-empty
       }
@@ -489,7 +505,7 @@ module.exports = (
   };
 
   era.api.resetGlobal = () => {
-    era.global = {};
+    era.global = { version: era.staticData['gamebase'].version };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
     return true;
   };
