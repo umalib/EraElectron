@@ -10,9 +10,16 @@ const { join } = require('path');
 const parseCSV = require('@/era/csv-utils');
 const { safeUndefinedCheck } = require('@/renderer/utils/value-utils');
 
-const baseNameMap = require('@/era/base-name.json');
+const nameMapping = require('@/era/nameMapping.json');
 
-module.exports = (path, connect, listen, cleanListener, logger) => {
+module.exports = (
+  path,
+  connect,
+  listen,
+  cleanListener,
+  logger,
+  isDevelopment,
+) => {
   function clear() {
     connect({ action: 'clear' });
   }
@@ -40,7 +47,11 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
   }
 
   function log(info) {
-    connect({ action: 'log', data: info });
+    if (isDevelopment) {
+      connect({ action: 'log', data: info });
+    } else {
+      logger.info(info);
+    }
   }
 
   function print(content, config) {
@@ -91,6 +102,10 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
 
   function setAlign(textAlign) {
     connect({ action: 'setAlign', data: textAlign });
+  }
+
+  function setGameBase(_gamebase) {
+    connect({ action: 'setGameBase', data: _gamebase });
   }
 
   // function setMaxHeight(height) {
@@ -164,14 +179,9 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
       if (!inputKey) {
         cleanListener(inputKey);
       }
-      this.api.setTitle(this.staticData['gamebase']['タイトル']);
       this.resetData();
       this.api.loadGlobal();
 
-      log({
-        data: this.data,
-        global: this.global,
-      });
       try {
         gameMain();
       } catch (e) {
@@ -227,7 +237,12 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
               k.startsWith('gamebase')
             ) {
               csv.forEach(
-                (a) => (this.staticData[k][a[0].toLowerCase()] = a[1]),
+                (a) =>
+                  (this.staticData[k][
+                    nameMapping[k]
+                      ? nameMapping.gamebase[a[0]]
+                      : a[0].toLowerCase()
+                  ] = a[1]),
               );
             } else if (k.startsWith('item')) {
               this.staticData.item = { name: {}, price: {} };
@@ -246,6 +261,7 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
             }
           }
         });
+      setGameBase(this.staticData['gamebase']);
 
       this.api.print('\nloading chara files ...');
       this.staticData.chara = {};
@@ -259,13 +275,13 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
           parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
             switch (a.length) {
               case 2:
-                tableName = safeUndefinedCheck(baseNameMap[a[0]], a[0]);
+                tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
                 value = a[1];
                 tmp[tableName] = value;
                 break;
               case 3:
                 tableName = safeUndefinedCheck(
-                  baseNameMap[a[0]],
+                  nameMapping.chara[a[0]],
                   a[0].toLowerCase(),
                 );
                 valueIndex = a[1];
@@ -540,7 +556,13 @@ module.exports = (path, connect, listen, cleanListener, logger) => {
     return Object.keys(era.data.base);
   };
 
-  logger.info(Object.keys(era.api));
+  if (isDevelopment) {
+    era.api.logData = () => {
+      log(era.data);
+    };
+  }
+
+  logger.debug(Object.keys(era.api));
 
   return era;
 };

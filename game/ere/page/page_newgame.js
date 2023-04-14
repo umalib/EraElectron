@@ -4,7 +4,7 @@ module.exports = async () => {
   const { genderArr } = require('../data/const.json');
   let flagNewGame = true;
   let playerName = '';
-  let playerGender = -1;
+  let playerGender = 3;
   let flagSelectGender = false;
 
   while (flagNewGame) {
@@ -33,7 +33,7 @@ module.exports = async () => {
       //    continue;
     } else if (!flagSelectGender) {
       //不在输入性别子循环
-      if (playerGender < 0) {
+      if (playerGender > 2) {
         //未输入性别
         era.printButton('[0] 选择性别', 0);
       } else {

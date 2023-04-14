@@ -11,17 +11,22 @@ const {
 const { createProtocol } = require('vue-cli-plugin-electron-builder/lib');
 const { join } = require('path');
 const { homedir } = require('os');
-const { readdirSync } = require('fs');
+const { existsSync, mkdirSync, readdirSync } = require('fs');
 const log4js = require('log4js');
 const createEra = require('@/era/era-electron');
+const { engineCommand } = require('@/renderer/utils/embedded.json');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+const logPath = join(app.getPath('userData'), './logs');
+if (!existsSync(logPath)) {
+  mkdirSync(logPath);
+}
 log4js.configure({
   appenders: {
     console: { type: 'console' },
     file: {
-      filename: join(app.getPath('userData'), './logs/main.log'),
+      filename: join(logPath, './main.log'),
       keepFileExt: true,
       pattern: 'yyMMdd',
       type: 'dateFile',
@@ -32,6 +37,11 @@ log4js.configure({
   },
 });
 const logger = log4js.getLogger('background');
+const engineLogger = log4js.getLogger('engine');
+if (isDevelopment) {
+  logger.level = 'debug';
+  engineLogger.level = 'debug';
+}
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -69,17 +79,18 @@ async function createWindow() {
     connect,
     listen,
     cleanListener,
-    logger,
+    engineLogger,
+    isDevelopment,
   );
 
   ipcMain.removeAllListeners();
 
   ipcMain.on('engine', (_, action) => {
     switch (action) {
-      case 'load':
+      case engineCommand.reload:
         era.start();
         break;
-      case 'restart':
+      case engineCommand.restart:
         era.restart();
         break;
     }
@@ -97,14 +108,14 @@ async function createWindow() {
       {
         accelerator: 'CmdOrCtrl+T',
         click() {
-          win.webContents.send('engine', 'restart');
+          win.webContents.send('engine', engineCommand.restart);
         },
         label: '返回标题',
       },
       {
         accelerator: 'CmdOrCtrl+R',
         click() {
-          win.webContents.send('engine', 'reload');
+          win.webContents.send('engine', engineCommand.reload);
         },
         label: '重新载入',
       },
@@ -120,7 +131,7 @@ async function createWindow() {
       {
         label: '版权',
         click() {
-          win.webContents.send('menu', '123');
+          win.webContents.send('engine', engineCommand.copyright);
         },
       },
     ],

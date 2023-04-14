@@ -141,6 +141,48 @@
         />
       </el-col>
     </el-row>
+    <el-dialog v-model="copyrightVisible" title="版权信息" width="80%">
+      <el-descriptions title="游戏基本信息">
+        <template v-if="gameBase.author">
+          <el-descriptions-item label="游戏名">
+            {{ gameBase.title }} @ {{ gameBase.id }}
+          </el-descriptions-item>
+          <el-descriptions-item label="作者">
+            {{ gameBase.author }}
+          </el-descriptions-item>
+          <el-descriptions-item label="版本号">
+            {{ gameBase.version / 1000 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="游戏发布时间">
+            {{ gameBase['publishTime'] }}
+          </el-descriptions-item>
+          <el-descriptions-item label="最低支持版本">
+            {{ gameBase['lowestVersion'] / 1000 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="追加信息">
+            {{ gameBase.info }}
+          </el-descriptions-item>
+        </template>
+        <template v-else>
+          <el-descriptions-item label="未知">
+            未加载游戏，还什么都不知道哦
+          </el-descriptions-item>
+        </template>
+      </el-descriptions>
+      <el-descriptions title="引擎情报">
+        <el-descriptions-item label="名称">ERA-Electron</el-descriptions-item>
+        <el-descriptions-item label="版本">0.9.0</el-descriptions-item>
+        <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
+        <el-descriptions-item label="开发">
+          风之低吟
+          <el-divider direction="vertical" />
+          Takatoshi
+        </el-descriptions-item>
+        <el-descriptions-item label="例程 & 测试">
+          Takatoshi
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
   </el-scrollbar>
 </template>
 
@@ -156,10 +198,12 @@ import {
 } from '@/renderer/utils/value-utils';
 
 const buttonValCount = ref(0);
+const copyrightVisible = ref(false);
 const defaultSetting = ref({});
 const inputParam = ref({});
 const lines = ref([]);
 const lineType = embeddedData.lineType;
+const gameBase = ref({});
 
 function clear(count) {
   const lineCount = Number(count);
@@ -280,6 +324,7 @@ function resetData() {
     rule: undefined,
     val: '',
   };
+  gameBase.value = {};
   clear();
 }
 
@@ -346,13 +391,17 @@ function throwError(message) {
 }
 
 resetData();
+const engineCommand = embeddedData.engineCommand;
 connector.registerMenu((action) => {
   switch (action) {
-    case 'reload':
+    case engineCommand.copyright:
+      copyrightVisible.value = true;
+      break;
+    case engineCommand.reload:
       resetData();
       connector.reload();
       break;
-    case 'restart':
+    case engineCommand.restart:
       resetData();
       connector.restart();
       break;
@@ -384,6 +433,12 @@ connector.register(
   'setAlign',
   (align) => (defaultSetting.value.textAlign = align),
 );
+connector.register('setGameBase', (_gamebase) => {
+  gameBase.value = _gamebase;
+  if (gameBase.value['author']) {
+    document.title = gameBase.value['title'];
+  }
+});
 // connector.register('setMaxHeight', setMaxHeight);
 connector.register('setOffset', setOffset);
 connector.register('setWidth', setWidth);
