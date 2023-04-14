@@ -444,9 +444,6 @@ module.exports = (
         join(savDirPath, `./save${savId}.sav`),
         JSON.stringify(era.data),
       );
-      if (!era.global.saveComments) {
-        era.global.saveComments = {};
-      }
       era.global.saveComments[savId] = comment;
       era.api.saveGlobal();
       return true;
@@ -514,7 +511,10 @@ module.exports = (
   };
 
   era.api.resetGlobal = () => {
-    era.global = { version: era.staticData['gamebase'].version };
+    era.global = {
+      version: era.staticData['gamebase'].version,
+      saveComments: {},
+    };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
     return true;
   };
