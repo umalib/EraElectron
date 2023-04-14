@@ -57,7 +57,7 @@ module.exports = {
   /**
    * print some text
    * @param {string} content REQUIRED the text to be printed
-   * @param {{p: boolean, offset: number, width: number, isParagraph: boolean, align: string}} [config] the config of the printed line
+   * @param {{[p]: boolean, [offset]: number, [width]: number, [isParagraph]: boolean, [align]: string}} [config] the config of the printed line
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -65,7 +65,7 @@ module.exports = {
   /**
    * print some text and wait any key from user
    * @param {string} content REQUIRED the text to be printed
-   * @param {{align: string, isParagraph: boolean, offset: number, p: boolean, width: number}} [config] the config of the printed line
+   * @param {{[align]: string, [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] the config of the printed line
    * @returns {Promise<void>} the same with waitAnyKey, please use await
    */
   // eslint-disable-next-line no-unused-vars
@@ -74,7 +74,7 @@ module.exports = {
    * print a button
    * @param {string} content REQUIRED the text of the button
    * @param {number} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{isButton: boolean, offset: number, width: number, buttonType: 'primary'|'success'|'warning'|'danger'|'info', align: string}} [config] the config of the printed button
+   * @param {{[align]: string, [buttonType]: 'primary'|'success'|'warning'|'danger'|'info', [isButton]: boolean, [offset]: number, [width]: number}} [config] the config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -82,7 +82,7 @@ module.exports = {
   /**
    * print multiple columns into a row, excluding inputs
    * @param {Array<{type: 'button'|'image'|'progress'|'text', config?: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
-   * @param {{justify: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly', align: 'top'|'middle'|'bottom'}} [config] the config of the row
+   * @param {{[align]: 'top'|'middle'|'bottom', [justify]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly'}} [config] the config of the row
    * @returns {void}
    * @see print
    * @see printButton
@@ -96,7 +96,7 @@ module.exports = {
    * @param {number} percentage REQUIRED the percentage of the progress bar, float, 0-100
    * @param {string} inContent REQUIRED the text shown in the progress bar
    * @param {string} outContent REQUIRED the text shown next to the progress bar
-   * @param {{barRatio: number, color: string, offset: number, width: number, align: string, fontColor: string, height: number}} [config] the config of the printed progress
+   * @param {{[align]: string, [barRatio]: number, [color]: string, [fontColor]: string, [height]: number, [offset]: number, [width]: number}} [config] the config of the printed progress
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars

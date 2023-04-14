@@ -4,5 +4,8 @@
     "先生",
     "女士……？",
     ""
-  ]
+  ],
+  "recruitCommands": {
+    "RandomRecruit": 1
+  }
 }

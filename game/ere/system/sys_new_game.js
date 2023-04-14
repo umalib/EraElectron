@@ -1,9 +1,6 @@
 ﻿const era = require('../era-electron');
 
 module.exports = (player_name, player_gender) => {
-  era.loadGlobal();
-  //era.resetAllExceptGlobal();
-
   era.addCharacter(0);
   era.set('callname:0:-1', player_name);
   era.set('callname:0:-2', '你');
@@ -28,4 +25,4 @@ module.exports = (player_name, player_gender) => {
 
   era.set('flag:当前声望', era.get('global:初始声望增加量') + 100);
   era.set('flag:当前金币', era.get('global:初始金钱增加量') + 10000);
-}
+};

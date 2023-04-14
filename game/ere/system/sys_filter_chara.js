@@ -6,8 +6,10 @@ module.exports = (table, key, value) => {
   let list_cur = era.getAddedCharacters();
 
   if (value) {
-    return list_cur.filter((item) => (era.get(`${table}:${item}:${key}`) == value));
+    return list_cur.filter(
+      (item) => era.get(`${table}:${item}:${key}`) === value,
+    );
   } else {
-    return list_cur.filter((item) => (!era.get(`${table}:${item}:${key}`)));
+    return list_cur.filter((item) => !era.get(`${table}:${item}:${key}`));
   }
-}
+};
