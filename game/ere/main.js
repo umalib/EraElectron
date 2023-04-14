@@ -26,6 +26,7 @@ module.exports = async () => {
         await require('./page/page_newgame')();
         break;
       case 1:
+        await require('./page/page_loadgame')();
         break;
       case 2:
         break;

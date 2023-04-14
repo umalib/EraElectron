@@ -4,7 +4,7 @@ module.exports = async () => {
   let flagLoadGame = true;
   let msgNotification = '';
 
-  while (flagSaveGame) {
+  while (flagLoadGame) {
     era.clear();
     require('./page_header')();
 
@@ -17,19 +17,19 @@ module.exports = async () => {
     era.drawLine();
     era.print('要从哪个栏位读取？');
 
-    for (let ind = 0; ind < 10; ind++) {
-      let comm_disp = era.get(`global:saveComments:${ind}`);
+    for (let ind = 0; ind < 11; ind++) {
+      let comm_disp = era.get(`global:saves:${ind}`);
       let slot_unavail = false;
 
       if (!comm_disp) {
         comm_disp = '空存档栏位';
         slot_unavail = true;
       }
-      era.printButton(`[${ind}] ${comm_disp}`, ind, {disabled: slot_unavail});
+      era.printButton(`[${ind}] ${comm_disp}`, ind, { disabled: slot_unavail });
     }
 
     era.drawLine();
-    era.printButton('[99]返回上一级', 99, { align:'right' });
+    era.printButton('[99]返回上一级', 99, { align: 'right' });
 
     let ret = await era.input({ rule: '[0-9]|99' });
 
@@ -47,4 +47,4 @@ module.exports = async () => {
         break;
     }
   }
-}
+};

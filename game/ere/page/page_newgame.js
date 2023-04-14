@@ -36,54 +36,48 @@ module.exports = async () => {
       if (playerGender > 2) {
         //未输入性别
 
-        era.printMultiColumns(
-          [
-            { 
-              content: '[0] 选择性别',
-              type: 'button',
-              accelerator: 0,
-              config: { width: 6 },
-            },
-            {
-              content: '[10] 重新签名',
-              type: 'button',
-              accelerator: 10,
-              config: { width: 6 },
-            },
-            {
-              content: '[99] 返回上一级',
-              type: 'button',
-              accelerator: 99,
-              config: { width: 12, align: 'right' },
-            },
-          ],
-        );
-
+        era.printMultiColumns([
+          {
+            content: '[0] 选择性别',
+            type: 'button',
+            accelerator: 0,
+            config: { width: 6 },
+          },
+          {
+            content: '[10] 重新签名',
+            type: 'button',
+            accelerator: 10,
+            config: { width: 6 },
+          },
+          {
+            content: '[99] 返回上一级',
+            type: 'button',
+            accelerator: 99,
+            config: { width: 12, align: 'right' },
+          },
+        ]);
       } else {
         //均已输入
-
-        era.printMultiColumns(
-          [
-            { 
-              content: '[1] 提交聘书',
-              type: 'button',
-              accelerator: 1,
-              config: { width: 6 },
-            },
-            {
-              content: '[10] 重新签名',
-              type: 'button',
-              accelerator: 10,
-              config: { width: 6 },
-            },
-            {
-              content: '[99] 返回上一级',
-              type: 'button',
-              accelerator: 99,
-              config: { width: 12, align: 'right' },
-            },
-          ],
-        );
+        era.printMultiColumns([
+          {
+            content: '[1] 提交聘书',
+            type: 'button',
+            accelerator: 1,
+            config: { width: 6 },
+          },
+          {
+            content: '[10] 重新签名',
+            type: 'button',
+            accelerator: 10,
+            config: { width: 6 },
+          },
+          {
+            content: '[99] 返回上一级',
+            type: 'button',
+            accelerator: 99,
+            config: { width: 12, align: 'right' },
+          },
+        ]);
       }
 
       let ret = await era.input({ rule: '0|1|10|99' });
@@ -108,28 +102,26 @@ module.exports = async () => {
     } else {
       //在输入性别子循环
 
-      era.printMultiColumns(
-        [
-          { 
-            content: '[0] 女性',
-            type: 'button',
-            accelerator: 0,
-            config: { width: 6 },
-          },
-          {
-            content: '[1] 男性',
-            type: 'button',
-            accelerator: 1,
-            config: { width: 6 },
-          },
-          {
-            content: '[2] 扶她',
-            type: 'button',
-            accelerator: 2,
-            config: { width: 6 },
-          },
-        ],
-      );
+      era.printMultiColumns([
+        {
+          content: '[0] 女性',
+          type: 'button',
+          accelerator: 0,
+          config: { width: 6 },
+        },
+        {
+          content: '[1] 男性',
+          type: 'button',
+          accelerator: 1,
+          config: { width: 6 },
+        },
+        {
+          content: '[2] 扶她',
+          type: 'button',
+          accelerator: 2,
+          config: { width: 6 },
+        },
+      ]);
 
       let ret = await era.input({ rule: '[0-2]' });
       playerGender = Number(ret);

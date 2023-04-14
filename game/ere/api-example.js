@@ -62,7 +62,7 @@ module.exports = async function () {
         },
       },
     ],
-    { align: 'middle' },
+    { verticalAlign: 'middle' },
   );
   era.printProgress(50, '50/100', '100/100', {
     align: 'right',

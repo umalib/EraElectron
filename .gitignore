@@ -26,4 +26,4 @@ pnpm-debug.log*
 /dist_electron
 package-lock.json
 /test
-/example/csv
+/game/sav/
