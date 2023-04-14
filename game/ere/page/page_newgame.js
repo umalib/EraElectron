@@ -65,16 +65,16 @@ module.exports = async () => {
       }
     } else {
       //在输入性别子循环
-      era.printButton('[0]女性', 0);
-      era.printButton('[1]男性', 1);
-      era.printButton('[2]扶她', 2);
-      era.print('\n');
+      era.printButton('[0] 女性', 0);
+      era.printButton('[1] 男性', 1);
+      era.printButton('[2] 扶她', 2);
+      era.println();
 
       let ret = await era.input({ rule: '[0-2]' });
       playerGender = Number(ret);
       flagSelectGender = false;
     }
-    era.print('\n');
+    era.println();
 
     //await era.waitAnyKey();
   }

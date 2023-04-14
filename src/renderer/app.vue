@@ -7,120 +7,23 @@
       :align="line.align"
     >
       <template v-if="line.type === lineType['multiCol']">
-        <el-col
+        <print-block
           v-for="(col, j) in line.columns"
+          @value-return="returnFromButton($event)"
           :key="`col-${i}-${j}`"
-          :offset="col.offset || defaultSetting.colOffset"
-          :span="col.width || defaultSetting.colWidth"
-          :style="{ textAlign: col.textAlign || defaultSetting.textAlign }"
-        >
-          <el-button
-            v-if="col.type === lineType.button"
-            @click="returnFromButton(col.accelerator)"
-            :disabled="col.valCount < buttonValCount"
-            :type="col.buttonType"
-            :link="!col.isButton"
-          >
-            <span :style="{ textAlign: col.inTextAlign }">
-              <template
-                v-for="(content, index) in col.contents"
-                :key="`button-${index}`"
-              >
-                <br v-if="index !== 0" />
-                {{ content }}
-              </template>
-            </span>
-          </el-button>
-          <el-row v-if="col.type === lineType['progress']">
-            <el-col :span="col.barWidth">
-              <el-progress
-                :color="col.barColor"
-                :percentage="col.percentage"
-                :stroke-width="col.height"
-                :text-inside="true"
-              >
-                <span :style="{ color: col.fontColor }">
-                  {{ col.inContent }}
-                </span>
-              </el-progress>
-            </el-col>
-            <el-col :span="24 - col.barWidth">
-              <span>{{ col.outContent }}</span>
-            </el-col>
-          </el-row>
-          <template v-if="col.type === lineType.text">
-            <p v-if="col.isParagraph">
-              <span v-for="(content, i) in col.contents" :key="content">
-                <br v-if="i !== 0" />
-                {{ content }}
-              </span>
-            </p>
-            <template v-else>
-              <template v-for="(content, i) in col.contents" :key="content">
-                <br v-if="i !== 0" />
-                {{ content }}
-              </template>
-            </template>
-          </template>
-        </el-col>
+          :button-val-count="buttonValCount.toString()"
+          :default-setting="defaultSetting"
+          :line="col"
+        />
       </template>
       <br v-else-if="line.type === lineType['lineUp']" />
-      <el-col
+      <print-block
         v-else
-        :offset="line.offset || defaultSetting.colOffset"
-        :span="line.width || defaultSetting.colWidth"
-        :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
-      >
-        <el-button
-          v-if="line.type === lineType.button"
-          @click="returnFromButton(line.accelerator)"
-          :disabled="line.valCount < buttonValCount"
-          :type="line.buttonType"
-          :link="!line.isButton"
-        >
-          <span :style="{ textAlign: line.inTextAlign }">
-            <template
-              v-for="(content, index) in line.contents"
-              :key="`button-${index}`"
-            >
-              <br v-if="index !== 0" />
-              {{ content }}
-            </template>
-          </span>
-        </el-button>
-        <el-divider v-if="line.type === lineType['divider']" />
-        <el-row v-if="line.type === lineType['progress']">
-          <el-col :span="line.barWidth">
-            <el-progress
-              :color="line.barColor"
-              :percentage="line.percentage"
-              :stroke-width="line.height"
-              :text-inside="true"
-            >
-              <span :style="{ color: line.fontColor }">
-                {{ line.inContent }}
-              </span>
-            </el-progress>
-          </el-col>
-          <el-col :span="24 - line.barWidth">
-            <span>{{ line.outContent }}</span>
-          </el-col>
-        </el-row>
-        <template v-if="line.type === lineType.text">
-          <p v-if="line.isParagraph">
-            <span v-for="(content, i) in line.contents" :key="content">
-              <br v-if="i !== 0" />
-              {{ content }}
-            </span>
-          </p>
-          <template v-else>
-            <template v-for="(content, i) in line.contents" :key="content">
-              <br v-if="i !== 0" />
-              {{ content }}
-            </template>
-          </template>
-        </template>
-      </el-col>
+        @value-return="returnFromButton($event)"
+        :button-val-count="buttonValCount.toString()"
+        :default-setting="defaultSetting"
+        :line="line"
+      />
     </el-row>
     <el-row>
       <el-col
@@ -142,58 +45,15 @@
       </el-col>
     </el-row>
   </el-scrollbar>
-  <el-dialog v-model="copyrightVisible" title="版权信息" width="80%">
-    <p>
-      <el-descriptions size="large" title="游戏基本信息">
-        <template v-if="gameBase.author">
-          <el-descriptions-item label="游戏名">
-            {{ gameBase.title }} @ {{ gameBase.id }}
-          </el-descriptions-item>
-          <el-descriptions-item label="作者">
-            {{ gameBase.author }}
-          </el-descriptions-item>
-          <el-descriptions-item label="版本号">
-            {{ gameBase.version / 1000 }}
-          </el-descriptions-item>
-          <el-descriptions-item label="游戏发布时间">
-            {{ gameBase['publishTime'] }}
-          </el-descriptions-item>
-          <el-descriptions-item label="最低支持版本">
-            {{ gameBase['lowestVersion'] / 1000 }}
-          </el-descriptions-item>
-          <el-descriptions-item label="追加信息">
-            {{ gameBase.info }}
-          </el-descriptions-item>
-        </template>
-        <template v-else>
-          <el-descriptions-item label="未知">
-            未加载游戏，还什么都不知道哦
-          </el-descriptions-item>
-        </template>
-      </el-descriptions>
-    </p>
-    <p>
-      <el-descriptions size="large" title="引擎信息">
-        <el-descriptions-item label="名称">ERA-Electron</el-descriptions-item>
-        <el-descriptions-item label="版本">0.9.0</el-descriptions-item>
-        <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
-        <el-descriptions-item label="开发">
-          风之低吟
-          <el-divider direction="vertical" />
-          Takatoshi
-        </el-descriptions-item>
-        <el-descriptions-item label="例程 & 测试">
-          Takatoshi
-        </el-descriptions-item>
-      </el-descriptions>
-    </p>
-  </el-dialog>
+  <copyright-dialog :visible="copyrightVisible" :game-base="gameBase" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
 
+import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
+import PrintBlock from '@/renderer/components/print-block.vue';
 import connector from '@/renderer/utils/connector';
 import embeddedData from '@/renderer/utils/embedded.json';
 import {
@@ -201,12 +61,13 @@ import {
   safeUndefinedCheck,
 } from '@/renderer/utils/value-utils';
 
+const lineType = embeddedData.lineType;
+
 const buttonValCount = ref(0);
 const copyrightVisible = ref(false);
 const defaultSetting = ref({});
 const inputParam = ref({});
 const lines = ref([]);
-const lineType = embeddedData.lineType;
 const gameBase = ref({});
 
 function clear(count) {
@@ -341,7 +202,6 @@ function returnFromButton(val) {
     buttonValCount.value++;
     inputParam.value.disableBefore = false;
   }
-  lines.value.pop();
 }
 
 function returnFromInput() {
@@ -378,7 +238,7 @@ function setWidth(width) {
 function showInput(data) {
   inputParam.value.val = '';
   inputParam.value.key = data.inputKey;
-  inputParam.value.disableBefore = data.disableBefore;
+  inputParam.value.disableBefore = data.config.disableBefore;
   if (data.config.rule) {
     inputParam.value.rule = new RegExp(`^${data.config.rule}$`);
   }

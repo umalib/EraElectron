@@ -129,7 +129,7 @@ async function createWindow() {
     label: '帮助',
     submenu: [
       {
-        label: '版权',
+        label: '版权信息',
         click() {
           win.webContents.send('engine', engineCommand.copyright);
         },

@@ -37,7 +37,7 @@ module.exports = {
   getAllCharacters() {},
   /**
    * wait for use's input
-   * @param {{rule: string}} [config] the config of input, like rule
+   * @param {{[rule]: string, [disableBefore]: boolean}} [config] the config of input, like rule
    * @returns {Promise<any>} a promise of the user input, please use await
    */
   // eslint-disable-next-line no-unused-vars
@@ -102,7 +102,7 @@ module.exports = {
   // eslint-disable-next-line no-unused-vars
   printProgress(percentage, inContent, outContent, config) {},
   /**
-   * @deprecated print a line break, please use print('\n') to replace
+   * print a line break, if just used to print enter at the end of a line, please use print('***\n') to replace
    * @returns {void}
    */
   println() {},
