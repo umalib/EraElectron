@@ -141,8 +141,10 @@
         />
       </el-col>
     </el-row>
-    <el-dialog v-model="copyrightVisible" title="版权信息" width="80%">
-      <el-descriptions title="游戏基本信息">
+  </el-scrollbar>
+  <el-dialog v-model="copyrightVisible" title="版权信息" width="80%">
+    <p>
+      <el-descriptions size="large" title="游戏基本信息">
         <template v-if="gameBase.author">
           <el-descriptions-item label="游戏名">
             {{ gameBase.title }} @ {{ gameBase.id }}
@@ -169,7 +171,9 @@
           </el-descriptions-item>
         </template>
       </el-descriptions>
-      <el-descriptions title="引擎情报">
+    </p>
+    <p>
+      <el-descriptions size="large" title="引擎信息">
         <el-descriptions-item label="名称">ERA-Electron</el-descriptions-item>
         <el-descriptions-item label="版本">0.9.0</el-descriptions-item>
         <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
@@ -182,8 +186,8 @@
           Takatoshi
         </el-descriptions-item>
       </el-descriptions>
-    </el-dialog>
-  </el-scrollbar>
+    </p>
+  </el-dialog>
 </template>
 
 <script setup>
