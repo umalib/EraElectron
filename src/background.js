@@ -95,22 +95,33 @@ async function createWindow() {
     label: '游戏',
     submenu: [
       {
-        label: '返回标题',
         accelerator: 'CmdOrCtrl+T',
         click() {
           win.webContents.send('engine', 'restart');
         },
+        label: '返回标题',
       },
       {
-        label: '重新载入',
         accelerator: 'CmdOrCtrl+R',
         click() {
           win.webContents.send('engine', 'reload');
         },
+        label: '重新载入',
       },
       {
         label: '退出',
         role: 'quit',
+      },
+    ],
+  });
+  template.push({
+    label: '帮助',
+    submenu: [
+      {
+        label: '版权',
+        click() {
+          win.webContents.send('menu', '123');
+        },
       },
     ],
   });
