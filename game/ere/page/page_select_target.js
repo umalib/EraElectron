@@ -10,7 +10,7 @@ module.exports = async () => {
   let list_team = filtCharacter('cflag', '招募状态', 1);
 
   let list_disp = [];
-  let input_rule = '|998|999|'
+  let input_rule = '|998|999|';
 
   for (let p = 0; p < list_team.length; p++) {
     let ind = list_team[p];
@@ -19,7 +19,7 @@ module.exports = async () => {
       type: 'button',
       accelerator: ind,
       config: { width: 6 },
-    }
+    };
 
     list_disp.push(block_chara);
     input_rule += `${ind}|`;
@@ -36,19 +36,19 @@ module.exports = async () => {
         content: '[998]清空互动对象',
         type: 'button',
         accelerator: 998,
-        config: { width: 6, align: 'right'},
+        config: { width: 6, align: 'right' },
       },
       {
         content: '[999]返回上一级',
         type: 'button',
         accelerator: 999,
-        config: { width: 6, align: 'right'},
+        config: { width: 6, align: 'right' },
       },
     ],
     { horizontalAlign: 'end' },
   );
 
-  let ret = await era.input( {rule: input_rule} );
+  let ret = await era.input({ rule: input_rule });
 
   switch (Number(ret)) {
     case 998:

@@ -439,6 +439,7 @@ module.exports = (
     }
   };
 
+  const charaReg = /chara[^/]+.csv/;
   era.start = async () => {
     if (!existsSync(path)) {
       era.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
@@ -450,10 +451,10 @@ module.exports = (
     function loadPath(_path) {
       const l = readdirSync(_path);
       l.forEach((f) => {
-        const filePath = join(_path, `./${f}`);
+        const filePath = join(_path, `./${f}`).toLowerCase();
         if (statSync(filePath).isDirectory()) {
           loadPath(filePath);
-        } else if (filePath.toLocaleLowerCase().endsWith('.csv')) {
+        } else if (filePath.endsWith('.csv')) {
           fileList[filePath] = f.replace(/\..*$/, '');
         }
       });
@@ -467,94 +468,97 @@ module.exports = (
       era.api.print(`文件夹${csvPath}不存在！游戏数据载入失败！`);
       return;
     }
-    Object.keys(fileList)
-      .filter((x) => x.toLocaleLowerCase().indexOf('chara') === -1)
-      .forEach((p) => {
-        const k = fileList[p].toLowerCase();
+    const normalCSVList = [],
+      charaCSVList = [];
+    Object.keys(fileList).forEach((x) => {
+      if (charaReg.test(x)) {
+        charaCSVList.push(x);
+      } else {
+        normalCSVList.push(x);
+      }
+    });
+    normalCSVList.forEach((p) => {
+      const k = fileList[p].toLowerCase();
+      if (
+        !k.startsWith('variablesize') &&
+        !k.startsWith('str') &&
+        !k.startsWith('strname')
+      ) {
+        era.api.print(`loading ${k}`);
+        era.staticData[k] = {};
+        const csv = parseCSV(readFileSync(p).toString('utf-8'));
         if (
-          !k.startsWith('variablesize') &&
-          !k.startsWith('str') &&
-          !k.startsWith('strname')
+          k.startsWith('_rename') ||
+          k.startsWith('_replace') ||
+          k.startsWith('gamebase')
         ) {
-          era.api.print(`loading ${k}`);
-          era.staticData[k] = {};
-          const csv = parseCSV(readFileSync(p).toString('utf-8'));
-          if (
-            k.startsWith('_rename') ||
-            k.startsWith('_replace') ||
-            k.startsWith('gamebase')
-          ) {
-            csv.forEach(
-              (a) =>
-                (era.staticData[k][
-                  nameMapping[k]
-                    ? nameMapping.gamebase[a[0]]
-                    : a[0].toLowerCase()
-                ] = a[1]),
-            );
-          } else if (k.startsWith('item')) {
-            era.staticData.item = { name: {}, price: {} };
-            era.fieldNames = {};
-            csv.forEach((a) => {
-              era.staticData.item.name[a[1]] = a[0];
-              era.staticData.item.price[a[0]] = a[2];
-              era.fieldNames[a[0]] = a[1];
-            });
-          } else {
-            era.fieldNames[k] = {};
-            csv.forEach((a) => {
-              era.staticData[k][a[1]] = a[0];
-              era.fieldNames[k][a[0]] = a[1];
-            });
-          }
+          csv.forEach(
+            (a) =>
+              (era.staticData[k][
+                nameMapping[k] ? nameMapping.gamebase[a[0]] : a[0].toLowerCase()
+              ] = a[1]),
+          );
+        } else if (k.startsWith('item')) {
+          era.staticData.item = { name: {}, price: {} };
+          era.fieldNames = {};
+          csv.forEach((a) => {
+            era.staticData.item.name[a[1]] = a[0];
+            era.staticData.item.price[a[0]] = a[2];
+            era.fieldNames[a[0]] = a[1];
+          });
+        } else {
+          era.fieldNames[k] = {};
+          csv.forEach((a) => {
+            era.staticData[k][a[1]] = a[0];
+            era.fieldNames[k][a[0]] = a[1];
+          });
         }
-      });
+      }
+    });
     setGameBase(era.staticData['gamebase']);
 
     era.api.print('\nloading chara files ...');
     era.staticData.chara = {};
-    Object.keys(fileList)
-      .filter((x) => x.toLocaleLowerCase().indexOf('chara') !== -1)
-      .forEach((p) => {
-        const k = fileList[p];
-        era.api.print(`loading ${k}`);
-        const tmp = {};
-        let tableName, valueIndex, value;
-        parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
-          switch (a.length) {
-            case 2:
-              tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
-              value = a[1];
-              tmp[tableName] = value;
-              break;
-            case 3:
-              tableName = safeUndefinedCheck(
-                nameMapping.chara[a[0]],
-                a[0].toLowerCase(),
+    charaCSVList.forEach((p) => {
+      const k = fileList[p];
+      era.api.print(`loading ${k}`);
+      const tmp = {};
+      let tableName, valueIndex, value;
+      parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
+        switch (a.length) {
+          case 2:
+            tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
+            value = a[1];
+            tmp[tableName] = value;
+            break;
+          case 3:
+            tableName = safeUndefinedCheck(
+              nameMapping.chara[a[0]],
+              a[0].toLowerCase(),
+            );
+            valueIndex = a[1];
+            value = a[2];
+            if (tableName === 'relation' || tableName === 'callname') {
+              era.staticData.relationship[tableName][
+                `${tmp['id']}|${valueIndex}`
+              ] = value;
+            } else {
+              valueIndex = safeUndefinedCheck(
+                era.staticData[tableName][valueIndex],
+                a[1],
               );
-              valueIndex = a[1];
-              value = a[2];
-              if (tableName === 'relation' || tableName === 'callname') {
-                era.staticData.relationship[tableName][
-                  `${tmp['id']}|${valueIndex}`
-                ] = value;
-              } else {
-                valueIndex = safeUndefinedCheck(
-                  era.staticData[tableName][valueIndex],
-                  a[1],
-                );
-                if (!tmp[tableName]) {
-                  tmp[tableName] = {};
-                }
-                tmp[tableName][valueIndex] = value;
+              if (!tmp[tableName]) {
+                tmp[tableName] = {};
               }
-              break;
-            default:
-              break;
-          }
-        });
-        era.staticData.chara[tmp['id']] = tmp;
+              tmp[tableName][valueIndex] = value;
+            }
+            break;
+          default:
+            break;
+        }
       });
+      era.staticData.chara[tmp['id']] = tmp;
+    });
 
     log({
       static: era.staticData,
