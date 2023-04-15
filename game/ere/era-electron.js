@@ -15,9 +15,11 @@ module.exports = {
   clear(lineCount) {},
   /**
    * draw a divider to separate lines. the divider is also a line
+   * @param {{[content]: string, [position]: 'left'|'center'|'right', [isSolid]: boolean}} [config] config of the line
    * @returns {void}
    */
-  drawLine() {},
+  // eslint-disable-next-line no-unused-vars
+  drawLine(config) {},
   /**
    * get a variable by name
    * @param {string} varName REQUIRED the name of variable, String, like 'callname:1:2'
@@ -37,7 +39,7 @@ module.exports = {
   getAllCharacters() {},
   /**
    * wait for use's input
-   * @param {{[rule]: string, [disableBefore]: boolean}} [config] the config of input, like rule
+   * @param {{[rule]: string, [disableBefore]: boolean}} [config] config of input, like rule
    * @returns {Promise<any>} a promise of the user input, please use await
    */
   // eslint-disable-next-line no-unused-vars
@@ -57,7 +59,7 @@ module.exports = {
   /**
    * print some text
    * @param {string} content REQUIRED the text to be printed
-   * @param {{[align]: 'left'|'center'|'right', [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] the config of the printed line
+   * @param {{[align]: 'left'|'center'|'right', [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] config of the printed line
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
@@ -65,7 +67,7 @@ module.exports = {
   /**
    * print some text and wait any key from user
    * @param {string} content REQUIRED the text to be printed
-   * @param {{[align]: 'left'|'center'|'right', [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] the config of the printed line   * @returns {Promise<void>} the same with waitAnyKey, please use await
+   * @param {{[align]: 'left'|'center'|'right', [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] config of the printed line   * @returns {Promise<void>} the same with waitAnyKey, please use await
    */
   // eslint-disable-next-line no-unused-vars
   async printAndWait(content, config) {},
@@ -73,15 +75,15 @@ module.exports = {
    * print a button
    * @param {string} content REQUIRED the text of the button
    * @param {number} accelerator REQUIRED the accelerator key of the button used in the input
-   * @param {{[align]: 'left'|'center'|'right', [badge]: 'dot'|string, [buttonType]: 'primary'|'success'|'warning'|'danger'|'info'|'', [disabled]: boolean, [inTextAlign]: 'left'|'center'|'right', [isButton]: boolean, [offset]: number, [width]: number}} [config] the config of the printed button
+   * @param {{[align]: 'left'|'center'|'right', [badge]: 'dot'|string, [buttonType]: 'primary'|'success'|'warning'|'danger'|'info'|'', [disabled]: boolean, [inTextAlign]: 'left'|'center'|'right', [isButton]: boolean, [offset]: number, [width]: number}} [config] config of the printed button
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
   printButton(content, accelerator, config) {},
   /**
    * print multiple columns into a row, excluding inputs
-   * @param {Array<{type: 'button'|'image'|'progress'|'text', [config]: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
-   * @param {{[horizontalAlign]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly', [verticalAlign]: 'top'|'middle'|'bottom'}} [config] the config of the row
+   * @param {Array<{type: 'button'|'divider'|'image'|'progress'|'text', [config]: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
+   * @param {{[horizontalAlign]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly', [verticalAlign]: 'top'|'middle'|'bottom'}} [config] config of the row
    * @returns {void}
    * @see print
    * @see printButton
@@ -95,7 +97,7 @@ module.exports = {
    * @param {number} percentage REQUIRED the percentage of the progress bar, float, 0-100
    * @param {string} inContent REQUIRED the text shown in the progress bar
    * @param {string} outContent REQUIRED the text shown next to the progress bar
-   * @param {{[align]: 'left'|'center'|'right', [barRatio]: number, [color]: string, [fontColor]: string, [height]: number, [offset]: number, [width]: number}} [config] the config of the printed progress
+   * @param {{[align]: 'left'|'center'|'right', [barRatio]: number, [color]: string, [fontColor]: string, [height]: number, [offset]: number, [width]: number}} [config] config of the printed progress
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars

@@ -28,7 +28,13 @@
         </span>
       </el-button>
     </el-badge>
-    <el-divider v-if="line.type === lineType['divider']" />
+    <el-divider
+      v-if="line.type === lineType['divider']"
+      :border-style="line.border"
+      :content-position="line.position"
+    >
+      {{ line.content }}
+    </el-divider>
     <el-row v-if="line.type === lineType['progress']">
       <el-col :span="line.barWidth">
         <el-progress

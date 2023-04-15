@@ -122,6 +122,15 @@ function getButtonObject(data) {
   };
 }
 
+function getDividerObject(data) {
+  return {
+    border: data.config.isSolid ? 'solid' : 'dashed',
+    content: data.config.content || '',
+    position: safeUndefinedCheck(data.config.position, 'center'),
+    type: lineType.divider,
+  };
+}
+
 function getMultiColumnObjects(data) {
   return {
     type: lineType.multiCol,
@@ -133,6 +142,8 @@ function getMultiColumnObjects(data) {
         switch (lineType[x.type]) {
           case lineType.button:
             return getButtonObject(x);
+          case lineType.divider:
+            return getDividerObject(x);
           case lineType.progress:
             return getProgressObject(x);
           case lineType.text:
@@ -283,8 +294,8 @@ connector.registerMenu((action) => {
   }
 });
 connector.register('clear', clear);
-connector.register('drawLine', () =>
-  lines.value.push({ type: lineType['divider'] }),
+connector.register('drawLine', (data) =>
+  lines.value.push(getDividerObject(data)),
 );
 connector.register('error', throwError);
 connector.register('input', showInput);

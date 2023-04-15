@@ -13,7 +13,14 @@ module.exports = async function () {
   era.addCharacter(1);
   era.clear();
   era.clear(5);
+  // drawLine默认画一条虚线
   era.drawLine();
+  // 设置isSolid画实线，设置content在线上写字，设置position控制线上文字的位置
+  era.drawLine({
+    content: '我是分界线',
+    isSolid: true,
+    position: 'left',
+  });
   console.log(era.get('maxbase:1:体力'));
   console.log(era.getAddedCharacters());
   console.log(era.getAllCharacters());
@@ -38,7 +45,23 @@ module.exports = async function () {
     width: 10,
     align: 'right',
   });
+  // 现在printButton的时候会自动在]之后补空格，不用专门写了
+  // 在isButton是true的时候可以通过设置badge在按钮上显示角标
+  // badge是'dot'的时候角标只有个圆点，不是的时候会显示字符串
+  era.printButton('[1]招募队员', 1, {
+    align: 'right',
+    badge: '6',
+    isButton: true,
+    offset: 7,
+    width: 10,
+  });
 
+  // multi columns里的type与API是对应的
+  // button对应era.printButton
+  // divider对应era.drawLine
+  // image对应era.printImage（还没实现）
+  // progress对应era.printProgress
+  // text对应era.print
   era.printMultiColumns(
     [
       { content: '我爱平底锅', type: 'text', config: { width: 8 } },

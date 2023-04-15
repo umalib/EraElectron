@@ -24,8 +24,13 @@ module.exports = (
     connect({ action: 'clear' });
   }
 
-  function drawLine() {
-    connect({ action: 'drawLine' });
+  function drawLine(config) {
+    connect({
+      action: 'drawLine',
+      data: {
+        config: config || {},
+      },
+    });
   }
 
   function error(message) {
