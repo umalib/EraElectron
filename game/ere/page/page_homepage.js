@@ -35,6 +35,7 @@ module.exports = async () => {
 
     era.drawLine();
     era.printButton('[101] 招募新成员', 101);
+    era.printButton('[1101] 招募新成员-debug', 1101);
     era.printMultiColumns([
       {
         content: '[900] 保存进度',
@@ -53,6 +54,9 @@ module.exports = async () => {
     let ret = await era.input(); //TODO: add rule
 
     switch (Number(ret)) {
+      case 1101:
+        await require('./debugpage_recruitany')();
+        break;
       case 100:
         await require('./page_select_target')();
         break;
