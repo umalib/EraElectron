@@ -19,9 +19,7 @@ module.exports = async () => {
     } else {
       era.printMultiColumns([
         {
-          content: `${era.get(
-            `name:${era.get('flag:当前互动角色')}:-1`,
-          )} 的状态：`,
+          content: `${era.get(`callname:${chara_cur_inter}:-1`)} :`,
           type: 'text',
           config: { width: 18 },
         },
@@ -55,6 +53,9 @@ module.exports = async () => {
     let ret = await era.input(); //TODO: add rule
 
     switch (Number(ret)) {
+      case 100:
+        await require('./page_select_target')();
+        break;
       case 101:
         await recruitRand();
         break;

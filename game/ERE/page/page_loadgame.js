@@ -21,7 +21,7 @@ module.exports = async () => {
     era.drawLine();
     era.print('要从哪个栏位读取？');
 
-    for (let ind = 0; ind < 11; ind++) {
+    for (let ind = 0; ind < 10; ind++) {
       let comm_disp = era.get(`global:saves:${ind}`);
       let slot_unavail = false;
 

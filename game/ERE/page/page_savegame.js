@@ -15,8 +15,8 @@ module.exports = async () => {
     era.drawLine();
     era.print('要保存至哪个栏位？');
 
-    for (let ind = 1; ind < 11; ind++) {
-      let comm_disp = era.get('global:saves')[ind];
+    for (let ind = 1; ind < 10; ind++) {
+      let comm_disp = era.get(`global:saves:${ind}`);
       if (!comm_disp) {
         comm_disp = '空存档栏位';
       }
@@ -40,7 +40,7 @@ module.exports = async () => {
         )} 保存的进度 `;
         comment += `( ${era.get('flag:当前年')} 年, ${era.get(
           'flag:当前月',
-        )} 月, 第 ${era.get('flag:当前周')} 周)`;
+        )} 月, 第 ${era.get('flag:当前周')} 周 )`;
 
         if (era.saveData(ret, comment)) {
           msgNotification = `已成功保存至 ${ret} 号栏位`;
