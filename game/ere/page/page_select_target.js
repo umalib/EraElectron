@@ -17,6 +17,7 @@ module.exports = async () => {
     let block_chara = {
       content: `[${ind}] ${era.get(`callname:${ind}:-1`)}`,
       type: 'button',
+      accelerator: ind,
       config: { width: 6 },
     }
 
