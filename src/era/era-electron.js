@@ -461,7 +461,7 @@ module.exports = (
     }
 
     era.api.clear();
-    era.api.print('loading csv files ...');
+
     const csvPath = join(path, './csv');
     existsSync(csvPath) && statSync(csvPath).isDirectory() && loadPath(csvPath);
     if (Object.keys(fileList).length === 0) {
@@ -471,12 +471,29 @@ module.exports = (
     const normalCSVList = [],
       charaCSVList = [];
     Object.keys(fileList).forEach((x) => {
-      if (charaReg.test(x)) {
+      if (x.indexOf('_replace.csv') !== -1) {
+        const csv = parseCSV(readFileSync(x).toString('utf-8'));
+        era.staticData['_replace'] = {};
+        csv.forEach(
+          (a) =>
+            (era.staticData['_replace'][
+              nameMapping['_replace'][a[0]]
+                ? nameMapping['_replace'][a[0]]
+                : a[0]
+            ] = a[1]),
+        );
+      } else if (charaReg.test(x)) {
         charaCSVList.push(x);
       } else {
         normalCSVList.push(x);
       }
     });
+    let showInfo = true;
+    if (era.staticData['_replace']['briefInformationOnLoading']) {
+      era.api.print(era.staticData['_replace']['briefInformationOnLoading']);
+      showInfo = false;
+    }
+    showInfo && era.api.print('loading csv files ...');
     normalCSVList.forEach((p) => {
       const k = fileList[p].toLowerCase();
       if (
@@ -484,14 +501,10 @@ module.exports = (
         !k.startsWith('str') &&
         !k.startsWith('strname')
       ) {
-        era.api.print(`loading ${k}`);
+        showInfo && era.api.print(`loading ${k}`);
         era.staticData[k] = {};
         const csv = parseCSV(readFileSync(p).toString('utf-8'));
-        if (
-          k.startsWith('_rename') ||
-          k.startsWith('_replace') ||
-          k.startsWith('gamebase')
-        ) {
+        if (k.startsWith('_rename') || k.startsWith('gamebase')) {
           csv.forEach(
             (a) =>
               (era.staticData[k][
@@ -517,11 +530,11 @@ module.exports = (
     });
     setGameBase(era.staticData['gamebase']);
 
-    era.api.print('\nloading chara files ...');
+    showInfo && era.api.print('\nloading chara files ...');
     era.staticData.chara = {};
     charaCSVList.forEach((p) => {
       const k = fileList[p];
-      era.api.print(`loading ${k}`);
+      showInfo && era.api.print(`loading ${k}`);
       const tmp = {};
       let tableName, valueIndex, value;
       parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
@@ -569,7 +582,7 @@ module.exports = (
     let eraModule;
     try {
       const gameMainPath = join(path, './ere/main.js').replace(/\\/g, '\\\\');
-      print(`\nloading game: ${path} ...`);
+      showInfo && era.api.print(`\nloading game: ${path} ...`);
 
       // clear cache, load game, and find era module
       eval(`Object.keys(require.cache)
@@ -584,10 +597,11 @@ module.exports = (
 
       // inject era.api
       Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
-      await era.api.waitAnyKey();
+      await era.api.printAndWait('\n加载完成');
     } catch (e) {
       error(e.message);
     }
+
     era.restart();
   };
 

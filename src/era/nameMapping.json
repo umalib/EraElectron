@@ -42,5 +42,8 @@
     "バージョン": "version",
     "最低支持版本": "lowestVersion",
     "バージョン違い認める": "lowestVersion"
+  },
+  "_replace": {
+    "起動時簡略表示": "briefInformationOnLoading"
   }
 }
