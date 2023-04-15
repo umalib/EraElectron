@@ -12,7 +12,6 @@ module.exports = async () => {
     era.clear();
     require('./page_header')();
 
-    era.drawLine();
     era.print('你在训练场内遇到了几位马娘，要试着招募谁呢？');
     era.drawLine();
 

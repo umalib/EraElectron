@@ -1,51 +1,55 @@
 <template>
-  <el-scrollbar @click="!inputParam.any || returnFromInput()">
-    <el-row
-      v-for="(line, i) in lines"
-      :key="i"
-      :justify="line.justify"
-      :align="line.align"
-    >
-      <template v-if="line.type === lineType['multiCol']">
-        <print-block
-          v-for="(col, j) in line.columns"
-          @value-return="returnFromButton($event)"
-          :key="`col-${i}-${j}`"
-          :button-val-count="buttonValCount.toString()"
-          :default-setting="defaultSetting"
-          :line="col"
-        />
-      </template>
-      <br v-else-if="line.type === lineType['lineUp']" />
-      <print-block
-        v-else
-        @value-return="returnFromButton($event)"
-        :button-val-count="buttonValCount.toString()"
-        :default-setting="defaultSetting"
-        :line="line"
-      />
-    </el-row>
-    <el-row>
-      <el-col
-        :offset="defaultSetting.colOffset"
-        :span="defaultSetting.colWidth"
-        :style="{ textAlign: defaultSetting.textAlign }"
-      >
-        <el-input
-          v-if="inputParam.key"
-          v-model="inputParam.val"
-          @blur="focusInput()"
-          @change="returnFromInput()"
-          @keyup.enter="!inputParam.any || returnFromInput()"
-          @input="!inputParam.any || returnFromInput()"
-          :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
-          autofocus
-          ref="elInput"
-        />
-      </el-col>
-    </el-row>
-  </el-scrollbar>
-  <copyright-dialog :visible="copyrightVisible" :game-base="gameBase" />
+  <el-container>
+    <el-main>
+      <el-scrollbar @click="!inputParam.any || returnFromInput()">
+        <el-row
+          v-for="(line, i) in lines"
+          :key="i"
+          :justify="line.justify"
+          :align="line.align"
+        >
+          <template v-if="line.type === lineType['multiCol']">
+            <print-block
+              v-for="(col, j) in line.columns"
+              @value-return="returnFromButton($event)"
+              :key="`col-${i}-${j}`"
+              :button-val-count="buttonValCount.toString()"
+              :default-setting="defaultSetting"
+              :line="col"
+            />
+          </template>
+          <br v-else-if="line.type === lineType['lineUp']" />
+          <print-block
+            v-else
+            @value-return="returnFromButton($event)"
+            :button-val-count="buttonValCount.toString()"
+            :default-setting="defaultSetting"
+            :line="line"
+          />
+        </el-row>
+        <el-row>
+          <el-col
+            :offset="defaultSetting.colOffset"
+            :span="defaultSetting.colWidth"
+            :style="{ textAlign: defaultSetting.textAlign }"
+          >
+            <el-input
+              v-if="inputParam.key"
+              v-model="inputParam.val"
+              @blur="focusInput()"
+              @change="returnFromInput()"
+              @keyup.enter="!inputParam.any || returnFromInput()"
+              @input="!inputParam.any || returnFromInput()"
+              :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
+              autofocus
+              ref="elInput"
+            />
+          </el-col>
+        </el-row>
+      </el-scrollbar>
+      <copyright-dialog :visible="copyrightVisible" :game-base="gameBase" />
+    </el-main>
+  </el-container>
 </template>
 
 <script setup>
