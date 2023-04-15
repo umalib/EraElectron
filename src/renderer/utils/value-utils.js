@@ -1,10 +1,17 @@
 module.exports = {
+  getNumber(val) {
+    const num = Number(val);
+    if (isNaN(num)) {
+      return val;
+    }
+    return num;
+  },
   getValidValue(val, lowest, highest, defVal) {
     const num = Number(val);
     if (isNaN(num) || num < lowest || num > highest) {
       return defVal;
     }
-    return val;
+    return num;
   },
   safeUndefinedCheck(_value, _default) {
     if (_value === undefined) {

@@ -8,7 +8,10 @@ const {
 } = require('fs');
 const { join } = require('path');
 const parseCSV = require('@/era/csv-utils');
-const { safeUndefinedCheck } = require('@/renderer/utils/value-utils');
+const {
+  getNumber,
+  safeUndefinedCheck,
+} = require('@/renderer/utils/value-utils');
 
 const nameMapping = require('@/era/nameMapping.json');
 
@@ -47,7 +50,7 @@ module.exports = (
       listen(inputKey, (_, ret) => {
         cleanListener(inputKey);
         inputKey = undefined;
-        resolve(ret);
+        resolve(getNumber(ret));
       });
     });
   }

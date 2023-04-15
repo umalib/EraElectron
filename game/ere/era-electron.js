@@ -38,7 +38,7 @@ module.exports = {
    */
   getAllCharacters() {},
   /**
-   * wait for use's input
+   * wait for use's input, the engine will try to return number
    * @param {{[rule]: string, [disableBefore]: boolean}} [config] config of input, like rule
    * @returns {Promise<any>} a promise of the user input, please use await
    */
