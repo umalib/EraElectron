@@ -99,7 +99,10 @@ function getButtonObject(data) {
   return {
     accelerator: data.accelerator,
     badge: data.config.badge,
-    buttonType: safeUndefinedCheck(data.config.buttonType, ''),
+    buttonType: safeUndefinedCheck(
+      data.config.buttonType,
+      data.config.isButton ? '' : 'primary',
+    ),
     contents: data.content.replace(/]\s*/, '] ').split('\n'),
     disabled: data.config.disabled,
     inTextAlign: data.config.inTextAlign || 'center',

@@ -42,7 +42,10 @@
           </span>
         </el-progress>
       </el-col>
-      <el-col :span="24 - line.barWidth" :style="{ color: line.fontColor }">
+      <el-col
+        :span="24 - line.barWidth"
+        :style="{ color: line.fontColor, textAlign: 'left' }"
+      >
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
