@@ -16,17 +16,35 @@ module.exports = async () => {
     era.drawLine();
 
     let today_list = [];
+    let today_disp = [];
     let today_rule = '|999|';
 
-    for (let ind = 0; ind < 3; ind++) {
+    //进行五次抽选
+    for (let p = 0; p < 5; p++) {
       let index = getAvailableChara(recruitCommands['RandomRecruit']);
 
       if (index !== -1) {
-        era.printButton(`[${index}] ${era.get(`callname:${index}:-1`)}`, index);
         today_list.push(index);
-        today_rule += `${index}|`;
       }
     }
+
+    //去重 再录进输入的合法性检测 以及按钮输出
+    today_list = today_list.filter((item, index) => today_list.indexOf(item) === index);
+
+    era.print(`DEBUG: 连抽去重结果 ${today_list}`);
+
+    for (let item of today_list) {
+      today_rule += `${item}|`;
+      let tmp_btn = {
+        content: `[${item}] ${era.get(`callname:${item}:-1`)}`,
+        type: 'button',
+        accelerator: item,
+        config: { width: 6 },
+      };
+      today_disp.push(tmp_btn);
+    }
+
+    era.printMultiColumns(today_disp);
 
     era.drawLine();
     era.printButton('[999] 直接离开', 999);
@@ -38,17 +56,20 @@ module.exports = async () => {
     switch (Number(ret)) {
       case 4:
         //直接招募姥爷则直接触发招募失败事件
-        callRecruitEvent(4, 'fail');
+        //callRecruitEvent(4, 'fail');
         break;
       case 999:
         //场内刷出姥爷的时候选择直接离开才正常触发招募事件
         if (today_list.includes(4)) {
-          callRecruitEvent(4);
+          //callRecruitEvent(4);
         }
         break;
       default:
         //其余可在场内刷出的角色则按普通流程
-        callRecruitEvent(ret);
+        //callRecruitEvent(ret);
+
+        //debug阶段使用简易操作
+        era.set(`cflag:${ret}:招募状态`, 1);
         break;
     }
 

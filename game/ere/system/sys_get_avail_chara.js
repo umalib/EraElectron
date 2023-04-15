@@ -7,14 +7,13 @@
 module.exports = (command) => {
   const { recruitCommands } = require('../data/const.json');
 
-  let ind = -1;
-  let flagRecruitSingle, aimFunc;
+  let flagRecruitList, aimFunc, list_avail;
   switch (command) {
     case recruitCommands['RandomRecruit']:
-      flagRecruitSingle = 0;
+      flagRecruitList = true;
       aimFunc = require('./sys_filter_chara');
-      while (flagRecruitSingle < 3) {
-        //每轮调用最多抽3次
+      while (flagRecruitList) {
+        
         let list_all = era.getAllCharacters();
         let list_cur = era.getAddedCharacters();
 
@@ -23,30 +22,33 @@ module.exports = (command) => {
 
         let list_unadd = list_all.filter((item) => !list_cur.includes(item)); //未激活的角色表
 
-        let list_avail = list_cur.filter((item) =>
+        //自激活角色列表中筛出
+        list_avail = list_cur.filter((item) =>
           list_filter_recr.includes(item),
         );
         list_avail = list_avail.filter((item) =>
           list_filter_rand.includes(item),
-        ); //激活角色列表中筛出
+        ); 
 
-        if (list_avail.length !== 0) {
-          ind = list_avail[Math.floor(Math.random() * list_avail.length)]; //从可行列表中抽选
-          return ind;
+        //可行列表足够长或无可添加角色则停止加长可行列表
+        if ( (list_avail.length > 9) || (list_unadd.length === 0) ){
+          flagRecruitList = false;
         } else {
-          //无可选角色
-          if (list_unadd.length === 0) {
-            //已添加所有角色
-            return -1;
-          } else {
-            let tmp_ind =
-              list_unadd[Math.floor(Math.random() * list_unadd.length)];
-            era.addCharacter(tmp_ind);
-          }
+          //否则从未激活列表中添加角色以试图加长可行列表
+          let tmp_ind =
+            list_unadd[Math.floor(Math.random() * list_unadd.length)];
+          era.addCharacter(tmp_ind);
         }
-        flagRecruitSingle++;
       }
-      break;
+
+      //若可行列表中无角色则返回-1
+      if (list_avail.length === 0) {
+        return -1;
+      } else {
+        //否则从可行列表中随机返回一个index
+        return list_avail[Math.floor(Math.random() * list_avail.length)];
+      }
+    default:
+      return -1;
   }
-  return -1;
 };
