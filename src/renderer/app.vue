@@ -98,11 +98,12 @@ function getValidWidth(width) {
 function getButtonObject(data) {
   return {
     accelerator: data.accelerator,
-    buttonType: safeUndefinedCheck(data.config.buttonType, 'primary'),
+    badge: data.config.badge,
+    buttonType: safeUndefinedCheck(data.config.buttonType, ''),
     contents: data.content.replace(/]\s*/, '] ').split('\n'),
+    disabled: data.config.disabled,
     inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
-    disabled: data.config.disabled,
     offset: getValidOffset(data.config.offset),
     textAlign: safeUndefinedCheck(
       data.config.align,
@@ -140,9 +141,9 @@ function getMultiColumnObjects(data) {
 }
 
 function getProgressObject(data) {
-  const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
-  const percentage = getValidValue(data.percentage, 0, 100, 100);
   const height = getValidValue(data.config.height, 6, 30, 6);
+  const percentage = getValidValue(data.percentage, 0, 100, 100);
+  const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
   return {
     barColor: data.config.color,
     barWidth: Math.floor(24 * ratio),

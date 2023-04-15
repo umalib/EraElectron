@@ -4,23 +4,30 @@
     :span="line.width || defaultSetting.colWidth"
     :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
   >
-    <el-button
+    <el-badge
       v-if="line.type === lineType.button"
-      @click="emit('value-return', line.accelerator)"
-      :disabled="line.disabled || line.valCount < buttonValCount"
-      :type="line.buttonType"
-      :link="!line.isButton"
+      :hidden="!line.isButton || !line.badge"
+      :is-dot="line.badge === 'dot'"
+      :value="line.badge"
+      type="success"
     >
-      <span :style="{ textAlign: line.inTextAlign }">
-        <template
-          v-for="(content, index) in line.contents"
-          :key="`button-${index}`"
-        >
-          <br v-if="index !== 0" />
-          {{ content }}
-        </template>
-      </span>
-    </el-button>
+      <el-button
+        @click="emit('value-return', line.accelerator)"
+        :disabled="line.disabled || line.valCount < buttonValCount"
+        :type="line.buttonType"
+        :link="!line.isButton"
+      >
+        <span :style="{ textAlign: line.inTextAlign }">
+          <template
+            v-for="(content, index) in line.contents"
+            :key="`button-${index}`"
+          >
+            <br v-if="index !== 0" />
+            {{ content }}
+          </template>
+        </span>
+      </el-button>
+    </el-badge>
     <el-divider v-if="line.type === lineType['divider']" />
     <el-row v-if="line.type === lineType['progress']">
       <el-col :span="line.barWidth">
@@ -35,7 +42,7 @@
           </span>
         </el-progress>
       </el-col>
-      <el-col :span="24 - line.barWidth">
+      <el-col :span="24 - line.barWidth" :style="{ color: line.fontColor }">
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
