@@ -33,16 +33,18 @@
             :span="defaultSetting.colWidth"
             :style="{ textAlign: defaultSetting.textAlign }"
           >
-            <el-input
-              v-model="inputParam.val"
-              v-show="inputParam.key"
-              @blur="$event.target.focus()"
-              @keyup.enter="returnFromInput()"
-              @input="inputParam.any && returnFromInput()"
-              :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
-              autofocus
-              ref="elInput"
-            />
+            <p>
+              <el-input
+                v-model="inputParam.val"
+                v-show="inputParam.key"
+                @blur="$event.target.focus()"
+                @keyup.enter="returnFromInput()"
+                @input="inputParam.any && returnFromInput()"
+                :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
+                autofocus
+                ref="elInput"
+              />
+            </p>
           </el-col>
         </el-row>
       </el-scrollbar>
