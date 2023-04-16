@@ -9,7 +9,7 @@
   },
   "engineCommand": {
     "copyright": 1,
-    "reload": 2,
-    "restart": 3
+    "restart": 2,
+    "start": 3
   }
 }

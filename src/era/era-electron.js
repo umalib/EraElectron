@@ -23,7 +23,7 @@ module.exports = (
   logger,
   isDevelopment,
 ) => {
-  const gamePath = resolve(path);
+  let gamePath = resolve(path);
 
   function clear() {
     connect({ action: 'clear' });
@@ -445,6 +445,10 @@ module.exports = (
     } catch (e) {
       error(e.message);
     }
+  };
+
+  era.setPath = (_path) => {
+    gamePath = resolve(_path);
   };
 
   const charaReg = /chara[^/]+.csv/;

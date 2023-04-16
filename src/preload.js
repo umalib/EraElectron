@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('ipc', {
     ipcRenderer.on('connector', (_, msg) => cb(msg));
   },
   load() {
-    ipcRenderer.send('engine', engineCommand.reload);
+    ipcRenderer.send('engine', engineCommand.start);
   },
   registerMenu(cb) {
     ipcRenderer.on('engine', (_, msg) => cb(msg));

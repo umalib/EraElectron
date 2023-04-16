@@ -1,12 +1,13 @@
 'use strict';
 
 const {
-  app,
   BrowserWindow,
+  Menu,
+  app,
+  dialog,
+  ipcMain,
   protocol,
   session,
-  ipcMain,
-  Menu,
 } = require('electron');
 const { createProtocol } = require('vue-cli-plugin-electron-builder/lib');
 const { join } = require('path');
@@ -87,11 +88,11 @@ async function createWindow() {
 
   ipcMain.on('engine', (_, action) => {
     switch (action) {
-      case engineCommand.reload:
-        era.start();
-        break;
       case engineCommand.restart:
         era.restart();
+        break;
+      case engineCommand.start:
+        era.start();
         break;
     }
   });
@@ -113,11 +114,20 @@ async function createWindow() {
         label: '返回标题',
       },
       {
-        accelerator: 'CmdOrCtrl+R',
-        click() {
-          win.webContents.send('engine', engineCommand.reload);
-        },
         label: '重新载入',
+        role: 'reload',
+      },
+      {
+        click() {
+          const paths = dialog.showOpenDialogSync({
+            properties: ['openDirectory'],
+          });
+          if (paths && paths.length) {
+            era.setPath(paths[0]);
+            era.start();
+          }
+        },
+        label: '选择游戏文件夹',
       },
       {
         label: '退出',

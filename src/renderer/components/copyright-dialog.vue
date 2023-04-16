@@ -1,5 +1,10 @@
 <template>
-  <el-dialog v-model="visible" title="版权信息" width="80%">
+  <el-dialog
+    v-model="visible"
+    @close="emit('copyright-close')"
+    title="版权信息"
+    width="80%"
+  >
     <p>
       <el-descriptions size="large" title="游戏基本信息">
         <template v-if="gameBase.author">
@@ -37,10 +42,10 @@
         <el-descriptions-item label="开发">
           风之低吟
           <el-divider direction="vertical" />
-          Takatoshi
+          无名路人
         </el-descriptions-item>
         <el-descriptions-item label="例程 & 测试">
-          Takatoshi
+          无名路人
         </el-descriptions-item>
       </el-descriptions>
     </p>
@@ -56,4 +61,7 @@ const props = defineProps({
   visible: Boolean,
 });
 const { gameBase, visible } = toRefs(props);
+
+// eslint-disable-next-line no-undef
+const emit = defineEmits(['copyright-close']);
 </script>

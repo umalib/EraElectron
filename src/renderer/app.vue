@@ -48,7 +48,11 @@
           </el-col>
         </el-row>
       </el-scrollbar>
-      <copyright-dialog :visible="copyrightVisible" :game-base="gameBase" />
+      <copyright-dialog
+        @copyright-close="copyrightVisible = false"
+        :visible="copyrightVisible"
+        :game-base="gameBase"
+      />
     </el-main>
   </el-container>
 </template>
@@ -277,10 +281,6 @@ connector.registerMenu((action) => {
   switch (action) {
     case engineCommand.copyright:
       copyrightVisible.value = true;
-      break;
-    case engineCommand.reload:
-      resetData();
-      connector.reload();
       break;
     case engineCommand.restart:
       resetData();
