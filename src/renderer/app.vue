@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-main>
-      <el-scrollbar @click="!inputParam.any || returnFromInput()">
+      <el-scrollbar @click="!inputParam.any || returnFromInput(inputParam.key)">
         <el-row
           v-for="(line, i) in lines"
           :key="i"
@@ -34,12 +34,11 @@
             :style="{ textAlign: defaultSetting.textAlign }"
           >
             <el-input
-              v-if="inputParam.key"
               v-model="inputParam.val"
-              @blur="focusInput()"
-              @change="returnFromInput()"
-              @keyup.enter="!inputParam.any || returnFromInput()"
-              @input="!inputParam.any || returnFromInput()"
+              v-show="inputParam.key"
+              @blur="$event.target.focus()"
+              @keyup.enter="returnFromInput()"
+              @input="inputParam.any && returnFromInput()"
               :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
               autofocus
               ref="elInput"
@@ -81,13 +80,6 @@ function clear(count) {
     buttonValCount.value = 0;
   } else if (lineCount > 0) {
     lines.value.slice(lines.value.length - lineCount, lineCount);
-  }
-}
-
-function focusInput() {
-  const elInput = ref();
-  if (elInput.value) {
-    elInput.value.focus();
   }
 }
 
@@ -214,7 +206,6 @@ function resetData() {
 }
 
 function returnFromButton(val) {
-  connector.returnInput(inputParam.value['key'], val);
   inputParam.value.any = false;
   inputParam.value.rule = undefined;
   inputParam.value.val = '';
@@ -222,9 +213,13 @@ function returnFromButton(val) {
     buttonValCount.value++;
     inputParam.value.disableBefore = false;
   }
+  connector.returnInput(inputParam.value['key'], val);
 }
 
 function returnFromInput() {
+  if (!inputParam.value['any'] && !inputParam.value['val']) {
+    return;
+  }
   if (
     inputParam.value['rule'] &&
     !inputParam.value['rule'].test(inputParam.value['val'].toString())
