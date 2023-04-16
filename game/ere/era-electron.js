@@ -57,6 +57,16 @@ module.exports = {
    */
   loadGlobal() {},
   /**
+   * used for engine debug
+   * @param msg
+   */
+  // eslint-disable-next-line no-unused-vars
+  log(msg) {},
+  /**
+   * used for engine debug
+   */
+  logData() {},
+  /**
    * print some text
    * @param {string} content REQUIRED the text to be printed
    * @param {{[align]: 'left'|'center'|'right', [isParagraph]: boolean, [offset]: number, [p]: boolean, [width]: number}} [config] config of the printed line

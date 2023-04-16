@@ -6,7 +6,7 @@ const {
   statSync,
   writeFileSync,
 } = require('fs');
-const { join } = require('path');
+const { join, resolve } = require('path');
 const parseCSV = require('@/era/csv-utils');
 const {
   getNumber,
@@ -23,6 +23,8 @@ module.exports = (
   logger,
   isDevelopment,
 ) => {
+  const gamePath = resolve(path);
+
   function clear() {
     connect({ action: 'clear' });
   }
@@ -214,14 +216,20 @@ module.exports = (
         tableName = keyArr[0];
         charaIndex = keyArr[1];
         valueIndex = keyArr[2];
-        if (tableName === 'callname' || tableName === 'relation') {
+        if (tableName === 'callname') {
           if (val !== undefined) {
             era.data[tableName][charaIndex][valueIndex] = val;
           }
           return safeUndefinedCheck(
-            era.data[tableName][charaIndex][valueIndex],
-            era.staticData.chara[charaIndex][tableName],
+            era.data.callname[charaIndex][valueIndex],
+            era.staticData.chara[charaIndex].callname,
           );
+        }
+        if (tableName === 'relation') {
+          if (val !== undefined) {
+            era.data.relation[charaIndex][valueIndex] = val;
+          }
+          return era.data.relation[charaIndex][valueIndex];
         }
         if (tableName === 'global') {
           if (!era[tableName][charaIndex]) {
@@ -254,7 +262,7 @@ module.exports = (
   };
 
   era.api.saveData = (savId, comment) => {
-    const savDirPath = join(path, './sav');
+    const savDirPath = join(gamePath, './sav');
     if (!existsSync(savDirPath)) {
       mkdirSync(savDirPath);
     }
@@ -273,7 +281,7 @@ module.exports = (
   };
 
   era.api.loadData = (savId) => {
-    const savPath = join(path, `./sav/save${savId}.sav`);
+    const savPath = join(gamePath, `./sav/save${savId}.sav`);
     try {
       const tmp = JSON.parse(readFileSync(savPath).toString('utf-8'));
       if (
@@ -314,7 +322,7 @@ module.exports = (
   };
 
   era.api.saveGlobal = () => {
-    const savDirPath = join(path, './sav');
+    const savDirPath = join(gamePath, './sav');
     if (!existsSync(savDirPath)) {
       mkdirSync(savDirPath);
     }
@@ -331,7 +339,7 @@ module.exports = (
   };
 
   era.api.loadGlobal = () => {
-    const globalPath = join(path, './sav/global.sav');
+    const globalPath = join(gamePath, './sav/global.sav');
     if (existsSync(globalPath)) {
       try {
         const tmp = JSON.parse(readFileSync(globalPath).toString('utf-8'));
@@ -414,16 +422,16 @@ module.exports = (
   };
 
   era.api.getAllCharacters = () => {
-    return Object.keys(era.staticData.chara);
+    return Object.keys(era.staticData.chara).map(Number);
   };
 
   era.api.getAddedCharacters = () => {
-    return Object.keys(era.data.base);
+    return Object.keys(era.data.base).map(Number);
   };
 
   era.restart = () => {
     if (!gameMain) {
-      era.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+      era.api.print(`路径${gamePath}不正确！请选择待载入游戏文件夹！`);
       return;
     }
     if (!inputKey) {
@@ -441,8 +449,8 @@ module.exports = (
 
   const charaReg = /chara[^/]+.csv/;
   era.start = async () => {
-    if (!existsSync(path)) {
-      era.api.print(`路径${path}不正确！请选择待载入游戏文件夹！`);
+    if (!existsSync(gamePath)) {
+      era.api.print(`路径${gamePath}不正确！请选择待载入游戏文件夹！`);
       return;
     }
     // load CSV
@@ -462,7 +470,7 @@ module.exports = (
 
     era.api.clear();
 
-    const csvPath = join(path, './csv');
+    const csvPath = join(gamePath, './csv');
     existsSync(csvPath) && statSync(csvPath).isDirectory() && loadPath(csvPath);
     if (Object.keys(fileList).length === 0) {
       era.api.print(`文件夹${csvPath}不存在！游戏数据载入失败！`);
@@ -581,16 +589,19 @@ module.exports = (
     // load ere
     let eraModule;
     try {
-      const gameMainPath = join(path, './ere/main.js').replace(/\\/g, '\\\\');
-      showInfo && era.api.print(`\nloading game: ${path} ...`);
+      const gameMainPath = join(gamePath, './ere/main.js').replace(
+        /\\/g,
+        '\\\\',
+      );
+      showInfo && era.api.print(`\nloading game: ${gamePath} ...`);
 
       // clear cache, load game, and find era module
       eval(`Object.keys(require.cache)
-        .filter(x => x.startsWith('${path}'))
+        .filter(x => x.startsWith('${gamePath}'))
         .forEach(x => delete require.cache[x]);
       gameMain = require('${gameMainPath}');
       eraModule = require.cache[Object.keys(require.cache)
-        .filter(x => x.startsWith('${path.replace(
+        .filter(x => x.startsWith('${gamePath.replace(
           /\\/g,
           '\\\\',
         )}') && x.endsWith('era-electron.js'))]`);
@@ -608,6 +619,9 @@ module.exports = (
   if (isDevelopment) {
     era.api.logData = () => {
       log(era.data);
+    };
+    era.api.log = (msg) => {
+      log(msg);
     };
   }
 
