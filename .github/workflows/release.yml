@@ -36,7 +36,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Uma Library Desktop ${{ github.ref_name }}
+          name: Era Electron ${{ github.ref_name }}
           body: built by Github Actions
           draft: false
           prerelease: false
@@ -77,7 +77,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Uma Library Desktop ${{ github.ref_name }}
+          name: Era Electron ${{ github.ref_name }}
           files: ./dist_electron/ere-mac-${{ github.ref_name }}.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
