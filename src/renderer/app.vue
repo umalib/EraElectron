@@ -157,8 +157,8 @@ function getMultiColumnObjects(data) {
 }
 
 function getProgressObject(data) {
-  const height = getValidValue(data.config.height, 6, 30, 6);
   const percentage = getValidValue(data.percentage, 0, 100, 100);
+  const height = getValidValue(data.config.height, 6, 30, 24);
   const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
   return {
     barColor: data.config.color,

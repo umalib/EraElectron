@@ -240,6 +240,16 @@ module.exports = (
           }
           return era[tableName][charaIndex][valueIndex];
         }
+        if (tableName === 'maxbase') {
+          valueIndex = safeUndefinedCheck(
+            era.staticData.base[valueIndex],
+            valueIndex,
+          );
+          if (val !== undefined) {
+            era.data[tableName][charaIndex][valueIndex] = val;
+          }
+          return era.data[tableName][charaIndex][valueIndex];
+        }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
           valueIndex = safeUndefinedCheck(
             era.staticData[tableName][valueIndex],
