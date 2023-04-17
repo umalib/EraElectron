@@ -163,7 +163,7 @@ function getProgressObject(data) {
   return {
     barColor: data.config.color,
     barWidth: Math.floor(24 * ratio),
-    fontColor: data.config.fontColor,
+    fontColor: data.config.fontColor || 'black',
     height,
     inContent: data.inContent,
     offset: getValidOffset(data.config.offset),

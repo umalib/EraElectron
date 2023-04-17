@@ -35,7 +35,7 @@
     >
       {{ line.content }}
     </el-divider>
-    <el-row v-if="line.type === lineType['progress']">
+    <el-row v-if="line.type === lineType['progress']" :gutter="10">
       <el-col :span="line.barWidth">
         <el-progress
           :color="line.barColor"
@@ -50,7 +50,7 @@
       </el-col>
       <el-col
         :span="24 - line.barWidth"
-        :style="{ color: line.fontColor, textAlign: 'left' }"
+        :style="{ color: line.fontColor, textAlign: line.textAlign }"
       >
         <span>{{ line.outContent }}</span>
       </el-col>
