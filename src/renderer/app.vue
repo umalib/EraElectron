@@ -1,7 +1,10 @@
 <template>
   <el-container>
     <el-main>
-      <el-scrollbar @click="!inputParam.any || returnFromInput(inputParam.key)">
+      <el-scrollbar
+        @click="!inputParam.any || returnFromInput(inputParam.key)"
+        ref="mainScrollbar"
+      >
         <el-row
           v-for="(line, i) in lines"
           :align="line.align"
@@ -58,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
 
 import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
@@ -78,6 +81,8 @@ const defaultSetting = ref({});
 const inputParam = ref({});
 const lines = ref([]);
 const gameBase = ref({});
+
+let mainScrollbar = ref();
 
 function clear(count) {
   const lineCount = Number(count);
@@ -193,6 +198,18 @@ function getTextObject(data) {
   };
 }
 
+function handlePush(obj) {
+  lines.value.push(obj);
+  console.log(mainScrollbar.value.wrapRef.scrollHeight);
+  nextTick(() => {
+    if (mainScrollbar.value) {
+      mainScrollbar.value.setScrollTop(
+        mainScrollbar.value.wrapRef.scrollHeight,
+      );
+    }
+  });
+}
+
 function resetData() {
   buttonValCount.value = 0;
   defaultSetting.value = {
@@ -292,24 +309,18 @@ connector.registerMenu((action) => {
   }
 });
 connector.register('clear', clear);
-connector.register('drawLine', (data) =>
-  lines.value.push(getDividerObject(data)),
-);
+connector.register('drawLine', (data) => handlePush(getDividerObject(data)));
 connector.register('error', throwError);
 connector.register('input', showInput);
 connector.register('log', console.log);
-connector.register('print', (data) => lines.value.push(getTextObject(data)));
-connector.register('printButton', (data) =>
-  lines.value.push(getButtonObject(data)),
-);
+connector.register('print', (data) => handlePush(getTextObject(data)));
+connector.register('printButton', (data) => handlePush(getButtonObject(data)));
 connector.register('printMultiCols', (data) =>
-  lines.value.push(getMultiColumnObjects(data)),
+  handlePush(getMultiColumnObjects(data)),
 );
-connector.register('println', () =>
-  lines.value.push({ type: lineType['lineUp'] }),
-);
+connector.register('println', () => handlePush({ type: lineType['lineUp'] }));
 connector.register('printProgress', (data) =>
-  lines.value.push(getProgressObject(data)),
+  handlePush(getProgressObject(data)),
 );
 connector.register(
   'setAlign',
