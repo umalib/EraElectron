@@ -14,8 +14,8 @@
       <el-button
         @click="emit('value-return', line.accelerator)"
         :disabled="line.disabled || line.valCount < buttonValCount"
-        :type="line.buttonType"
         :link="!line.isButton"
+        :type="line.buttonType"
       >
         <span :style="{ textAlign: line.inTextAlign }">
           <template

@@ -4,17 +4,18 @@
       <el-scrollbar @click="!inputParam.any || returnFromInput(inputParam.key)">
         <el-row
           v-for="(line, i) in lines"
-          :key="i"
-          :justify="line.justify"
           :align="line.align"
+          :gutter="line.gutter"
+          :justify="line.justify"
+          :key="`row-${i}`"
         >
           <template v-if="line.type === lineType['multiCol']">
             <print-block
               v-for="(col, j) in line.columns"
               @value-return="returnFromButton($event)"
-              :key="`col-${i}-${j}`"
               :button-val-count="buttonValCount.toString()"
               :default-setting="defaultSetting"
+              :key="`col-${i}-${j}`"
               :line="col"
             />
           </template>
@@ -42,7 +43,6 @@
                 @input="inputParam.any && returnFromInput()"
                 :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
                 autofocus
-                ref="elInput"
               />
             </p>
           </el-col>
@@ -50,8 +50,8 @@
       </el-scrollbar>
       <copyright-dialog
         @copyright-close="copyrightVisible = false"
-        :visible="copyrightVisible"
         :game-base="gameBase"
+        :visible="copyrightVisible"
       />
     </el-main>
   </el-container>
@@ -131,7 +131,7 @@ function getDividerObject(data) {
 
 function getMultiColumnObjects(data) {
   return {
-    type: lineType.multiCol,
+    align: data.config.verticalAlign || 'top',
     columns: data.columns
       .map((x) => {
         if (!x.config) {
@@ -151,8 +151,9 @@ function getMultiColumnObjects(data) {
         }
       })
       .filter((x) => x),
+    gutter: data.config.gutter || 0,
     justify: data.config.horizontalAlign || 'start',
-    align: data.config.verticalAlign || 'top',
+    type: lineType.multiCol,
   };
 }
 
