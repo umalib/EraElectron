@@ -632,7 +632,7 @@ module.exports = (
 
   if (isDevelopment) {
     era.api.logData = () => {
-      log(era.data);
+      log({ data: era.data, global: era.global });
     };
     era.api.log = (msg) => {
       log(msg);

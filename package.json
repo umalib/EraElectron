@@ -2,6 +2,7 @@
   "author": "WindyWisper <umalib629@outlook.com>",
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
+    "@vueuse/core": "^10.0.2",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.2",
     "log4js": "^6.9.1",
@@ -20,7 +21,9 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.0.3",
+    "node-sass": "^8.0.0",
     "prettier": "^2.4.1",
+    "sass-loader": "^13.2.2",
     "vue-cli-plugin-electron-builder": "~2.1.1"
   },
   "main": "background.js",

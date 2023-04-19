@@ -63,6 +63,7 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
+import { useDark } from '@vueuse/core';
 
 import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
 import PrintBlock from '@/renderer/components/print-block.vue';
@@ -72,6 +73,8 @@ import {
   getValidValue,
   safeUndefinedCheck,
 } from '@/renderer/utils/value-utils';
+
+useDark().value = true;
 
 const lineType = embeddedData.lineType;
 
@@ -108,7 +111,7 @@ function getButtonObject(data) {
     badge: data.config.badge,
     buttonType: safeUndefinedCheck(
       data.config.buttonType,
-      data.config.isButton ? '' : 'primary',
+      data.config.isButton ? '' : 'warning',
     ),
     contents: data.content.replace(/]\s*/, '] ').split('\n'),
     disabled: data.config.disabled,
@@ -169,7 +172,7 @@ function getProgressObject(data) {
   return {
     barColor: data.config.color,
     barWidth: Math.floor(24 * ratio),
-    fontColor: data.config.fontColor || 'black',
+    fontColor: data.config.fontColor,
     height,
     inContent: data.inContent,
     offset: getValidOffset(data.config.offset),
@@ -186,6 +189,7 @@ function getProgressObject(data) {
 
 function getTextObject(data) {
   return {
+    color: data.config.color,
     contents: data.content.split('\n'),
     isParagraph: data.config.isParagraph || data.config.p,
     offset: getValidOffset(data.config.offset),
@@ -338,3 +342,5 @@ connector.register('setWidth', setWidth);
 connector.register('setTitle', (title) => (document.title = title));
 connector.ready();
 </script>
+
+<style lang="scss"></style>

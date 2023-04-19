@@ -55,7 +55,7 @@
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
-    <template v-if="line.type === lineType.text">
+    <div v-if="line.type === lineType.text" :style="{ color: line.color }">
       <p v-if="line.isParagraph">
         <span v-for="(content, i) in line.contents" :key="content">
           <br v-if="i !== 0" />
@@ -68,7 +68,7 @@
           {{ content }}
         </template>
       </template>
-    </template>
+    </div>
   </el-col>
 </template>
 
