@@ -136,7 +136,7 @@ module.exports = (
   }
 
   async function waitAnyKey() {
-    await input({ any: true });
+    await input({ any: true, useRule: false });
   }
 
   let gameMain = () => {};

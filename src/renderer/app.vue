@@ -108,6 +108,9 @@ function getValidWidth(width) {
 }
 
 function getButtonObject(data) {
+  if (!data.config.disabled) {
+    inputParam.value['rule'].push(data.accelerator);
+  }
   return {
     accelerator: data.accelerator,
     badge: data.config.badge,
@@ -228,7 +231,8 @@ function resetData() {
     any: false,
     disableBefore: false,
     key: '',
-    rule: undefined,
+    rule: [],
+    useRule: true,
     val: '',
   };
   gameBase.value = {};
@@ -236,8 +240,32 @@ function resetData() {
 }
 
 function returnFromButton(val) {
+  if (inputParam.value['useRule']) {
+    if (inputParam.value['rule'].length === undefined) {
+      if (!inputParam.value['rule'].test(val.toString())) {
+        ElMessage.error(
+          `输入不合法！输入规范：${inputParam.value['rule'].source.substring(
+            1,
+            inputParam.value['rule'].source.length - 1,
+          )}`,
+        );
+        return;
+      }
+    } else if (inputParam.value['rule'].length > 0) {
+      const rule = new RegExp(`^${inputParam.value['rule'].join('|')}$`);
+      if (!rule.test(val.toString())) {
+        ElMessage.error(
+          `输入不合法！请输入以下值之一：${inputParam.value['rule'].join(
+            ', ',
+          )}`,
+        );
+        return;
+      }
+    }
+  }
   inputParam.value.any = false;
-  inputParam.value.rule = undefined;
+  inputParam.value.rule = [];
+  inputParam.value.useRule = true;
   inputParam.value.val = '';
   if (inputParam.value['disableBefore']) {
     buttonValCount.value++;
@@ -248,18 +276,6 @@ function returnFromButton(val) {
 
 function returnFromInput() {
   if (!inputParam.value['any'] && !inputParam.value['val']) {
-    return;
-  }
-  if (
-    inputParam.value['rule'] &&
-    !inputParam.value['rule'].test(inputParam.value['val'].toString())
-  ) {
-    ElMessage.error(
-      `输入不合法！输入规范：${inputParam.value['rule'].source.substring(
-        1,
-        inputParam.value['rule'].source.length - 1,
-      )}`,
-    );
     return;
   }
   returnFromButton(inputParam.value['val']);
@@ -280,6 +296,7 @@ function showInput(data) {
   if (data.config.rule) {
     inputParam.value.rule = new RegExp(`^${data.config.rule}$`);
   }
+  inputParam.value.useRule = safeUndefinedCheck(data.config.useRule, true);
   inputParam.value.any = data.config.any;
 }
 
