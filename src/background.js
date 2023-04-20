@@ -92,6 +92,10 @@ async function createWindow() {
         era.restart();
         break;
       case engineCommand.start:
+        win.webContents.send('engine', {
+          action: engineCommand.resize,
+          arg: win.getContentSize()[1] - 20 * 2 - 8 * 2,
+        });
         era.start();
         break;
     }
@@ -109,7 +113,7 @@ async function createWindow() {
       {
         accelerator: 'CmdOrCtrl+T',
         click() {
-          win.webContents.send('engine', engineCommand.restart);
+          win.webContents.send('engine', { action: engineCommand.restart });
         },
         label: '返回标题',
       },
@@ -141,7 +145,7 @@ async function createWindow() {
       {
         label: '版权信息',
         click() {
-          win.webContents.send('engine', engineCommand.copyright);
+          win.webContents.send('engine', { action: engineCommand.copyright });
         },
       },
     ],

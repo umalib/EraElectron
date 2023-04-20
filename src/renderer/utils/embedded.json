@@ -9,7 +9,8 @@
   },
   "engineCommand": {
     "copyright": 1,
-    "restart": 2,
-    "start": 3
+    "resize": 2,
+    "restart": 3,
+    "start": 4
   }
 }

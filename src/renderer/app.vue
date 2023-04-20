@@ -3,6 +3,7 @@
     <el-main>
       <el-scrollbar
         @click="!inputParam.any || returnFromInput(inputParam.key)"
+        :height="`${defaultSetting.height}px`"
         ref="mainScrollbar"
       >
         <el-row
@@ -50,12 +51,12 @@
             </p>
           </el-col>
         </el-row>
+        <copyright-dialog
+          @copyright-close="copyrightVisible = false"
+          :game-base="gameBase"
+          :visible="copyrightVisible"
+        />
       </el-scrollbar>
-      <copyright-dialog
-        @copyright-close="copyrightVisible = false"
-        :game-base="gameBase"
-        :visible="copyrightVisible"
-      />
     </el-main>
   </el-container>
 </template>
@@ -74,7 +75,7 @@ import {
   safeUndefinedCheck,
 } from '@/renderer/utils/value-utils';
 
-useDark().value = true;
+useDark();
 
 const lineType = embeddedData.lineType;
 
@@ -85,7 +86,7 @@ const inputParam = ref({});
 const lines = ref([]);
 const gameBase = ref({});
 
-let mainScrollbar = ref();
+const mainScrollbar = ref(null);
 
 function clear(count) {
   const lineCount = Number(count);
@@ -204,14 +205,14 @@ function getTextObject(data) {
 
 function handlePush(obj) {
   lines.value.push(obj);
-  console.log(mainScrollbar.value.wrapRef.scrollHeight);
-  nextTick(() => {
-    if (mainScrollbar.value) {
+  nextTick(
+    () =>
+      mainScrollbar.value &&
       mainScrollbar.value.setScrollTop(
-        mainScrollbar.value.wrapRef.scrollHeight,
-      );
-    }
-  });
+        mainScrollbar.value.wrapRef.scrollHeight -
+          defaultSetting.value['height'],
+      ),
+  );
 }
 
 function resetData() {
@@ -219,7 +220,7 @@ function resetData() {
   defaultSetting.value = {
     colOffset: 0,
     colWidth: 24,
-    // maxHeight: 880,
+    height: 800,
     textAlign: 'left',
   };
   inputParam.value = {
@@ -263,13 +264,6 @@ function returnFromInput() {
   returnFromButton(inputParam.value['val']);
 }
 
-// setMaxHeight(height) {
-//   const _height = Number(height);
-//   if (!isNaN(_height) && _height > 0) {
-//     defaultSetting.value['maxHeight'] = height;
-//   }
-// }
-
 function setOffset(offset) {
   defaultSetting.value.colOffset = getValidOffset(offset);
 }
@@ -299,10 +293,14 @@ function throwError(message) {
 
 resetData();
 const engineCommand = embeddedData.engineCommand;
-connector.registerMenu((action) => {
-  switch (action) {
+connector.registerMenu((command) => {
+  switch (command.action) {
     case engineCommand.copyright:
       copyrightVisible.value = true;
+      break;
+    case engineCommand.resize:
+      console.log(command);
+      defaultSetting.value.height = command.arg;
       break;
     case engineCommand.restart:
       resetData();
@@ -336,11 +334,8 @@ connector.register('setGameBase', (_gamebase) => {
     document.title = gameBase.value['title'];
   }
 });
-// connector.register('setMaxHeight', setMaxHeight);
 connector.register('setOffset', setOffset);
 connector.register('setWidth', setWidth);
 connector.register('setTitle', (title) => (document.title = title));
 connector.ready();
 </script>
-
-<style lang="scss"></style>
