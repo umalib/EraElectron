@@ -42,11 +42,11 @@
               <el-input
                 v-model="inputParam.val"
                 v-show="inputParam.key"
-                @blur="$event.target.focus()"
                 @keyup.enter="returnFromInput()"
                 @input="inputParam.any && returnFromInput()"
                 :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
                 autofocus
+                ref="mainInput"
               />
             </p>
           </el-col>
@@ -87,6 +87,7 @@ const lines = ref([]);
 const gameBase = ref({});
 
 const mainScrollbar = ref(null);
+const mainInput = ref(null);
 
 function clear(count) {
   const lineCount = Number(count);
@@ -205,14 +206,14 @@ function getTextObject(data) {
 
 function handlePush(obj) {
   lines.value.push(obj);
-  nextTick(
-    () =>
-      mainScrollbar.value &&
+  nextTick(() => {
+    mainScrollbar.value &&
       mainScrollbar.value.setScrollTop(
         mainScrollbar.value.wrapRef.scrollHeight -
           defaultSetting.value['height'],
-      ),
-  );
+      );
+    mainInput.value && mainInput.value.focus();
+  });
 }
 
 function resetData() {
@@ -299,7 +300,6 @@ connector.registerMenu((command) => {
       copyrightVisible.value = true;
       break;
     case engineCommand.resize:
-      console.log(command);
       defaultSetting.value.height = command.arg;
       break;
     case engineCommand.restart:

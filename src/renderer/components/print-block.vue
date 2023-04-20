@@ -17,7 +17,7 @@
         :link="!line.isButton"
         :type="line.buttonType"
       >
-        <span :style="{ textAlign: line.inTextAlign }">
+        <span :style="{ fontSize: '16px', textAlign: line.inTextAlign }">
           <template
             v-for="(content, index) in line.contents"
             :key="`button-${index}`"
