@@ -95,6 +95,20 @@ module.exports = (
     });
   }
 
+  function printMultiRows(...columnObjects) {
+    connect({
+      action: 'printMultiRows',
+      data: {
+        columns: columnObjects.map((x) => {
+          return {
+            columns: x.columns,
+            config: x.config || {},
+          };
+        }),
+      },
+    });
+  }
+
   function printProgress(percentage, inContent, outContent, config) {
     connect({
       action: 'printProgress',
@@ -150,10 +164,10 @@ module.exports = (
       printAndWait,
       printButton,
       printMultiColumns,
+      printMultiRows,
       printProgress,
       println,
       setAlign,
-      // setMaxHeight,
       setOffset,
       setTitle,
       setWidth,

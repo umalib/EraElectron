@@ -13,10 +13,33 @@
           :justify="line.justify"
           :key="`row-${i}`"
         >
+          <template v-if="line.type === lineType['multiRow']">
+            <el-col
+              v-for="(col, j) in line.columns"
+              :key="`col-${i}-${j}`"
+              :span="col.width"
+              :offset="col.offset"
+            >
+              <el-row
+                :align="col.align"
+                :gutter="col.gutter"
+                :justify="col.justify"
+              >
+                <print-block
+                  v-for="(suc, k) in col.columns"
+                  @value-return="returnFromButton"
+                  :button-val-count="buttonValCount.toString()"
+                  :default-setting="defaultSetting"
+                  :key="`col-${i}-${j}-${k}`"
+                  :line="suc"
+                />
+              </el-row>
+            </el-col>
+          </template>
           <template v-if="line.type === lineType['multiCol']">
             <print-block
               v-for="(col, j) in line.columns"
-              @value-return="returnFromButton($event)"
+              @value-return="returnFromButton"
               :button-val-count="buttonValCount.toString()"
               :default-setting="defaultSetting"
               :key="`col-${i}-${j}`"
@@ -26,7 +49,7 @@
           <br v-else-if="line.type === lineType['lineUp']" />
           <print-block
             v-else
-            @value-return="returnFromButton($event)"
+            @value-return="returnFromButton"
             :button-val-count="buttonValCount.toString()"
             :default-setting="defaultSetting"
             :line="line"
@@ -166,7 +189,18 @@ function getMultiColumnObjects(data) {
       .filter((x) => x),
     gutter: data.config.gutter || 0,
     justify: data.config.horizontalAlign || 'start',
+    width: safeUndefinedCheck(data.config.width, 24),
     type: lineType.multiCol,
+  };
+}
+
+function getMultiRowObjects(data) {
+  return {
+    align: 'top',
+    columns: data.columns.map(getMultiColumnObjects),
+    gutter: 0,
+    justify: 'start',
+    type: lineType.multiRow,
   };
 }
 
@@ -198,6 +232,7 @@ function getTextObject(data) {
     contents: data.content.split('\n'),
     isParagraph: data.config.isParagraph || data.config.p,
     offset: getValidOffset(data.config.offset),
+    fontSize: safeUndefinedCheck(data.config.fontSize, '16px'),
     textAlign: safeUndefinedCheck(
       data.config.align,
       defaultSetting.value['textAlign'],
@@ -336,6 +371,9 @@ connector.register('print', (data) => handlePush(getTextObject(data)));
 connector.register('printButton', (data) => handlePush(getButtonObject(data)));
 connector.register('printMultiCols', (data) =>
   handlePush(getMultiColumnObjects(data)),
+);
+connector.register('printMultiRows', (data) =>
+  handlePush(getMultiRowObjects(data)),
 );
 connector.register('println', () => handlePush({ type: lineType['lineUp'] }));
 connector.register('printProgress', (data) =>

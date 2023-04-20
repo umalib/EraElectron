@@ -4,8 +4,9 @@
     "divider": 2,
     "lineUp": 3,
     "multiCol": 4,
-    "progress": 5,
-    "text": 6
+    "multiRow": 5,
+    "progress": 6,
+    "text": 7
   },
   "engineCommand": {
     "copyright": 1,

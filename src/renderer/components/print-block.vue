@@ -35,7 +35,11 @@
     >
       {{ line.content }}
     </el-divider>
-    <el-row v-if="line.type === lineType['progress']" :gutter="10">
+    <el-row
+      v-if="line.type === lineType['progress']"
+      :gutter="10"
+      align="middle"
+    >
       <el-col :span="line.barWidth">
         <el-progress
           :color="line.barColor"
@@ -55,7 +59,10 @@
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
-    <div v-if="line.type === lineType.text" :style="{ color: line.color }">
+    <div
+      v-if="line.type === lineType.text"
+      :style="{ color: line.color, fontSize: line.fontSize }"
+    >
       <p v-if="line.isParagraph">
         <span v-for="(content, i) in line.contents" :key="content">
           <br v-if="i !== 0" />
