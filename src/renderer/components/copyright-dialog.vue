@@ -37,7 +37,7 @@
     <p>
       <el-descriptions size="large" title="引擎信息">
         <el-descriptions-item label="名称">ERA-Electron</el-descriptions-item>
-        <el-descriptions-item label="版本">0.9.0-debug</el-descriptions-item>
+        <el-descriptions-item label="版本">0.9.0-alpha</el-descriptions-item>
         <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
         <el-descriptions-item label="开发">
           风之低吟
@@ -46,6 +46,8 @@
         </el-descriptions-item>
         <el-descriptions-item label="例程 & 测试">
           无名路人
+          <el-divider direction="vertical" />
+          风之低吟
         </el-descriptions-item>
       </el-descriptions>
     </p>
