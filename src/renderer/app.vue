@@ -162,6 +162,7 @@ function getDividerObject(data) {
     content: data.config.content || '',
     position: safeUndefinedCheck(data.config.position, 'center'),
     type: lineType.divider,
+    width: getValidWidth(data.config.width),
   };
 }
 
@@ -189,7 +190,6 @@ function getMultiColumnObjects(data) {
       .filter((x) => x),
     gutter: data.config.gutter || 0,
     justify: data.config.horizontalAlign || 'start',
-    width: safeUndefinedCheck(data.config.width, 24),
     type: lineType.multiCol,
   };
 }
