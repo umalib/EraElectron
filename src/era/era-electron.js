@@ -184,7 +184,63 @@ module.exports = (
     },
   };
 
-  era.api.set = (key, val) => {
+  era.api.resetData = () => {
+    era.data = {
+      abl: {},
+      amour: {},
+      base: {},
+      callname: {},
+      cflag: {},
+      cstr: {},
+      equip: {},
+      exp: {},
+      flag: {},
+      juel: {},
+      mark: {},
+      maxbase: {},
+      newCharaIndex: 0,
+      no: {},
+      relation: {},
+      talent: {},
+      version: era.staticData['gamebase'].version,
+    };
+  };
+
+  era.api.beginTrain = (...charaId) => {
+    era.data.tequip = {};
+    era.data.tflag = {};
+    era.data.tcvar = {};
+    era.data.palam = {};
+    era.data.gotjuel = {};
+    era.data.stain = {};
+    era.data.ex = {};
+    era.data.nowex = {};
+
+    era.api.addCharactersForTrain(charaId);
+  };
+
+  era.api.addCharactersForTrain = (...charaId) => {
+    if (charaId) {
+      charaId.forEach((id) => {
+        era.data.tcvar[id] = {};
+        era.data.palam[id] = {};
+        era.data.gotjuel[id] = {};
+      });
+    }
+  };
+
+  era.api.endTrain = () => {
+    delete era.data.tequip;
+    delete era.data.tflag;
+    delete era.data.tcvar;
+    delete era.data.palam;
+    delete era.data.gotjuel;
+    delete era.data.stain;
+    delete era.data.ex;
+    delete era.data.nowex;
+  };
+
+  era.api.get = era.api.set = (key, val) => {
     if (!key) {
       return undefined;
     }
@@ -209,6 +265,9 @@ module.exports = (
             era.global[valueIndex] = val;
           }
           return era.global[valueIndex];
+        }
+        if (tableName === 'palamname') {
+          return era.fieldNames.juel[valueIndex];
         }
         if (tableName.endsWith('name')) {
           tableName = tableName.substring(0, tableName.length - 4);
@@ -297,10 +356,6 @@ module.exports = (
     return undefined;
   };
 
-  era.api.get = (key) => {
-    return era.api.set(key);
-  };
-
   era.api.saveData = (savId, comment) => {
     const savDirPath = join(gamePath, './sav');
     if (!existsSync(savDirPath)) {
@@ -312,7 +367,6 @@ module.exports = (
         JSON.stringify(era.data),
       );
       era.global.saves[savId] = comment;
-      era.api.saveGlobal();
       return true;
     } catch (e) {
       error(e.message);
@@ -339,26 +393,9 @@ module.exports = (
     return false;
   };
 
-  era.api.resetData = () => {
-    era.data = {
-      version: era.staticData['gamebase'].version,
-      abl: {},
-      amour: {},
-      base: {},
-      maxbase: {},
-      callname: {},
-      cflag: {},
-      cstr: {},
-      equip: {},
-      exp: {},
-      flag: {},
-      juel: {},
-      mark: {},
-      newCharaIndex: 0,
-      no: {},
-      relation: {},
-      talent: {},
-    };
+  era.api.resetAllExceptGlobal = () => {
+    Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
+    return true;
   };
 
   era.api.saveGlobal = () => {
@@ -405,11 +442,6 @@ module.exports = (
       saves: {},
     };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
-  };
-
-  era.api.resetAllExceptGlobal = () => {
-    Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
-    return true;
   };
 
   era.api.addCharacter = era.api.resetCharacter = (charaId) => {
@@ -459,6 +491,10 @@ module.exports = (
           }
         }),
     );
+  };
+
+  era.api.addCharacters = era.api.resetCharacters = (...charaId) => {
+    charaId.forEach(era.api.addCharacter);
   };
 
   era.api.getAllCharacters = () => {
@@ -563,13 +599,20 @@ module.exports = (
                 nameMapping[k] ? nameMapping.gamebase[a[0]] : a[0].toLowerCase()
               ] = a[1]),
           );
+        } else if (k.startsWith('palam')) {
+          era.staticData.juel = {};
+          era.fieldNames.juel = {};
+          csv.forEach((a) => {
+            era.staticData.juel[a[1]] = a[0];
+            era.fieldNames.juel[a[0]] = a[1];
+          });
         } else if (k.startsWith('item')) {
           era.staticData.item = { name: {}, price: {} };
-          era.fieldNames = {};
+          era.fieldNames[k] = {};
           csv.forEach((a) => {
             era.staticData.item.name[a[1]] = a[0];
             era.staticData.item.price[a[0]] = a[2];
-            era.fieldNames[a[0]] = a[1];
+            era.fieldNames[k][a[0]] = a[1];
           });
         } else {
           era.fieldNames[k] = {};
@@ -625,10 +668,9 @@ module.exports = (
       era.staticData.chara[tmp['id']] = tmp;
     });
 
-    log({
-      static: era.staticData,
-      names: era.fieldNames,
-    });
+    if (isDevelopment) {
+      era.api.logStatic();
+    }
 
     // load ere
     let eraModule;
@@ -660,14 +702,20 @@ module.exports = (
     era.restart();
   };
 
-  if (isDevelopment) {
-    era.api.logData = () => {
-      log({ data: era.data, global: era.global });
-    };
-    era.api.log = (msg) => {
-      log(msg);
-    };
-  }
+  era.api.logStatic = () => {
+    log({
+      static: era.staticData,
+      names: era.fieldNames,
+    });
+  };
+
+  era.api.logData = () => {
+    log({ data: era.data, global: era.global });
+  };
+
+  era.api.log = (msg) => {
+    log(msg);
+  };
 
   logger.debug(Object.keys(era.api));
 
