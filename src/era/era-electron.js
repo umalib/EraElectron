@@ -196,9 +196,9 @@ module.exports = (
         valueIndex = keyArr[1];
         if (tableName === 'amour') {
           if (val !== undefined) {
-            era.data[tableName][valueIndex] = val;
+            era.data.amour[valueIndex] = val;
           }
-          return era.data[tableName][valueIndex];
+          return era.data.amour[valueIndex];
         }
         if (tableName === 'global') {
           valueIndex = safeUndefinedCheck(
@@ -235,7 +235,7 @@ module.exports = (
             return '-';
           }
           if (val !== undefined) {
-            era.data[tableName][charaIndex][valueIndex] = val;
+            era.data.callname[charaIndex][valueIndex] = val;
           }
           return safeUndefinedCheck(
             era.data.callname[charaIndex][valueIndex],
@@ -249,13 +249,13 @@ module.exports = (
           return era.data.relation[charaIndex][valueIndex];
         }
         if (tableName === 'global') {
-          if (!era[tableName][charaIndex]) {
+          if (!era.global[charaIndex]) {
             return undefined;
           }
           if (val !== undefined) {
-            era[tableName][charaIndex][valueIndex] = val;
+            era.global[charaIndex][valueIndex] = val;
           }
-          return era[tableName][charaIndex][valueIndex];
+          return era.global[charaIndex][valueIndex];
         }
         if (tableName === 'maxbase') {
           valueIndex = safeUndefinedCheck(
@@ -263,9 +263,22 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
-            era.data[tableName][charaIndex][valueIndex] = val;
+            era.data.maxbase[charaIndex][valueIndex] = val;
           }
-          return era.data[tableName][charaIndex][valueIndex];
+          return era.data.maxbase[charaIndex][valueIndex];
+        }
+        if (tableName === 'base') {
+          valueIndex = safeUndefinedCheck(
+            era.staticData.base[valueIndex],
+            valueIndex,
+          );
+          if (val !== undefined) {
+            era.data.base[charaIndex][valueIndex] =
+              val > era.data.maxbase[charaIndex][valueIndex]
+                ? era.data.maxbase[charaIndex][valueIndex]
+                : val;
+          }
+          return era.data.base[charaIndex][valueIndex];
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
           valueIndex = safeUndefinedCheck(
