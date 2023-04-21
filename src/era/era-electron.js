@@ -231,6 +231,9 @@ module.exports = (
         charaIndex = keyArr[1];
         valueIndex = keyArr[2];
         if (tableName === 'callname') {
+          if (!era.data.callname[charaIndex]) {
+            return '-';
+          }
           if (val !== undefined) {
             era.data[tableName][charaIndex][valueIndex] = val;
           }
