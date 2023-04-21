@@ -367,6 +367,7 @@ module.exports = (
         JSON.stringify(era.data),
       );
       era.global.saves[savId] = comment;
+      era.api.saveGlobal();
       return true;
     } catch (e) {
       error(e.message);
@@ -717,7 +718,9 @@ module.exports = (
     log(msg);
   };
 
-  logger.debug(Object.keys(era.api));
+  if (isDevelopment) {
+    logger.debug(Object.keys(era.api).sort());
+  }
 
   return era;
 };
