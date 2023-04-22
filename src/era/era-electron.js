@@ -676,22 +676,32 @@ module.exports = (
     // load ere
     let eraModule;
     try {
-      const gameMainPath = join(gamePath, './ere/main.js').replace(
-        /\\/g,
-        '\\\\',
-      );
       showInfo && era.api.print(`\nloading game: ${gamePath} ...`);
+
+      const module = require('module');
+      const include = module.prototype.require;
+      const erePath = join(gamePath, 'ere');
+      module.prototype.require = function (path) {
+        let dir = path;
+        if (path[0] === '.') {
+          return include.call(this, path);
+        }
+        if (path[0] === '#') {
+          dir = `${erePath}${path.substring(1)}`;
+        }
+        return include.call(this, dir);
+      };
 
       // clear cache, load game, and find era module
       eval(`Object.keys(require.cache)
         .filter(x => x.startsWith('${gamePath}'))
         .forEach(x => delete require.cache[x]);
-      gameMain = require('${gameMainPath}');
+      gameMain = require('#/main');
       eraModule = require.cache[Object.keys(require.cache)
         .filter(x => x.startsWith('${gamePath.replace(
           /\\/g,
           '\\\\',
-        )}') && x.endsWith('era-electron.js'))]`);
+        )}') && x.endsWith('era-electron.js'))];`);
 
       // inject era.api
       Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
