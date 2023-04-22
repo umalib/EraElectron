@@ -27,3 +27,4 @@ pnpm-debug.log*
 package-lock.json
 /test
 /game/sav/
+/example

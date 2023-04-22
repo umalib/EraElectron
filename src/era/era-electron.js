@@ -560,7 +560,7 @@ module.exports = (
     const normalCSVList = [],
       charaCSVList = [];
     Object.keys(fileList).forEach((x) => {
-      if (x.indexOf('_replace.csv') !== -1) {
+      if (x.endsWith('_replace.csv')) {
         const csv = parseCSV(readFileSync(x).toString('utf-8'));
         era.staticData['_replace'] = {};
         csv.forEach(
