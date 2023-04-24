@@ -52,7 +52,7 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1000,
+    backgroundColor: 'black',
     height: 880,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -61,10 +61,11 @@ async function createWindow() {
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
       preload: join(__dirname, 'preload.js'),
     },
+    width: 1000,
   });
 
-  function connect(request) {
-    win.webContents.send('connector', request);
+  function connect(action, data) {
+    win.webContents.send('connector', { action, data });
   }
 
   function listen(key, cb) {
@@ -86,20 +87,26 @@ async function createWindow() {
 
   ipcMain.removeAllListeners();
 
+  function setContentHeight() {
+    win.webContents.send('engine', {
+      action: engineCommand.resize,
+      arg: win.getContentSize()[1],
+    });
+  }
+
   ipcMain.on('engine', (_, action) => {
     switch (action) {
       case engineCommand.restart:
         era.restart();
         break;
       case engineCommand.start:
-        win.webContents.send('engine', {
-          action: engineCommand.resize,
-          arg: win.getContentSize()[1] - 20 * 2 - 8 * 2,
-        });
+        setContentHeight();
         era.start();
         break;
     }
   });
+
+  win.on('resize', setContentHeight);
 
   const template = [];
   if (process.platform === 'darwin') {

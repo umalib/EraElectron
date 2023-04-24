@@ -24,30 +24,33 @@ module.exports = (
   isDevelopment,
 ) => {
   let gamePath = resolve(path);
-
-  function clear() {
-    connect({ action: 'clear' });
+  let totalLines = 0;
+  function clear(lineCount) {
+    totalLines -= lineCount;
+    if (totalLines < 0) {
+      totalLines = 0;
+    }
+    connect('clear', lineCount);
+    return totalLines;
   }
 
   function drawLine(config) {
-    connect({
-      action: 'drawLine',
-      data: {
-        config: config || {},
-      },
+    connect('drawLine', {
+      config: config || {},
     });
+    return totalLines++;
   }
 
   function error(message) {
     logger.error(message);
-    connect({ action: 'error', data: message });
+    connect('error', message);
   }
 
   let inputKey = undefined;
 
   async function input(config) {
     inputKey = new Date().getTime().toString();
-    connect({ action: 'input', data: { config: config || {}, inputKey } });
+    connect('input', { config: config || {}, inputKey });
     return new Promise((resolve) => {
       listen(inputKey, (_, ret) => {
         cleanListener(inputKey);
@@ -59,94 +62,98 @@ module.exports = (
 
   function log(info) {
     if (isDevelopment) {
-      connect({ action: 'log', data: info });
+      connect('log', info);
     } else {
       logger.info(info);
     }
   }
 
   function print(content, config) {
-    connect({ action: 'print', data: { content, config: config || {} } });
+    connect('print', { content, config: config || {} });
+    return totalLines++;
   }
 
   async function printAndWait(content, config) {
     print(content, config);
     await waitAnyKey();
+    return totalLines++;
   }
 
   function printButton(content, accelerator, config) {
-    connect({
-      action: 'printButton',
-      data: {
-        content,
-        accelerator,
-        config: config || {},
-      },
+    connect('printButton', {
+      content,
+      accelerator,
+      config: config || {},
     });
+    return totalLines++;
+  }
+
+  function printDynamicText(content, config, style) {
+    connect('printDynamicText', {
+      content,
+      config: config || {},
+      style: style || {},
+    });
+    return totalLines++;
   }
 
   function printMultiColumns(columnObjects, config) {
-    connect({
-      action: 'printMultiCols',
-      data: {
-        columns: columnObjects,
-        config: config || {},
-      },
+    connect('printMultiCols', {
+      columns: columnObjects,
+      config: config || {},
     });
+    return totalLines++;
   }
 
   function printMultiRows(...columnObjects) {
-    connect({
-      action: 'printMultiRows',
-      data: {
-        columns: columnObjects.map((x) => {
-          return {
-            columns: x.columns,
-            config: x.config || {},
-          };
-        }),
-      },
+    connect('printMultiRows', {
+      columns: columnObjects.map((x) => {
+        return {
+          columns: x.columns,
+          config: x.config || {},
+        };
+      }),
     });
+    return totalLines++;
   }
 
   function printProgress(percentage, inContent, outContent, config) {
-    connect({
-      action: 'printProgress',
-      data: {
-        config: config || {},
-        inContent,
-        outContent,
-        percentage,
-      },
+    connect('printProgress', {
+      config: config || {},
+      inContent,
+      outContent,
+      percentage,
     });
+    return totalLines++;
   }
 
   function println() {
-    connect({ action: 'println' });
+    connect('println');
+    return totalLines++;
   }
 
   function setAlign(textAlign) {
-    connect({ action: 'setAlign', data: textAlign });
+    connect('setAlign', textAlign);
+  }
+
+  function setDynamicStyle(lineNumber, style) {
+    connect('setDynamicStyle', { lineNumber, style });
   }
 
   function setGameBase(_gamebase) {
-    connect({ action: 'setGameBase', data: _gamebase });
+    connect('setGameBase', _gamebase);
   }
 
-  // function setMaxHeight(height) {
-  //   connect({ action: 'setMaxHeight', data: height });
-  // }
-
   function setOffset(offset) {
-    connect({ action: 'setOffset', data: offset });
+    connect('setOffset', offset);
   }
 
   function setTitle(title) {
-    connect({ action: 'setTitle', data: title });
+    connect('setTitle', title);
   }
 
   function setWidth(width) {
-    connect({ action: 'setWidth', data: width });
+    connect('setWidth', width);
   }
 
   async function waitAnyKey() {
@@ -163,11 +170,13 @@ module.exports = (
       print,
       printAndWait,
       printButton,
+      printDynamicText,
       printMultiColumns,
       printMultiRows,
       printProgress,
       println,
       setAlign,
+      setDynamicStyle,
       setOffset,
       setTitle,
       setWidth,
@@ -722,10 +731,6 @@ module.exports = (
 
   era.api.logData = () => {
     log({ data: era.data, global: era.global });
-  };
-
-  era.api.log = (msg) => {
-    log(msg);
   };
 
   if (isDevelopment) {

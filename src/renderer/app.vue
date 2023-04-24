@@ -36,7 +36,7 @@
               </el-row>
             </el-col>
           </template>
-          <template v-if="line.type === lineType['multiCol']">
+          <template v-else-if="line.type === lineType['multiCol']">
             <print-block
               v-for="(col, j) in line.columns"
               @value-return="returnFromButton"
@@ -47,6 +47,10 @@
             />
           </template>
           <br v-else-if="line.type === lineType['lineUp']" />
+          <print-block
+            v-if="line.type === lineType['dynamicText']"
+            :style="styles[i]"
+          />
           <print-block
             v-else
             @value-return="returnFromButton"
@@ -108,6 +112,7 @@ const copyrightVisible = ref(false);
 const defaultSetting = ref({});
 const inputParam = ref({});
 const lines = ref([]);
+const styles = ref({});
 const gameBase = ref({});
 
 const mainScrollbar = ref(null);
@@ -117,9 +122,13 @@ function clear(count) {
   const lineCount = Number(count);
   if (isNaN(lineCount) || lineCount > lines.value.length) {
     lines.value = [];
+    styles.value = [];
     buttonValCount.value = 0;
   } else if (lineCount > 0) {
-    lines.value.slice(lines.value.length - lineCount, lineCount);
+    for (let i = lines.value.length - lineCount; i < lines.value.length; ++i) {
+      delete styles.value[i];
+    }
+    lines.value.splice(lines.value.length - lineCount, lines.value.length);
   }
 }
 
@@ -318,12 +327,28 @@ function returnFromInput() {
   returnFromButton(inputParam.value['val']);
 }
 
+function setDynamicStyle(data) {
+  Object.entries(data.style).forEach(
+    (e) => (styles.value[data.lineNumber][e[0]] = e[1]),
+  );
+}
+
 function setOffset(offset) {
   defaultSetting.value.colOffset = getValidOffset(offset);
 }
 
 function setWidth(width) {
   defaultSetting.value.colWidth = getValidWidth(width);
+}
+
+function showDynamicText(data) {
+  styles.value[lines.value.length] = {};
+  Object.entries(data.styles).forEach(
+    (e) => (styles.value[lines.value.length][e[0]] = e[1]),
+  );
+  const object = getTextObject(data);
+  object.type = lineType.dynamicText;
+  handlePush(object);
 }
 
 function showInput(data) {
@@ -354,7 +379,7 @@ connector.registerMenu((command) => {
       copyrightVisible.value = true;
       break;
     case engineCommand.resize:
-      defaultSetting.value.height = command.arg;
+      defaultSetting.value.height = command.arg - 20 * 2 - 8 * 2;
       break;
     case engineCommand.restart:
       resetData();
@@ -371,6 +396,7 @@ connector.register('input', showInput);
 connector.register('log', console.log);
 connector.register('print', (data) => handlePush(getTextObject(data)));
 connector.register('printButton', (data) => handlePush(getButtonObject(data)));
+connector.register('printDynamicText', showDynamicText);
 connector.register('printMultiCols', (data) =>
   handlePush(getMultiColumnObjects(data)),
 );
@@ -385,6 +411,7 @@ connector.register(
   'setAlign',
   (align) => (defaultSetting.value.textAlign = align),
 );
+connector.register('setDynamicStyle', setDynamicStyle);
 connector.register('setGameBase', (_gamebase) => {
   gameBase.value = _gamebase;
   if (gameBase.value['author']) {

@@ -2,11 +2,12 @@
   "lineType": {
     "button": 1,
     "divider": 2,
-    "lineUp": 3,
-    "multiCol": 4,
-    "multiRow": 5,
-    "progress": 6,
-    "text": 7
+    "dynamicText": 3,
+    "lineUp": 4,
+    "multiCol": 5,
+    "multiRow": 6,
+    "progress": 7,
+    "text": 8
   },
   "engineCommand": {
     "copyright": 1,
