@@ -28,7 +28,7 @@
                 <print-block
                   v-for="(suc, k) in col.columns"
                   @value-return="returnFromButton"
-                  :button-val-count="buttonValCount.toString()"
+                  :button-val-count="buttonValCount"
                   :default-setting="defaultSetting"
                   :key="`col-${i}-${j}-${k}`"
                   :line="suc"
@@ -40,7 +40,7 @@
             <print-block
               v-for="(col, j) in line.columns"
               @value-return="returnFromButton"
-              :button-val-count="buttonValCount.toString()"
+              :button-val-count="buttonValCount"
               :default-setting="defaultSetting"
               :key="`col-${i}-${j}`"
               :line="col"
@@ -50,7 +50,7 @@
           <print-block
             v-else
             @value-return="returnFromButton"
-            :button-val-count="buttonValCount.toString()"
+            :button-val-count="buttonValCount"
             :default-setting="defaultSetting"
             :line="line"
           />
@@ -91,6 +91,7 @@ import { useDark } from '@vueuse/core';
 
 import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
 import PrintBlock from '@/renderer/components/print-block.vue';
+
 import connector from '@/renderer/utils/connector';
 import embeddedData from '@/renderer/utils/embedded.json';
 import {
@@ -142,7 +143,7 @@ function getButtonObject(data) {
       data.config.isButton ? '' : 'warning',
     ),
     contents: data.content.replace(/]\s*/, '] ').split('\n'),
-    disabled: data.config.disabled,
+    disabled: safeUndefinedCheck(data.config.disabled, true),
     inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
     offset: getValidOffset(data.config.offset),
@@ -229,8 +230,9 @@ function getProgressObject(data) {
 function getTextObject(data) {
   return {
     color: data.config.color,
-    contents: data.content.split('\n'),
-    isParagraph: data.config.isParagraph || data.config.p,
+    contents: data.config.isList ? data.content : data.content.split('\n'),
+    isList: data.config.isList,
+    isParagraph: data.config.isParagraph,
     offset: getValidOffset(data.config.offset),
     fontSize: safeUndefinedCheck(data.config.fontSize, '16px'),
     textAlign: safeUndefinedCheck(

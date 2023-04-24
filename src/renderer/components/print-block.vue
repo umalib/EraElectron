@@ -64,23 +64,18 @@
       :style="{ color: line.color, fontSize: line.fontSize }"
     >
       <p v-if="line.isParagraph">
-        <span v-for="(content, i) in line.contents" :key="content">
-          <br v-if="i !== 0" />
-          {{ content }}
-        </span>
+        <text-block :contents="line.contents" :is-list="line.isList" />
       </p>
-      <template v-else>
-        <template v-for="(content, i) in line.contents" :key="content">
-          <br v-if="i !== 0" />
-          {{ content }}
-        </template>
-      </template>
+      <text-block v-else :contents="line.contents" :is-list="line.isList" />
     </div>
   </el-col>
 </template>
 
 <script setup>
 import { toRefs } from 'vue';
+
+import TextBlock from '@/renderer/components/text-block.vue';
+
 import embeddedData from '@/renderer/utils/embedded.json';
 
 const lineType = embeddedData.lineType;
@@ -89,7 +84,7 @@ const lineType = embeddedData.lineType;
 const props = defineProps({
   line: Object,
   defaultSetting: Object,
-  buttonValCount: String,
+  buttonValCount: Number,
 });
 const { line, defaultSetting, buttonValCount } = toRefs(props);
 
