@@ -26,8 +26,12 @@ module.exports = (
   let gamePath = resolve(path);
   let totalLines = 0;
   function clear(lineCount) {
-    totalLines -= lineCount;
-    if (totalLines < 0) {
+    if (lineCount && !isNaN(Number(lineCount))) {
+      totalLines -= lineCount;
+      if (totalLines < 0) {
+        totalLines = 0;
+      }
+    } else {
       totalLines = 0;
     }
     connect('clear', lineCount);
@@ -283,7 +287,7 @@ module.exports = (
           if (era.fieldNames[tableName]) {
             return era.fieldNames[tableName][valueIndex];
           }
-        } else {
+        } else if (era.data[tableName]) {
           valueIndex = safeUndefinedCheck(
             era.staticData[tableName][valueIndex],
             valueIndex,
@@ -311,6 +315,9 @@ module.exports = (
           );
         }
         if (tableName === 'relation') {
+          if (!era.data.relation[charaIndex]) {
+            return undefined;
+          }
           if (val !== undefined) {
             era.data.relation[charaIndex][valueIndex] = val;
           }
@@ -326,6 +333,9 @@ module.exports = (
           return era.global[charaIndex][valueIndex];
         }
         if (tableName === 'maxbase') {
+          if (!era.data.maxbase[charaIndex]) {
+            return undefined;
+          }
           valueIndex = safeUndefinedCheck(
             era.staticData.base[valueIndex],
             valueIndex,
@@ -336,6 +346,9 @@ module.exports = (
           return era.data.maxbase[charaIndex][valueIndex];
         }
         if (tableName === 'base') {
+          if (!era.data.base[charaIndex]) {
+            return undefined;
+          }
           valueIndex = safeUndefinedCheck(
             era.staticData.base[valueIndex],
             valueIndex,
@@ -349,6 +362,9 @@ module.exports = (
           return era.data.base[charaIndex][valueIndex];
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
+          if (!era.data[tableName][charaIndex]) {
+            return undefined;
+          }
           valueIndex = safeUndefinedCheck(
             era.staticData[tableName][valueIndex],
             valueIndex,

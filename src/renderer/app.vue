@@ -47,10 +47,12 @@
             />
           </template>
           <br v-else-if="line.type === lineType['lineUp']" />
-          <print-block
-            v-if="line.type === lineType['dynamicText']"
+          <el-col
+            v-else-if="line.type === lineType['dynamicText']"
             :style="styles[i]"
-          />
+          >
+            <text-block :contents="line.contents" :is-list="line.isList" />
+          </el-col>
           <print-block
             v-else
             @value-return="returnFromButton"
@@ -95,6 +97,7 @@ import { useDark } from '@vueuse/core';
 
 import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
 import PrintBlock from '@/renderer/components/print-block.vue';
+import TextBlock from '@/renderer/components/text-block.vue';
 
 import connector from '@/renderer/utils/connector';
 import embeddedData from '@/renderer/utils/embedded.json';
@@ -152,7 +155,7 @@ function getButtonObject(data) {
       data.config.isButton ? '' : 'warning',
     ),
     contents: data.content.replace(/]\s*/, '] ').split('\n'),
-    disabled: safeUndefinedCheck(data.config.disabled, true),
+    disabled: data.config.disabled,
     inTextAlign: data.config.inTextAlign || 'center',
     isButton: data.config.isButton,
     offset: getValidOffset(data.config.offset),
@@ -275,7 +278,7 @@ function resetData() {
   };
   inputParam.value = {
     any: false,
-    disableBefore: false,
+    disableBefore: true,
     key: '',
     rule: [],
     useRule: true,
@@ -315,7 +318,8 @@ function returnFromButton(val) {
   inputParam.value.val = '';
   if (inputParam.value['disableBefore']) {
     buttonValCount.value++;
-    inputParam.value.disableBefore = false;
+  } else {
+    inputParam.value.disableBefore = true;
   }
   connector.returnInput(inputParam.value['key'], val);
 }
@@ -343,7 +347,7 @@ function setWidth(width) {
 
 function showDynamicText(data) {
   styles.value[lines.value.length] = {};
-  Object.entries(data.styles).forEach(
+  Object.entries(data.style).forEach(
     (e) => (styles.value[lines.value.length][e[0]] = e[1]),
   );
   const object = getTextObject(data);
@@ -354,7 +358,10 @@ function showDynamicText(data) {
 function showInput(data) {
   inputParam.value.val = '';
   inputParam.value.key = data.inputKey;
-  inputParam.value.disableBefore = data.config.disableBefore;
+  inputParam.value.disableBefore = safeUndefinedCheck(
+    data.config.disableBefore,
+    true,
+  );
   if (data.config.rule) {
     inputParam.value.rule = new RegExp(`^${data.config.rule}$`);
   }
