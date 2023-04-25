@@ -49,9 +49,12 @@
           <br v-else-if="line.type === lineType['lineUp']" />
           <el-col
             v-else-if="line.type === lineType['dynamicText']"
+            :span="line.width || defaultSetting.colWidth"
             :style="styles[i]"
           >
-            <text-block :contents="line.contents" :is-list="line.isList" />
+            <span>
+              <text-block :contents="line.contents" :is-list="line.isList" />
+            </span>
           </el-col>
           <print-block
             v-else
