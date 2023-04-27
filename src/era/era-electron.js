@@ -691,7 +691,7 @@ module.exports = (
             break;
         }
       });
-      if (tmp['id']) {
+      if (tmp['id'] !== undefined) {
         if (!era.staticData.chara[tmp['id']]) {
           era.staticData.chara[tmp['id']] = tmp;
         } else {
