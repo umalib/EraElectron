@@ -553,7 +553,6 @@ module.exports = (
     gamePath = resolve(_path);
   };
 
-  const charaReg = /chara[^/]+.csv/;
   era.start = async () => {
     if (!existsSync(gamePath)) {
       era.api.print(`路径${gamePath}不正确！请选择待载入游戏文件夹！`);
@@ -584,6 +583,7 @@ module.exports = (
     }
     const normalCSVList = [],
       charaCSVList = [];
+    const charaReg = /chara[^/]+.csv/;
     Object.keys(fileList).forEach((x) => {
       if (x.endsWith('_replace.csv')) {
         const csv = parseCSV(readFileSync(x).toString('utf-8'));
@@ -691,7 +691,26 @@ module.exports = (
             break;
         }
       });
-      era.staticData.chara[tmp['id']] = tmp;
+      if (tmp['id']) {
+        if (!era.staticData.chara[tmp['id']]) {
+          era.staticData.chara[tmp['id']] = tmp;
+        } else {
+          const charaTable = era.staticData.chara[tmp['id']];
+          Object.keys(tmp).forEach((k) => {
+            if (typeof tmp[k] === 'object') {
+              if (!charaTable[k]) {
+                charaTable[k] = tmp[k];
+              } else {
+                Object.keys(tmp[k]).forEach((k2) => {
+                  charaTable[k][k2] = tmp[k][k2];
+                });
+              }
+            } else {
+              charaTable[k] = tmp[k];
+            }
+          });
+        }
+      }
     });
 
     if (isDevelopment) {
