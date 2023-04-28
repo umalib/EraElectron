@@ -332,19 +332,6 @@ module.exports = (
           }
           return era.global[charaIndex][valueIndex];
         }
-        if (tableName === 'maxbase') {
-          if (!era.data.maxbase[charaIndex]) {
-            return undefined;
-          }
-          valueIndex = safeUndefinedCheck(
-            era.staticData.base[valueIndex],
-            valueIndex,
-          );
-          if (val !== undefined) {
-            era.data.maxbase[charaIndex][valueIndex] = val;
-          }
-          return era.data.maxbase[charaIndex][valueIndex];
-        }
         if (tableName === 'base') {
           if (!era.data.base[charaIndex]) {
             return undefined;
@@ -360,6 +347,29 @@ module.exports = (
                 : val;
           }
           return era.data.base[charaIndex][valueIndex];
+        }
+        if (tableName === 'maxbase') {
+          if (!era.data.maxbase[charaIndex]) {
+            return undefined;
+          }
+          valueIndex = safeUndefinedCheck(
+            era.staticData.base[valueIndex],
+            valueIndex,
+          );
+          if (val !== undefined) {
+            era.data.maxbase[charaIndex][valueIndex] = val;
+          }
+          return era.data.maxbase[charaIndex][valueIndex];
+        }
+        if (tableName === 'staticbase') {
+          if (!era.staticData.chara[charaIndex]) {
+            return undefined;
+          }
+          valueIndex = safeUndefinedCheck(
+            era.staticData.base[valueIndex],
+            valueIndex,
+          );
+          return era.staticData.chara[charaIndex].base[valueIndex];
         }
         if (era.data[tableName] && era.data[tableName][charaIndex]) {
           if (!era.data[tableName][charaIndex]) {
