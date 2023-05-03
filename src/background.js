@@ -155,6 +155,10 @@ async function createWindow() {
           win.webContents.send('engine', { action: engineCommand.copyright });
         },
       },
+      {
+        label: '控制台',
+        role: 'toggleDevTools',
+      },
     ],
   });
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

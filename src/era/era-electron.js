@@ -65,11 +65,7 @@ module.exports = (
   }
 
   function log(info) {
-    if (isDevelopment) {
-      connect('log', info);
-    } else {
-      logger.info(info);
-    }
+    connect('log', info);
   }
 
   function print(content, config) {
@@ -170,7 +166,6 @@ module.exports = (
       clear,
       drawLine,
       input,
-      log,
       print,
       printAndWait,
       printButton,
@@ -195,6 +190,18 @@ module.exports = (
         relation: {},
       },
     },
+    debug: false,
+  };
+
+  era.api.toggleDebug = () => {
+    era.debug = !era.debug;
+    return era.debug;
+  };
+
+  era.api.log = (info) => {
+    if (era.debug) {
+      log(info);
+    }
   };
 
   era.api.resetData = () => {
@@ -779,6 +786,7 @@ module.exports = (
   };
 
   if (isDevelopment) {
+    era.debug = true;
     logger.debug(Object.keys(era.api).sort());
   }
 
