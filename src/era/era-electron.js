@@ -64,8 +64,8 @@ module.exports = (
     });
   }
 
-  function log(info) {
-    connect('log', info);
+  function log(info, stack) {
+    connect('log', { info, stack });
   }
 
   function print(content, config) {
@@ -200,7 +200,13 @@ module.exports = (
 
   era.api.log = (info) => {
     if (era.debug) {
-      log(info);
+      log(
+        info,
+        new Error().stack.replace(
+          /^\s*Error\s*at era\.api\.log\s*\([^)]+\)\s*/,
+          '',
+        ),
+      );
     }
   };
 
@@ -236,15 +242,34 @@ module.exports = (
     era.data.ex = {};
     era.data.nowex = {};
 
+    Object.values(era.staticData.tflag).forEach((v) => (era.data.tflag[v] = 0));
+
     era.api.addCharactersForTrain(charaId);
   };
 
   era.api.addCharactersForTrain = (...charaId) => {
     if (charaId) {
       charaId.forEach((id) => {
+        era.data.tequip[id] = {};
         era.data.tcvar[id] = {};
         era.data.palam[id] = {};
         era.data.gotjuel[id] = {};
+        era.data.stain[id] = {};
+        era.data.ex[id] = {};
+        era.data.nowex[id] = {};
+
+        Object.values(era.staticData.tcvar).forEach(
+          (v) => (era.data.tcvar[id][v] = ''),
+        );
+        Object.values(era.staticData.juel).forEach(
+          (v) => (era.data.palam[id][v] = era.data.gotjuel[id][v] = 0),
+        );
+        Object.values(era.staticData.stain).forEach(
+          (v) => (era.data.stain[id][v] = 0),
+        );
+        Object.values(era.staticData.ex).forEach(
+          (v) => (era.data.ex[id][v] = era.data.nowex[id][v] = 0),
+        );
       });
     }
   };
@@ -491,8 +516,7 @@ module.exports = (
     if (!era.staticData.chara[charaId]) {
       return;
     }
-    era.data.no[era.data.newCharaIndex] = charaId;
-    era.data.newCharaIndex++;
+    era.data.no[era.data.newCharaIndex++] = charaId;
     era.data.maxbase[charaId] = {};
     era.data.base[charaId] = {};
     era.data.abl[charaId] = {};
@@ -507,32 +531,51 @@ module.exports = (
     era.data.relation[charaId] = {};
 
     // init
-    Object.keys(era.staticData.chara[charaId])
-      .filter(
-        (table) => typeof era.staticData.chara[charaId][table] === 'object',
-      )
-      .forEach((table) =>
-        Object.keys(era.staticData.chara[charaId][table]).forEach(
-          (k) =>
-            (era.data[table][charaId][k] =
-              era.staticData.chara[charaId][table][k]),
+    Object.entries(era.staticData.chara[charaId])
+      .filter((kv) => typeof kv[1] === 'object')
+      .forEach((kv) =>
+        Object.entries(kv[1]).forEach(
+          (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
         ),
       );
-    Object.keys(era.data.base[charaId]).forEach(
-      (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
+    Object.entries(era.staticData)
+      .filter(
+        (kv) =>
+          kv[0] !== 'chara' &&
+          kv[0] !== 'relationship' &&
+          kv[0] !== 'cstr' &&
+          typeof era.data[kv[0]] === 'object' &&
+          typeof era.data[kv[0]][0] === 'object',
+      )
+      .forEach((kv) =>
+        Object.entries(kv[1])
+          .filter((kv1) => typeof kv1[1] !== 'object')
+          .forEach((kv1) => {
+            if (era.data[kv[0]][charaId][kv1[1]] === undefined) {
+              era.data[kv[0]][charaId][kv1[1]] = 0;
+            }
+          }),
+      );
+    Object.values(era.staticData.cstr).forEach(
+      (v) => (era.data.cstr[charaId][v] = ''),
     );
     era.data.callname[charaId][-2] = era.data.callname[charaId][-1] =
       era.staticData.chara[charaId].name;
-    ['relation', 'callname'].forEach((tableName) =>
-      Object.keys(era.staticData.relationship[tableName])
-        .filter((x) => x.startsWith(`${charaId}|`) || x.endsWith(`|${charaId}`))
-        .forEach((ids) => {
-          const idArr = ids.split('|');
-          if (era.data[tableName][idArr[0]]) {
-            era.data[tableName][idArr[0]][idArr[1]] =
-              era.staticData.relationship[tableName][ids];
+    Object.entries(era.staticData.relationship).forEach((kv) =>
+      Object.entries(kv[1])
+        .filter(
+          (kv1) =>
+            kv1[0].startsWith(`${charaId}|`) || kv1[0].endsWith(`|${charaId}`),
+        )
+        .forEach((kv1) => {
+          const idArr = kv1[0].split('|');
+          if (era.data[kv[0]][idArr[0]]) {
+            era.data[kv[0]][idArr[0]][idArr[1]] = kv1[1];
           }
         }),
+    );
+    Object.keys(era.data.base[charaId]).forEach(
+      (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
     );
   };
 

@@ -403,7 +403,13 @@ connector.register('clear', clear);
 connector.register('drawLine', (data) => handlePush(getDividerObject(data)));
 connector.register('error', throwError);
 connector.register('input', showInput);
-connector.register('log', console.log);
+connector.register('log', (data) => {
+  if (data.stack) {
+    console.log(`${data.info}\n${data.stack}`);
+  } else {
+    console.log(data.info);
+  }
+});
 connector.register('print', (data) => handlePush(getTextObject(data)));
 connector.register('printButton', (data) => handlePush(getButtonObject(data)));
 connector.register('printDynamicText', showDynamicText);
