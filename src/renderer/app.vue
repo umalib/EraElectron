@@ -9,7 +9,7 @@
         <el-row
           v-for="(line, i) in lines"
           :align="line.align"
-          :gutter="line.gutter"
+          :gutter="line.gutter || defaultSetting.gutter"
           :justify="line.justify"
           :key="`row-${i}`"
         >
@@ -22,7 +22,7 @@
             >
               <el-row
                 :align="col.align"
-                :gutter="col.gutter"
+                :gutter="col.gutter || defaultSetting.gutter"
                 :justify="col.justify"
               >
                 <print-block
@@ -204,9 +204,10 @@ function getMultiColumnObjects(data) {
         }
       })
       .filter((x) => x),
-    gutter: data.config.gutter || 0,
+    gutter: data.config.gutter,
     justify: data.config.horizontalAlign || 'start',
     type: lineType.multiCol,
+    width: data.config.width || 24,
   };
 }
 
@@ -214,7 +215,7 @@ function getMultiRowObjects(data) {
   return {
     align: 'top',
     columns: data.columns.map(getMultiColumnObjects),
-    gutter: 0,
+    gutter: defaultSetting.value['gutter'],
     justify: 'start',
     type: lineType.multiRow,
   };
@@ -223,7 +224,7 @@ function getMultiRowObjects(data) {
 function getProgressObject(data) {
   const percentage = getValidValue(data.percentage, 0, 100, 100);
   const height = getValidValue(data.config.height, 6, 30, 24);
-  const ratio = getValidValue(data.config.barRatio || 1, 0, 1, 1);
+  const ratio = getValidValue(data.config.barRatio, 0, 1, 0.96);
   return {
     barColor: data.config.color,
     barWidth: Math.floor(24 * ratio),
@@ -278,6 +279,7 @@ function resetData() {
     colWidth: 24,
     height: 800,
     textAlign: 'left',
+    gutter: 0,
   };
   inputParam.value = {
     any: false,
