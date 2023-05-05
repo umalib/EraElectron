@@ -246,7 +246,9 @@ function getProgressObject(data) {
 function getTextObject(data) {
   return {
     color: data.config.color,
-    contents: data.config.isList ? data.content : data.content.split('\n'),
+    contents: data.config.isList
+      ? data.content
+      : data.content.toString().split('\n'),
     isList: data.config.isList,
     isParagraph: data.config.isParagraph,
     offset: getValidOffset(data.config.offset),
@@ -306,8 +308,7 @@ function returnFromButton(val) {
         return;
       }
     } else if (inputParam.value['rule'].length > 0) {
-      const rule = new RegExp(`^${inputParam.value['rule'].join('|')}$`);
-      if (!rule.test(val.toString())) {
+      if (inputParam.value['rule'].indexOf(Number(val)) === -1) {
         ElMessage.error(
           `输入不合法！请输入以下值之一：${inputParam.value['rule'].join(
             ', ',
