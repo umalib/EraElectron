@@ -1,10 +1,4 @@
-function parseNumber(num) {
-  const ret = Number(num);
-  if (isNaN(ret)) {
-    return num;
-  }
-  return ret;
-}
+const { getNumber } = require('@/renderer/utils/value-utils');
 
 module.exports = (csv) => {
   const toParsed = csv.replace(/\s*;[^\n]*/g, '');
@@ -12,7 +6,7 @@ module.exports = (csv) => {
   for (const line of toParsed.split('\n')) {
     const arr = line
       .split(',')
-      .map((x) => parseNumber(x.replace(/(^\s+|\s+$)/, '')));
+      .map((x) => getNumber(x.toLowerCase().replace(/(^\s+|\s+$)/, '')));
     if (arr.length > 1) {
       ret.push(arr);
     }
