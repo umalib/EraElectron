@@ -533,10 +533,14 @@ module.exports = (
     // init
     Object.entries(era.staticData.chara[charaId])
       .filter((kv) => typeof kv[1] === 'object')
-      .forEach((kv) =>
-        Object.entries(kv[1]).forEach(
-          (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
-        ),
+      .forEach(
+        /**
+         * @param {[string, {}]} kv
+         */
+        (kv) =>
+          Object.entries(kv[1]).forEach(
+            (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
+          ),
       );
     Object.entries(era.staticData)
       .filter(
