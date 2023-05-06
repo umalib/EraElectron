@@ -427,6 +427,7 @@ connector.register('log', (data) => {
 connector.register('print', (data) => handlePush(getTextObject(data)));
 connector.register('printButton', (data) => handlePush(getButtonObject(data)));
 connector.register('printDynamicText', showDynamicText);
+connector.register('printImage', (data) => handlePush(getImageObject(data)));
 connector.register('printMultiCols', (data) =>
   handlePush(getMultiColumnObjects(data)),
 );

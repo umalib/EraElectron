@@ -16,6 +16,10 @@ const {
 
 const nameMapping = require('@/era/nameMapping.json');
 
+function loadImage(src) {
+  return src;
+}
+
 module.exports = (
   path,
   connect,
@@ -98,6 +102,14 @@ module.exports = (
     return totalLines++;
   }
 
+  function printImage(src, config) {
+    connect('printImage', {
+      src: src.startsWith('http') ? src : loadImage(src),
+      config: config || {},
+    });
+    return totalLines++;
+  }
+
   function printMultiColumns(columnObjects, config) {
     connect('printMultiCols', {
       columns: columnObjects,
@@ -171,6 +183,7 @@ module.exports = (
       printAndWait,
       printButton,
       printDynamicText,
+      printImage,
       printMultiColumns,
       printMultiRows,
       printProgress,

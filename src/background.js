@@ -114,53 +114,70 @@ async function createWindow() {
       role: 'appMenu',
     });
   }
-  template.push({
-    label: '游戏',
-    submenu: [
-      {
-        accelerator: 'CmdOrCtrl+T',
-        click() {
-          win.webContents.send('engine', { action: engineCommand.restart });
+  template.push(
+    {
+      label: '游戏',
+      submenu: [
+        {
+          accelerator: 'CmdOrCtrl+T',
+          click() {
+            win.webContents.send('engine', { action: engineCommand.restart });
+          },
+          label: '返回标题',
         },
-        label: '返回标题',
-      },
-      {
-        label: '重新载入',
-        role: 'reload',
-      },
-      {
-        click() {
-          const paths = dialog.showOpenDialogSync({
-            properties: ['openDirectory'],
-          });
-          if (paths && paths.length) {
-            era.setPath(paths[0]);
-            era.start();
-          }
+        {
+          label: '重新载入',
+          role: 'reload',
         },
-        label: '选择游戏文件夹',
-      },
-      {
-        label: '退出',
-        role: 'quit',
-      },
-    ],
-  });
-  template.push({
-    label: '帮助',
-    submenu: [
-      {
-        label: '版权信息',
-        click() {
-          win.webContents.send('engine', { action: engineCommand.copyright });
+        {
+          click() {
+            const paths = dialog.showOpenDialogSync({
+              properties: ['openDirectory'],
+            });
+            if (paths && paths.length) {
+              era.setPath(paths[0]);
+              era.start();
+            }
+          },
+          label: '选择游戏文件夹',
         },
-      },
-      {
-        label: '控制台',
-        role: 'toggleDevTools',
-      },
-    ],
-  });
+        {
+          label: '退出',
+          role: 'quit',
+        },
+      ],
+    },
+    {
+      label: '调试',
+      submenu: [
+        {
+          label: '控制台',
+          role: 'toggleDevTools',
+        },
+        { type: 'separator' },
+        { label: '撤销', role: 'undo' },
+        { label: '重做', role: 'redo' },
+        { type: 'separator' },
+        { label: '剪切', role: 'cut' },
+        { label: '复制', role: 'copy' },
+        { label: '粘贴', role: 'paste' },
+        { label: '删除', role: 'delete' },
+        { type: 'separator' },
+        { label: '全选', role: 'selectAll' },
+      ],
+    },
+    {
+      label: '帮助',
+      submenu: [
+        {
+          label: '版权信息',
+          click() {
+            win.webContents.send('engine', { action: engineCommand.copyright });
+          },
+        },
+      ],
+    },
+  );
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
