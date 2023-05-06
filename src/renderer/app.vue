@@ -138,12 +138,22 @@ function clear(count) {
   }
 }
 
-function getValidOffset(offset) {
-  return getValidValue(offset, 0, 23, defaultSetting.value['colOffset']);
+function getValidOffset(offset, defVal) {
+  return getValidValue(
+    offset,
+    0,
+    23,
+    defVal || defaultSetting.value['colOffset'],
+  );
 }
 
-function getValidWidth(width) {
-  return getValidValue(width, 1, 24, defaultSetting.value['colWidth']);
+function getValidWidth(width, defVal) {
+  return getValidValue(
+    width,
+    1,
+    24,
+    defVal || defaultSetting.value['colWidth'],
+  );
 }
 
 function getButtonObject(data) {
@@ -178,7 +188,8 @@ function getDividerObject(data) {
     content: data.config.content || '',
     position: safeUndefinedCheck(data.config.position, 'center'),
     type: lineType.divider,
-    width: getValidWidth(data.config.width),
+    width: data.config.width,
+    offset: data.config.offset,
   };
 }
 

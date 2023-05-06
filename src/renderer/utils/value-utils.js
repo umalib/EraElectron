@@ -19,4 +19,10 @@ module.exports = {
     }
     return _value;
   },
+  toLowerCase(val) {
+    if (typeof val === 'string') {
+      return val.toLowerCase();
+    }
+    return val;
+  },
 };

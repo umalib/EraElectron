@@ -11,6 +11,7 @@ const parseCSV = require('@/era/csv-utils');
 const {
   getNumber,
   safeUndefinedCheck,
+  toLowerCase,
 } = require('@/renderer/utils/value-utils');
 
 const nameMapping = require('@/era/nameMapping.json');
@@ -707,7 +708,7 @@ module.exports = (
     let showInfo = true;
     if (era.staticData['_replace']['briefInformationOnLoading']) {
       era.api.print(era.staticData['_replace']['briefInformationOnLoading']);
-      showInfo = false;
+      // showInfo = false;
     }
     showInfo && era.api.print('loading csv files ...');
     normalCSVList.forEach((p) => {
@@ -719,7 +720,7 @@ module.exports = (
       ) {
         showInfo && era.api.print(`loading ${k}`);
         era.staticData[k] = {};
-        const csv = parseCSV(readFileSync(p).toString('utf-8'));
+        let csv = parseCSV(readFileSync(p).toString('utf-8'));
         if (k.startsWith('_rename') || k.startsWith('gamebase')) {
           csv.forEach(
             (a) =>
@@ -727,27 +728,32 @@ module.exports = (
                 nameMapping[k] ? nameMapping.gamebase[a[0]] : a[0].toLowerCase()
               ] = a[1]),
           );
-        } else if (k.startsWith('palam')) {
-          era.staticData.juel = {};
-          era.fieldNames.juel = {};
-          csv.forEach((a) => {
-            era.staticData.juel[a[1]] = a[0];
-            era.fieldNames.juel[a[0]] = a[1];
-          });
-        } else if (k.startsWith('item')) {
-          era.staticData.item = { name: {}, price: {} };
-          era.fieldNames[k] = {};
-          csv.forEach((a) => {
-            era.staticData.item.name[a[1]] = a[0];
-            era.staticData.item.price[a[0]] = a[2];
-            era.fieldNames[k][a[0]] = a[1];
-          });
         } else {
-          era.fieldNames[k] = {};
-          csv.forEach((a) => {
-            era.staticData[k][a[1]] = a[0];
-            era.fieldNames[k][a[0]] = a[1];
+          csv = csv.map((a) => {
+            return a.map(toLowerCase);
           });
+          if (k.startsWith('palam')) {
+            era.staticData.juel = {};
+            era.fieldNames.juel = {};
+            csv.forEach((a) => {
+              era.staticData.juel[a[1]] = a[0];
+              era.fieldNames.juel[a[0]] = a[1];
+            });
+          } else if (k.startsWith('item')) {
+            era.staticData.item = { name: {}, price: {} };
+            era.fieldNames[k] = {};
+            csv.forEach((a) => {
+              era.staticData.item.name[a[1]] = a[0];
+              era.staticData.item.price[a[0]] = a[2];
+              era.fieldNames[k][a[0]] = a[1];
+            });
+          } else {
+            era.fieldNames[k] = {};
+            csv.forEach((a) => {
+              era.staticData[k][a[1]] = a[0];
+              era.fieldNames[k][a[0]] = a[1];
+            });
+          }
         }
       }
     });
@@ -761,6 +767,7 @@ module.exports = (
       const tmp = {};
       let tableName, valueIndex, value;
       parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
+        a = a.map(toLowerCase);
         switch (a.length) {
           case 2:
             tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
@@ -768,10 +775,7 @@ module.exports = (
             tmp[tableName] = value;
             break;
           case 3:
-            tableName = safeUndefinedCheck(
-              nameMapping.chara[a[0]],
-              a[0].toLowerCase(),
-            );
+            tableName = safeUndefinedCheck(nameMapping.chara[a[0]], a[0]);
             valueIndex = a[1];
             value = a[2];
             if (tableName === 'relation' || tableName === 'callname') {

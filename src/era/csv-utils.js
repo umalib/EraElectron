@@ -6,7 +6,7 @@ module.exports = (csv) => {
   for (const line of toParsed.split('\n')) {
     const arr = line
       .split(',')
-      .map((x) => getNumber(x.toLowerCase().replace(/(^\s+|\s+$)/, '')));
+      .map((x) => getNumber(x.replace(/(^\s+|\s+$)/, '')));
     if (arr.length > 1) {
       ret.push(arr);
     }
