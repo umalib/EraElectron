@@ -285,7 +285,7 @@ module.exports = (
     delete era.data.nowex;
   };
 
-  era.api.get = era.api.set = (key, val) => {
+  era.api.get = era.api.set = (key, val, isAdd) => {
     if (!key) {
       return undefined;
     }
@@ -297,7 +297,11 @@ module.exports = (
         valueIndex = keyArr[1];
         if (tableName === 'amour') {
           if (val !== undefined) {
-            era.data.amour[valueIndex] = val;
+            if (isAdd) {
+              era.data.amour[valueIndex] += val;
+            } else {
+              era.data.amour[valueIndex] = val;
+            }
           }
           return era.data.amour[valueIndex];
         }
@@ -307,7 +311,11 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
-            era.global[valueIndex] = val;
+            if (isAdd) {
+              era.global[valueIndex] += val;
+            } else {
+              era.global[valueIndex] = val;
+            }
           }
           return era.global[valueIndex];
         }
@@ -325,7 +333,11 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
-            era.data[tableName][valueIndex] = val;
+            if (isAdd) {
+              era.data[tableName][valueIndex] += val;
+            } else {
+              era.data[tableName][valueIndex] = val;
+            }
           }
           return era.data[tableName][valueIndex];
         }
@@ -351,7 +363,11 @@ module.exports = (
             return undefined;
           }
           if (val !== undefined) {
-            era.data.relation[charaIndex][valueIndex] = val;
+            if (isAdd) {
+              era.data.relation[charaIndex][valueIndex] += val;
+            } else {
+              era.data.relation[charaIndex][valueIndex] = val;
+            }
           }
           return era.data.relation[charaIndex][valueIndex];
         }
@@ -360,7 +376,11 @@ module.exports = (
             return undefined;
           }
           if (val !== undefined) {
-            era.global[charaIndex][valueIndex] = val;
+            if (isAdd) {
+              era.global[charaIndex][valueIndex] += val;
+            } else {
+              era.global[charaIndex][valueIndex] = val;
+            }
           }
           return era.global[charaIndex][valueIndex];
         }
@@ -373,10 +393,16 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
+            if (isAdd) {
+              era.data.base[charaIndex][valueIndex] += val;
+            } else {
+              era.data.base[charaIndex][valueIndex] = val;
+            }
             era.data.base[charaIndex][valueIndex] =
-              val > era.data.maxbase[charaIndex][valueIndex]
+              era.data.base[charaIndex][valueIndex] >
+              era.data.maxbase[charaIndex][valueIndex]
                 ? era.data.maxbase[charaIndex][valueIndex]
-                : val;
+                : era.data.base[charaIndex][valueIndex];
           }
           return era.data.base[charaIndex][valueIndex];
         }
@@ -389,7 +415,11 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
-            era.data.maxbase[charaIndex][valueIndex] = val;
+            if (isAdd) {
+              era.data.maxbase[charaIndex][valueIndex] += val;
+            } else {
+              era.data.maxbase[charaIndex][valueIndex] = val;
+            }
           }
           return era.data.maxbase[charaIndex][valueIndex];
         }
@@ -412,7 +442,11 @@ module.exports = (
             valueIndex,
           );
           if (val !== undefined) {
-            era.data[tableName][charaIndex][valueIndex] = val;
+            if (isAdd) {
+              era.data[tableName][charaIndex][valueIndex] += val;
+            } else {
+              era.data[tableName][charaIndex][valueIndex] = val;
+            }
           }
           return era.data[tableName][charaIndex][valueIndex];
         }
@@ -421,6 +455,10 @@ module.exports = (
         break;
     }
     return undefined;
+  };
+
+  era.api.add = (key, val) => {
+    return era.api.set(key, val, true);
   };
 
   era.api.saveData = (savId, comment) => {
