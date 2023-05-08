@@ -3,11 +3,12 @@
     "button": 1,
     "divider": 2,
     "dynamicText": 3,
-    "lineUp": 4,
-    "multiCol": 5,
-    "multiRow": 6,
-    "progress": 7,
-    "text": 8
+    "image": 4,
+    "lineUp": 5,
+    "multiCol": 6,
+    "multiRow": 7,
+    "progress": 8,
+    "text": 9
   },
   "engineCommand": {
     "copyright": 1,

@@ -6,7 +6,7 @@ const {
   statSync,
   writeFileSync,
 } = require('fs');
-const { join, resolve } = require('path');
+const { dirname, extname, join, resolve } = require('path');
 const parseCSV = require('@/era/csv-utils');
 const {
   getNumber,
@@ -16,10 +16,6 @@ const {
 
 const nameMapping = require('@/era/nameMapping.json');
 
-function loadImage(src) {
-  return src;
-}
-
 module.exports = (
   path,
   connect,
@@ -28,26 +24,8 @@ module.exports = (
   logger,
   isDevelopment,
 ) => {
-  let gamePath = resolve(path);
-  let totalLines = 0;
-  function clear(lineCount) {
-    if (lineCount && !isNaN(Number(lineCount))) {
-      totalLines -= lineCount;
-      if (totalLines < 0) {
-        totalLines = 0;
-      }
-    } else {
-      totalLines = 0;
-    }
-    connect('clear', lineCount);
-    return totalLines;
-  }
-
-  function drawLine(config) {
-    connect('drawLine', {
-      config: config || {},
-    });
-    return totalLines++;
+  function log(info, stack) {
+    connect('log', { info, stack });
   }
 
   function error(message) {
@@ -55,213 +33,133 @@ module.exports = (
     connect('error', message);
   }
 
-  let inputKey = undefined;
-
-  async function input(config) {
-    inputKey = new Date().getTime().toString();
-    connect('input', { config: config || {}, inputKey });
-    return new Promise((resolve) => {
-      listen(inputKey, (_, ret) => {
-        cleanListener(inputKey);
-        inputKey = undefined;
-        resolve(getNumber(ret));
-      });
-    });
-  }
-
-  function log(info, stack) {
-    connect('log', { info, stack });
-  }
-
-  function print(content, config) {
-    connect('print', { content, config: config || {} });
-    return totalLines++;
-  }
-
-  async function printAndWait(content, config) {
-    print(content, config);
-    await waitAnyKey();
-    return totalLines++;
-  }
-
-  function printButton(content, accelerator, config) {
-    connect('printButton', {
-      content,
-      accelerator,
-      config: config || {},
-    });
-    return totalLines++;
-  }
-
-  function printDynamicText(content, config, style) {
-    connect('printDynamicText', {
-      content,
-      config: config || {},
-      style: style || {},
-    });
-    return totalLines++;
-  }
-
-  function printImage(src, config) {
-    connect('printImage', {
-      src: src.startsWith('http') ? src : loadImage(src),
-      config: config || {},
-    });
-    return totalLines++;
-  }
-
-  function printMultiColumns(columnObjects, config) {
-    connect('printMultiCols', {
-      columns: columnObjects,
-      config: config || {},
-    });
-    return totalLines++;
-  }
-
-  function printMultiRows(...columnObjects) {
-    connect('printMultiRows', {
-      columns: columnObjects.map((x) => {
-        return {
-          columns: x.columns,
-          config: x.config || {},
-        };
-      }),
-    });
-    return totalLines++;
-  }
-
-  function printProgress(percentage, inContent, outContent, config) {
-    connect('printProgress', {
-      config: config || {},
-      inContent,
-      outContent,
-      percentage,
-    });
-    return totalLines++;
-  }
-
-  function println() {
-    connect('println');
-    return totalLines++;
-  }
-
-  function setAlign(textAlign) {
-    connect('setAlign', textAlign);
-  }
-
-  function setDynamicStyle(lineNumber, style) {
-    connect('setDynamicStyle', { lineNumber, style });
-  }
-
-  function setGameBase(_gamebase) {
-    connect('setGameBase', _gamebase);
-  }
-
-  function setOffset(offset) {
-    connect('setOffset', offset);
-  }
-
-  function setTitle(title) {
-    connect('setTitle', title);
-  }
-
-  function setWidth(width) {
-    connect('setWidth', width);
-  }
-
-  async function waitAnyKey() {
-    await input({ any: true, useRule: false });
-  }
-
+  let gamePath = resolve(path);
   let gameMain = () => {};
+  let inputKey = undefined;
+  let totalLines = 0;
+
   const era = {
-    api: {
-      clear,
-      drawLine,
-      input,
-      print,
-      printAndWait,
-      printButton,
-      printDynamicText,
-      printImage,
-      printMultiColumns,
-      printMultiRows,
-      printProgress,
-      println,
-      setAlign,
-      setDynamicStyle,
-      setOffset,
-      setTitle,
-      setWidth,
-      waitAnyKey,
-    },
+    api: {},
+    cache: {},
     data: {},
+    debug: false,
     fieldNames: {},
     global: {},
-    staticData: {
-      relationship: {
-        callname: {},
-        relation: {},
-      },
-    },
-    debug: false,
+    images: {},
+    staticData: {},
   };
 
-  era.api.toggleDebug = () => {
-    era.debug = !era.debug;
-    return era.debug;
-  };
-
-  era.api.log = (info) => {
-    if (era.debug) {
-      log(
-        info,
-        new Error().stack.replace(
-          /^\s*Error\s*at era\.api\.log\s*\([^)]+\)\s*/,
-          '',
-        ),
-      );
+  function getImageObject(names) {
+    if (!names || !names.length) {
+      return [];
     }
+    return names
+      .map((n) => {
+        if (era.images[n]) {
+          const _path = era.images[n].path;
+          if (!era.cache[n]) {
+            try {
+              const base64str = readFileSync(_path, 'base64');
+              era.cache[_path] = `data:image/${extname(_path).substring(
+                1,
+              )};base64,${base64str}`;
+            } catch (_) {
+              // eslint-disable-next-line no-empty
+            }
+          }
+          return {
+            src: era.cache[_path],
+            x: era.images[n].x,
+            y: era.images[n].y,
+            width: era.images[n].width,
+            height: era.images[n].height,
+            posX: era.images[n].posX,
+            posY: era.images[n].posY,
+          };
+        }
+      })
+      .filter((x) => x);
+  }
+
+  era.api.add = (key, val) => {
+    return era.api.set(key, val, true);
   };
 
-  era.api.resetData = () => {
-    era.data = {
-      abl: {},
-      amour: {},
-      base: {},
-      callname: {},
-      cflag: {},
-      cstr: {},
-      equip: {},
-      exp: {},
-      flag: {},
-      juel: {},
-      mark: {},
-      maxbase: {},
-      newCharaIndex: 0,
-      no: {},
-      relation: {},
-      talent: {},
-      version: era.staticData['gamebase'].version,
-    };
+  era.api.addCharacter = era.api.resetCharacter = (...ids) => {
+    ids.forEach((charaId) => {
+      if (!era.staticData.chara[charaId]) {
+        return;
+      }
+      era.data.no[era.data.newCharaIndex++] = charaId;
+      era.data.maxbase[charaId] = {};
+      era.data.base[charaId] = {};
+      era.data.abl[charaId] = {};
+      era.data.talent[charaId] = {};
+      era.data.cflag[charaId] = {};
+      era.data.cstr[charaId] = {};
+      era.data.equip[charaId] = {};
+      era.data.mark[charaId] = {};
+      era.data.exp[charaId] = {};
+      era.data.juel[charaId] = {};
+      era.data.callname[charaId] = {};
+      era.data.relation[charaId] = {};
+
+      // init
+      Object.entries(era.staticData.chara[charaId])
+        .filter((kv) => typeof kv[1] === 'object')
+        .forEach(
+          /** @param {[string, {}]} kv */
+          (kv) =>
+            Object.entries(kv[1]).forEach(
+              (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
+            ),
+        );
+      Object.entries(era.staticData)
+        .filter(
+          (kv) =>
+            kv[0] !== 'chara' &&
+            kv[0] !== 'relationship' &&
+            kv[0] !== 'cstr' &&
+            typeof era.data[kv[0]] === 'object' &&
+            typeof era.data[kv[0]][0] === 'object',
+        )
+        .forEach(
+          /** @param {[string, object]} kv */
+          (kv) =>
+            Object.entries(kv[1])
+              .filter((kv1) => typeof kv1[1] !== 'object')
+              .forEach((kv1) => {
+                if (era.data[kv[0]][charaId][kv1[1]] === undefined) {
+                  era.data[kv[0]][charaId][kv1[1]] = 0;
+                }
+              }),
+        );
+      Object.values(era.staticData.cstr).forEach(
+        (v) => era.data.cstr[charaId][v] || (era.data.cstr[charaId][v] = ''),
+      );
+      era.data.callname[charaId][-2] = era.data.callname[charaId][-1] =
+        era.staticData.chara[charaId].name;
+      Object.entries(era.staticData.relationship).forEach((kv) =>
+        Object.entries(kv[1])
+          .filter(
+            (kv1) =>
+              kv1[0].startsWith(`${charaId}|`) ||
+              kv1[0].endsWith(`|${charaId}`),
+          )
+          .forEach((kv1) => {
+            const idArr = kv1[0].split('|');
+            if (era.data[kv[0]][idArr[0]]) {
+              era.data[kv[0]][idArr[0]][idArr[1]] = kv1[1];
+            }
+          }),
+      );
+      Object.keys(era.data.base[charaId]).forEach(
+        (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
+      );
+    });
   };
 
-  era.api.beginTrain = (...charaId) => {
-    era.data.tequip = {};
-    era.data.tflag = {};
-    era.data.tcvar = {};
-    era.data.palam = {};
-    era.data.gotjuel = {};
-    era.data.stain = {};
-    era.data.ex = {};
-    era.data.nowex = {};
-
-    Object.values(era.staticData.tflag).forEach((v) => (era.data.tflag[v] = 0));
-
-    era.api.addCharactersForTrain(charaId);
-  };
-
-  era.api.addCharactersForTrain = (...charaId) => {
+  era.api.addCharacterForTrain = (...charaId) => {
     if (charaId) {
       charaId.forEach((id) => {
         era.data.tequip[id] = {};
@@ -271,7 +169,6 @@ module.exports = (
         era.data.stain[id] = {};
         era.data.ex[id] = {};
         era.data.nowex[id] = {};
-
         Object.values(era.staticData.tcvar).forEach(
           (v) => (era.data.tcvar[id][v] = ''),
         );
@@ -286,6 +183,41 @@ module.exports = (
         );
       });
     }
+  };
+
+  era.api.beginTrain = (...charaId) => {
+    era.data.tequip = {};
+    era.data.tflag = {};
+    era.data.tcvar = {};
+    era.data.palam = {};
+    era.data.gotjuel = {};
+    era.data.stain = {};
+    era.data.ex = {};
+    era.data.nowex = {};
+
+    Object.values(era.staticData.tflag).forEach((v) => (era.data.tflag[v] = 0));
+
+    era.api.addCharacterForTrain(charaId);
+  };
+
+  era.api.clear = (lineCount) => {
+    if (lineCount && !isNaN(Number(lineCount))) {
+      totalLines -= lineCount;
+      if (totalLines < 0) {
+        totalLines = 0;
+      }
+    } else {
+      totalLines = 0;
+    }
+    connect('clear', lineCount);
+    return totalLines;
+  };
+
+  era.api.drawLine = (config) => {
+    connect('drawLine', {
+      config: config || {},
+    });
+    return totalLines++;
   };
 
   era.api.endTrain = () => {
@@ -471,27 +403,24 @@ module.exports = (
     return undefined;
   };
 
-  era.api.add = (key, val) => {
-    return era.api.set(key, val, true);
+  era.api.getAllCharacters = () => {
+    return Object.keys(era.staticData.chara).map(Number);
   };
 
-  era.api.saveData = (savId, comment) => {
-    const savDirPath = join(gamePath, './sav');
-    if (!existsSync(savDirPath)) {
-      mkdirSync(savDirPath);
-    }
-    try {
-      writeFileSync(
-        join(savDirPath, `./save${savId}.sav`),
-        JSON.stringify(era.data),
-      );
-      era.global.saves[savId] = comment;
-      era.api.saveGlobal();
-      return true;
-    } catch (e) {
-      error(e.message);
-      return false;
-    }
+  era.api.getAddedCharacters = () => {
+    return Object.keys(era.data.base).map(Number);
+  };
+
+  era.api.input = async (config) => {
+    inputKey = new Date().getTime().toString();
+    connect('input', { config: config || {}, inputKey });
+    return new Promise((resolve) => {
+      listen(inputKey, (_, ret) => {
+        cleanListener(inputKey);
+        inputKey = undefined;
+        resolve(getNumber(ret));
+      });
+    });
   };
 
   era.api.loadData = (savId) => {
@@ -507,28 +436,6 @@ module.exports = (
         era.data = tmp;
         return true;
       }
-    } catch (e) {
-      error(e.message);
-    }
-    return false;
-  };
-
-  era.api.resetAllExceptGlobal = () => {
-    Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
-    return true;
-  };
-
-  era.api.saveGlobal = () => {
-    const savDirPath = join(gamePath, './sav');
-    if (!existsSync(savDirPath)) {
-      mkdirSync(savDirPath);
-    }
-    try {
-      writeFileSync(
-        join(savDirPath, './global.sav'),
-        JSON.stringify(era.global),
-      );
-      return true;
     } catch (e) {
       error(e.message);
     }
@@ -556,6 +463,144 @@ module.exports = (
     return era.api.resetGlobal();
   };
 
+  era.api.log = (info) => {
+    if (era.debug) {
+      log(
+        info,
+        new Error().stack.replace(
+          /^\s*Error\s*at era\.api\.log\s*\([^)]+\)\s*/,
+          '',
+        ),
+      );
+    }
+  };
+
+  era.api.logData = () => {
+    log({ data: era.data, global: era.global });
+  };
+
+  era.api.logStatic = () => {
+    log({
+      static: era.staticData,
+      names: era.fieldNames,
+      images: era.images,
+    });
+  };
+
+  era.api.print = (content, config) => {
+    connect('print', { content, config: config || {} });
+    return totalLines++;
+  };
+
+  era.api.printAndWait = async (content, config) => {
+    era.api.print(content, config);
+    await era.api.waitAnyKey();
+    return totalLines;
+  };
+
+  era.api.printButton = (content, accelerator, config) => {
+    connect('printButton', {
+      content,
+      accelerator,
+      config: config || {},
+    });
+    return totalLines++;
+  };
+
+  era.api.printDynamicText = (content, config, style) => {
+    connect('printDynamicText', {
+      content,
+      config: config || {},
+      style: style || {},
+    });
+    return totalLines++;
+  };
+
+  era.api.printImage = (...names) => {
+    connect('printImage', {
+      images: getImageObject(names),
+    });
+    return totalLines++;
+  };
+
+  era.api.printMultiColumns = (columnObjects, config) => {
+    connect('printMultiCols', {
+      columns: columnObjects.map((x) => {
+        if (x.type === 'image') {
+          return {
+            type: 'image',
+            images: getImageObject(x.names),
+          };
+        }
+        return x;
+      }),
+      config: config || {},
+    });
+    return totalLines++;
+  };
+
+  era.api.printMultiRows = (...columnObjects) => {
+    connect('printMultiRows', {
+      columns: columnObjects.map((x) => {
+        return {
+          columns: x.columns.map((y) => {
+            if (y.type === 'image') {
+              return {
+                type: 'image',
+                images: getImageObject(y.names),
+              };
+            }
+            return y;
+          }),
+          config: x.config || {},
+        };
+      }),
+    });
+    return totalLines++;
+  };
+
+  era.api.printProgress = (percentage, inContent, outContent, config) => {
+    connect('printProgress', {
+      config: config || {},
+      inContent,
+      outContent,
+      percentage,
+    });
+    return totalLines++;
+  };
+
+  era.api.println = () => {
+    connect('println');
+    return totalLines++;
+  };
+
+  era.api.resetAllExceptGlobal = () => {
+    Object.keys(era.data).forEach((tableName) => (era.data[tableName] = {}));
+    return true;
+  };
+
+  era.api.resetData = () => {
+    era.data = {
+      abl: {},
+      amour: {},
+      base: {},
+      callname: {},
+      cflag: {},
+      cstr: {},
+      equip: {},
+      exp: {},
+      flag: {},
+      juel: {},
+      mark: {},
+      maxbase: {},
+      newCharaIndex: 0,
+      no: {},
+      relation: {},
+      talent: {},
+      version: era.staticData['gamebase'].version,
+    };
+  };
+
   era.api.resetGlobal = () => {
     era.global = {
       version: era.staticData['gamebase'].version,
@@ -564,87 +609,73 @@ module.exports = (
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
   };
 
-  era.api.addCharacter = era.api.resetCharacter = (charaId) => {
-    if (!era.staticData.chara[charaId]) {
-      return;
+  era.api.saveData = (savId, comment) => {
+    const savDirPath = join(gamePath, './sav');
+    if (!existsSync(savDirPath)) {
+      mkdirSync(savDirPath);
     }
-    era.data.no[era.data.newCharaIndex++] = charaId;
-    era.data.maxbase[charaId] = {};
-    era.data.base[charaId] = {};
-    era.data.abl[charaId] = {};
-    era.data.talent[charaId] = {};
-    era.data.cflag[charaId] = {};
-    era.data.cstr[charaId] = {};
-    era.data.equip[charaId] = {};
-    era.data.mark[charaId] = {};
-    era.data.exp[charaId] = {};
-    era.data.juel[charaId] = {};
-    era.data.callname[charaId] = {};
-    era.data.relation[charaId] = {};
-
-    // init
-    Object.entries(era.staticData.chara[charaId])
-      .filter((kv) => typeof kv[1] === 'object')
-      .forEach(
-        /**
-         * @param {[string, {}]} kv
-         */
-        (kv) =>
-          Object.entries(kv[1]).forEach(
-            (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
-          ),
+    try {
+      writeFileSync(
+        join(savDirPath, `./save${savId}.sav`),
+        JSON.stringify(era.data),
       );
-    Object.entries(era.staticData)
-      .filter(
-        (kv) =>
-          kv[0] !== 'chara' &&
-          kv[0] !== 'relationship' &&
-          kv[0] !== 'cstr' &&
-          typeof era.data[kv[0]] === 'object' &&
-          typeof era.data[kv[0]][0] === 'object',
-      )
-      .forEach((kv) =>
-        Object.entries(kv[1])
-          .filter((kv1) => typeof kv1[1] !== 'object')
-          .forEach((kv1) => {
-            if (era.data[kv[0]][charaId][kv1[1]] === undefined) {
-              era.data[kv[0]][charaId][kv1[1]] = 0;
-            }
-          }),
+      era.global.saves[savId] = comment;
+      era.api.saveGlobal();
+      return true;
+    } catch (e) {
+      error(e.message);
+      return false;
+    }
+  };
+
+  era.api.saveGlobal = () => {
+    const savDirPath = join(gamePath, './sav');
+    if (!existsSync(savDirPath)) {
+      mkdirSync(savDirPath);
+    }
+    try {
+      writeFileSync(
+        join(savDirPath, './global.sav'),
+        JSON.stringify(era.global),
       );
-    Object.values(era.staticData.cstr).forEach(
-      (v) => (era.data.cstr[charaId][v] = ''),
-    );
-    era.data.callname[charaId][-2] = era.data.callname[charaId][-1] =
-      era.staticData.chara[charaId].name;
-    Object.entries(era.staticData.relationship).forEach((kv) =>
-      Object.entries(kv[1])
-        .filter(
-          (kv1) =>
-            kv1[0].startsWith(`${charaId}|`) || kv1[0].endsWith(`|${charaId}`),
-        )
-        .forEach((kv1) => {
-          const idArr = kv1[0].split('|');
-          if (era.data[kv[0]][idArr[0]]) {
-            era.data[kv[0]][idArr[0]][idArr[1]] = kv1[1];
-          }
-        }),
-    );
-    Object.keys(era.data.base[charaId]).forEach(
-      (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
-    );
+      return true;
+    } catch (e) {
+      error(e.message);
+    }
+    return false;
   };
 
-  era.api.addCharacters = era.api.resetCharacters = (...charaId) => {
-    charaId.forEach(era.api.addCharacter);
+  era.api.setAlign = (textAlign) => {
+    connect('setAlign', textAlign);
   };
 
-  era.api.getAllCharacters = () => {
-    return Object.keys(era.staticData.chara).map(Number);
+  era.api.setDynamicStyle = (lineNumber, style) => {
+    connect('setDynamicStyle', { lineNumber, style });
   };
 
-  era.api.getAddedCharacters = () => {
-    return Object.keys(era.data.base).map(Number);
+  era.api.setGameBase = (_gamebase) => {
+    connect('setGameBase', _gamebase);
+  };
+
+  era.api.setOffset = (offset) => {
+    connect('setOffset', offset);
+  };
+
+  era.api.setTitle = (title) => {
+    connect('setTitle', title);
+  };
+
+  era.api.setWidth = (width) => {
+    connect('setWidth', width);
+  };
+
+  era.api.toggleDebug = () => {
+    era.debug = !era.debug;
+    return era.debug;
+  };
+
+  era.api.waitAnyKey = async () => {
+    await era.api.input({ any: true, useRule: false });
   };
 
   era.restart = () => {
@@ -675,7 +706,16 @@ module.exports = (
       return;
     }
     // load CSV
-    const fileList = {};
+    let fileList = {};
+    era.cache = {};
+    era.fieldNames = {};
+    era.images = {};
+    era.staticData = {
+      relationship: {
+        callname: {},
+        relation: {},
+      },
+    };
 
     function loadPath(_path) {
       const l = readdirSync(_path);
@@ -700,6 +740,7 @@ module.exports = (
     const normalCSVList = [],
       charaCSVList = [];
     const charaReg = /chara[^/]+.csv/;
+    // load _replace.csv
     Object.keys(fileList).forEach((x) => {
       if (x.endsWith('_replace.csv')) {
         const csv = parseCSV(readFileSync(x).toString('utf-8'));
@@ -721,8 +762,9 @@ module.exports = (
     let showInfo = true;
     if (era.staticData['_replace']['briefInformationOnLoading']) {
       era.api.print(era.staticData['_replace']['briefInformationOnLoading']);
-      // showInfo = false;
+      showInfo = false;
     }
+    // load normal csv
     showInfo && era.api.print('loading csv files ...');
     normalCSVList.forEach((p) => {
       const k = fileList[p].toLowerCase();
@@ -770,10 +812,11 @@ module.exports = (
         }
       }
     });
-    setGameBase(era.staticData['gamebase']);
+    era.api.setGameBase(era.staticData['gamebase']);
 
     showInfo && era.api.print('\nloading chara files ...');
     era.staticData.chara = {};
+    // load chara csv
     charaCSVList.forEach((p) => {
       const k = fileList[p];
       showInfo && era.api.print(`loading ${k}`);
@@ -814,6 +857,7 @@ module.exports = (
         if (!era.staticData.chara[tmp['id']]) {
           era.staticData.chara[tmp['id']] = tmp;
         } else {
+          logger.info(tmp);
           const charaTable = era.staticData.chara[tmp['id']];
           Object.keys(tmp).forEach((k) => {
             if (typeof tmp[k] === 'object') {
@@ -830,6 +874,43 @@ module.exports = (
           });
         }
       }
+    });
+
+    // load resource csv
+    fileList = {};
+    loadPath(join(gamePath, './resources'));
+    Object.keys(fileList).forEach((_path) => {
+      const parent = dirname(_path);
+      parseCSV(readFileSync(_path).toString('utf-8')).forEach((a) => {
+        switch (a.length) {
+          case 4:
+            break;
+          case 6:
+            era.images[toLowerCase(a[0])] = {
+              path: join(parent, a[1]),
+              x: a[2] || 0,
+              y: a[3] || 0,
+              width: a[4],
+              height: a[5],
+              posX: 0,
+              posY: 0,
+            };
+            break;
+          case 8:
+            era.images[toLowerCase(a[0])] = {
+              path: join(parent, a[1]),
+              x: a[2] || 0,
+              y: a[3] || 0,
+              width: a[4],
+              height: a[5],
+              posX: a[6],
+              posY: a[7],
+            };
+            break;
+          case 9:
+            break;
+        }
+      });
     });
 
     if (isDevelopment) {
@@ -874,17 +955,6 @@ module.exports = (
     }
 
     era.restart();
-  };
-
-  era.api.logStatic = () => {
-    log({
-      static: era.staticData,
-      names: era.fieldNames,
-    });
-  };
-
-  era.api.logData = () => {
-    log({ data: era.data, global: era.global });
   };
 
   if (isDevelopment) {

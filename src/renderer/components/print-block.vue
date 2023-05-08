@@ -35,6 +35,31 @@
     >
       {{ line.content }}
     </el-divider>
+    <el-container
+      v-if="line.type === lineType['image']"
+      :style="{
+        textAlign: 'center',
+        width: `${line.width}px`,
+        height: `${line.height}px`,
+      }"
+    >
+      <img
+        v-for="(img, i) in line['images']"
+        :alt="`Image-${i + 1}`"
+        :key="`img-${i}`"
+        :src="img.src"
+        :style="{
+          position: 'absolute',
+          height: `${img.height}px`,
+          objectFit: 'none',
+          objectPosition: `-${img.x}px -${img.y}px`,
+          width: `${img.width}px`,
+          left: `calc(50% + ${img['posX'] - line.width / 2}px)`,
+          top: `${img['posY']}px`,
+          zIndex: i + 1,
+        }"
+      />
+    </el-container>
     <el-row
       v-if="line.type === lineType['progress']"
       :gutter="10"

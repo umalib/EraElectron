@@ -193,6 +193,17 @@ function getDividerObject(data) {
   };
 }
 
+function getImageObject(data) {
+  const height = Math.max(...data.images.map((x) => x.height + x.posY));
+  const width = Math.max(...data.images.map((x) => x.width + x.posX));
+  return {
+    height: height < 0 ? 0 : height,
+    images: data.images,
+    type: lineType.image,
+    width: width < 0 ? 0 : width,
+  };
+}
+
 function getMultiColumnObjects(data) {
   return {
     align: data.config.verticalAlign || 'top',
@@ -206,6 +217,8 @@ function getMultiColumnObjects(data) {
             return getButtonObject(x);
           case lineType.divider:
             return getDividerObject(x);
+          case lineType.image:
+            return getImageObject(x);
           case lineType.progress:
             return getProgressObject(x);
           case lineType.text:
