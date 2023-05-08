@@ -49,6 +49,26 @@ module.exports = (
     staticData: {},
   };
 
+  function checkImageCache(_path) {
+    if (!_path) {
+      return '';
+    }
+    if (typeof _path !== 'string' || _path.startsWith('http')) {
+      return _path.toString() || '';
+    }
+    if (!era.cache[_path]) {
+      try {
+        const base64str = readFileSync(_path, 'base64');
+        era.cache[_path] = `data:image/${extname(_path).substring(
+          1,
+        )};base64,${base64str}`;
+      } catch (_) {
+        // eslint-disable-next-line no-empty
+      }
+    }
+    return era.cache[_path];
+  }
+
   function getImageObject(names) {
     if (!names || !names.length) {
       return [];
@@ -56,19 +76,8 @@ module.exports = (
     return names
       .map((n) => {
         if (era.images[n]) {
-          const _path = era.images[n].path;
-          if (!era.cache[n]) {
-            try {
-              const base64str = readFileSync(_path, 'base64');
-              era.cache[_path] = `data:image/${extname(_path).substring(
-                1,
-              )};base64,${base64str}`;
-            } catch (_) {
-              // eslint-disable-next-line no-empty
-            }
-          }
           return {
-            src: era.cache[_path],
+            src: checkImageCache(era.images[n].path),
             x: era.images[n].x,
             y: era.images[n].y,
             width: era.images[n].width,
@@ -531,6 +540,12 @@ module.exports = (
             type: 'image',
             images: getImageObject(x.names),
           };
+        } else if (x.type === 'image.whole') {
+          return {
+            type: 'image.whole',
+            src: checkImageCache(era.images[x.src]),
+            config: x.config || {},
+          };
         }
         return x;
       }),
@@ -549,6 +564,12 @@ module.exports = (
                 type: 'image',
                 images: getImageObject(y.names),
               };
+            } else if (y.type === 'image.whole') {
+              return {
+                type: 'image.whole',
+                src: checkImageCache(era.images[y.src]),
+                config: y.config || {},
+              };
             }
             return y;
           }),
@@ -565,6 +586,14 @@ module.exports = (
       inContent,
       outContent,
       percentage,
+    });
+    return totalLines++;
+  };
+
+  era.api.printWholeImage = (name, config) => {
+    connect('printWholeImage', {
+      config: config || {},
+      src: checkImageCache(era.images[name]),
     });
     return totalLines++;
   };
@@ -857,7 +886,6 @@ module.exports = (
         if (!era.staticData.chara[tmp['id']]) {
           era.staticData.chara[tmp['id']] = tmp;
         } else {
-          logger.info(tmp);
           const charaTable = era.staticData.chara[tmp['id']];
           Object.keys(tmp).forEach((k) => {
             if (typeof tmp[k] === 'object') {
@@ -883,6 +911,9 @@ module.exports = (
       const parent = dirname(_path);
       parseCSV(readFileSync(_path).toString('utf-8')).forEach((a) => {
         switch (a.length) {
+          case 2:
+            era.images[toLowerCase(a[0])] = join(parent, a[1]);
+            break;
           case 4:
             break;
           case 6:

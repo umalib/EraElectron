@@ -188,8 +188,8 @@ function getDividerObject(data) {
     content: data.config.content || '',
     position: safeUndefinedCheck(data.config.position, 'center'),
     type: lineType.divider,
-    width: data.config.width,
-    offset: data.config.offset,
+    width: getValidWidth(data.config.width),
+    offset: getValidOffset(data.config.offset),
   };
 }
 
@@ -219,6 +219,8 @@ function getMultiColumnObjects(data) {
             return getDividerObject(x);
           case lineType.image:
             return getImageObject(x);
+          case lineType['image.whole']:
+            return getWholeImageObject(x);
           case lineType.progress:
             return getProgressObject(x);
           case lineType.text:
@@ -228,7 +230,10 @@ function getMultiColumnObjects(data) {
         }
       })
       .filter((x) => x),
-    gutter: data.config.gutter,
+    gutter: safeUndefinedCheck(
+      data.config.gutter,
+      defaultSetting.value['gutter'],
+    ),
     justify: data.config.horizontalAlign || 'start',
     type: lineType.multiCol,
     width: data.config.width || 24,
@@ -282,6 +287,20 @@ function getTextObject(data) {
       defaultSetting.value['textAlign'],
     ),
     type: lineType.text,
+    width: getValidWidth(data.config.width),
+  };
+}
+
+function getWholeImageObject(data) {
+  return {
+    src: data.src,
+    type: lineType['image.whole'],
+    fit: safeUndefinedCheck(data.config.fit, 'contain'),
+    textAlign: safeUndefinedCheck(
+      data.config.align,
+      defaultSetting.value['textAlign'],
+    ),
+    offset: getValidOffset(data.config.offset),
     width: getValidWidth(data.config.width),
   };
 }
@@ -450,6 +469,9 @@ connector.register('printMultiRows', (data) =>
 connector.register('println', () => handlePush({ type: lineType['lineUp'] }));
 connector.register('printProgress', (data) =>
   handlePush(getProgressObject(data)),
+);
+connector.register('printWholeImage', (data) =>
+  handlePush(getWholeImageObject(data)),
 );
 connector.register(
   'setAlign',

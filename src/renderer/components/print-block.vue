@@ -60,6 +60,11 @@
         }"
       />
     </el-container>
+    <el-image
+      v-if="line.type === lineType['image.whole']"
+      :fit="line.fit"
+      :src="line.src"
+    />
     <el-row
       v-if="line.type === lineType['progress']"
       :gutter="10"
