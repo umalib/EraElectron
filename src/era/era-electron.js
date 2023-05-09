@@ -207,7 +207,7 @@ module.exports = (
 
     Object.values(era.staticData.tflag).forEach((v) => (era.data.tflag[v] = 0));
 
-    era.api.addCharacterForTrain(charaId);
+    era.api.addCharacterForTrain(...charaId);
   };
 
   era.api.clear = (lineCount) => {
@@ -389,24 +389,33 @@ module.exports = (
           );
           return era.staticData.chara[charaIndex].base[valueIndex];
         }
-        if (era.data[tableName] && era.data[tableName][charaIndex]) {
-          if (!era.data[tableName][charaIndex]) {
-            return undefined;
-          }
+        if (!era.data[tableName] || !era.data[tableName][charaIndex]) {
+          return undefined;
+        }
+        if (tableName === 'palam' || tableName === 'gotjuel') {
+          valueIndex = safeUndefinedCheck(
+            era.staticData.juel[valueIndex],
+            valueIndex,
+          );
+        } else if (tableName === 'nowex') {
+          valueIndex = safeUndefinedCheck(
+            era.staticData.ex[valueIndex],
+            valueIndex,
+          );
+        } else {
           valueIndex = safeUndefinedCheck(
             era.staticData[tableName][valueIndex],
             valueIndex,
           );
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data[tableName][charaIndex][valueIndex] += val;
-            } else {
-              era.data[tableName][charaIndex][valueIndex] = val;
-            }
-          }
-          return era.data[tableName][charaIndex][valueIndex];
         }
-        break;
+        if (val !== undefined) {
+          if (isAdd) {
+            era.data[tableName][charaIndex][valueIndex] += val;
+          } else {
+            era.data[tableName][charaIndex][valueIndex] = val;
+          }
+        }
+        return era.data[tableName][charaIndex][valueIndex];
       default:
         break;
     }
