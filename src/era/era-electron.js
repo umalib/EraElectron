@@ -162,6 +162,7 @@ module.exports = (
             }
           }),
       );
+      era.data.amour[charaId] = 0;
       Object.keys(era.data.base[charaId]).forEach(
         (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
       );
@@ -179,7 +180,7 @@ module.exports = (
         era.data.ex[id] = {};
         era.data.nowex[id] = {};
         Object.values(era.staticData.tcvar).forEach(
-          (v) => (era.data.tcvar[id][v] = ''),
+          (v) => (era.data.tcvar[id][v] = 0),
         );
         Object.values(era.staticData.juel).forEach(
           (v) => (era.data.palam[id][v] = era.data.gotjuel[id][v] = 0),
