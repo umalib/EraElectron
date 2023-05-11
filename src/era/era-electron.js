@@ -95,9 +95,9 @@ module.exports = (
   };
 
   era.api.addCharacter = era.api.resetCharacter = (...ids) => {
-    ids.forEach((charaId) => {
+    const result = ids.map((charaId) => {
       if (!era.staticData.chara[charaId]) {
-        return;
+        return false;
       }
       era.data.no[era.data.newCharaIndex++] = charaId;
       era.data.maxbase[charaId] = {};
@@ -166,7 +166,12 @@ module.exports = (
       Object.keys(era.data.base[charaId]).forEach(
         (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
       );
+      return true;
     });
+    if (ids.length === 1) {
+      return result[0];
+    }
+    return result;
   };
 
   era.api.addCharacterForTrain = (...charaId) => {

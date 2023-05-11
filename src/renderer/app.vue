@@ -73,9 +73,9 @@
             <p>
               <el-input
                 v-model="inputParam.val"
-                v-show="inputParam.key"
                 @keyup.enter="returnFromInput()"
                 @input="inputParam.any && returnFromInput()"
+                :disabled="!inputParam.key"
                 :placeholder="`${inputParam.any ? '按任意键继续……' : ''}`"
                 autofocus
                 ref="mainInput"
