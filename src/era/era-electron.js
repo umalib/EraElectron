@@ -92,6 +92,9 @@ module.exports = (
   }
 
   era.api.add = (key, val) => {
+    if (!val) {
+      return era.api.get(key);
+    }
     return era.api.set(key, val, true);
   };
 
@@ -237,17 +240,6 @@ module.exports = (
   };
 
   era.api.endTrain = () => {
-    Object.entries(era.data.gotjuel).forEach(
-      /** @param {[string, object]} e charaId -> gotjuel object */
-      (e) => {
-        Object.entries(e[1]).forEach(
-          /** @param {[string, number]} e1 juelId -> value */
-          (e1) => {
-            era.data.juel[e[0]][e1[0]] += e1[1];
-          },
-        );
-      },
-    );
     delete era.data.tequip;
     delete era.data.tflag;
     delete era.data.tcvar;
@@ -490,7 +482,9 @@ module.exports = (
         ) {
           error(`global.sav版本过低（${tmp.version}）！已重新生成`);
         } else {
-          era.global = tmp;
+          Object.entries(tmp)
+            .filter((kv) => kv[0] !== 'version')
+            .forEach((kv) => (era.global[kv[0]] = kv[1]));
           return true;
         }
       } catch (_) {
