@@ -3,6 +3,7 @@ const {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   statSync,
   writeFileSync,
 } = require('fs');
@@ -236,6 +237,17 @@ module.exports = (
   };
 
   era.api.endTrain = () => {
+    Object.entries(era.data.gotjuel).forEach(
+      /** @param {[string, object]} e charaId -> gotjuel object */
+      (e) => {
+        Object.entries(e[1]).forEach(
+          /** @param {[string, number]} e1 juelId -> value */
+          (e1) => {
+            era.data.juel[e[0]][e1[0]] += e1[1];
+          },
+        );
+      },
+    );
     delete era.data.tequip;
     delete era.data.tflag;
     delete era.data.tcvar;
@@ -359,11 +371,12 @@ module.exports = (
             } else {
               era.data.base[charaIndex][valueIndex] = val;
             }
-            era.data.base[charaIndex][valueIndex] =
+            if (
               era.data.base[charaIndex][valueIndex] >
               era.data.maxbase[charaIndex][valueIndex]
-                ? era.data.maxbase[charaIndex][valueIndex]
-                : era.data.base[charaIndex][valueIndex];
+            )
+              era.data.base[charaIndex][valueIndex] =
+                era.data.maxbase[charaIndex][valueIndex];
           }
           return era.data.base[charaIndex][valueIndex];
         }
@@ -487,7 +500,8 @@ module.exports = (
     return era.api.resetGlobal();
   };
 
-  era.api.log = (info) => {
+  era.api.log = log;
+  era.api.log.debug = (info) => {
     if (era.debug) {
       log(
         info,
@@ -498,6 +512,8 @@ module.exports = (
       );
     }
   };
+  era.api.log.error = error;
+  era.api.log.info = log;
 
   era.api.logData = () => {
     log({ data: era.data, global: era.global });
@@ -651,6 +667,18 @@ module.exports = (
       saves: {},
     };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
+  };
+
+  era.api.rmData = (savId) => {
+    try {
+      rmSync(join(join(gamePath, `./sav/save${savId}.sav`)));
+      delete era.global.saves[savId];
+      era.api.saveGlobal();
+    } catch (e) {
+      error(e.message);
+      return false;
+    }
+    return true;
   };
 
   era.api.saveData = (savId, comment) => {
