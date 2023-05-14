@@ -100,31 +100,39 @@ module.exports = (
 
   era.api.addCharacter = era.api.resetCharacter = (...ids) => {
     const result = ids.map((charaId) => {
-      if (!era.staticData.chara[charaId]) {
+      let src = charaId,
+        dst = charaId;
+      if (charaId.length === 2) {
+        src = charaId[0];
+        dst = charaId[1];
+      } else {
         return false;
       }
-      era.data.no[era.data.newCharaIndex++] = charaId;
-      era.data.maxbase[charaId] = {};
-      era.data.base[charaId] = {};
-      era.data.abl[charaId] = {};
-      era.data.talent[charaId] = {};
-      era.data.cflag[charaId] = {};
-      era.data.cstr[charaId] = {};
-      era.data.equip[charaId] = {};
-      era.data.mark[charaId] = {};
-      era.data.exp[charaId] = {};
-      era.data.juel[charaId] = {};
-      era.data.callname[charaId] = {};
-      era.data.relation[charaId] = {};
+      if (!era.staticData.chara[src]) {
+        return false;
+      }
+      era.data.no[era.data.newCharaIndex++] = dst;
+      era.data.maxbase[dst] = {};
+      era.data.base[dst] = {};
+      era.data.abl[dst] = {};
+      era.data.talent[dst] = {};
+      era.data.cflag[dst] = {};
+      era.data.cstr[dst] = {};
+      era.data.equip[dst] = {};
+      era.data.mark[dst] = {};
+      era.data.exp[dst] = {};
+      era.data.juel[dst] = {};
+      era.data.callname[dst] = {};
+      era.data.relation[dst] = {};
 
       // init
-      Object.entries(era.staticData.chara[charaId])
+      Object.entries(era.staticData.chara[src])
         .filter((kv) => typeof kv[1] === 'object')
         .forEach(
           /** @param {[string, {}]} kv */
           (kv) =>
             Object.entries(kv[1]).forEach(
-              (kv1) => (era.data[kv[0]][charaId][kv1[0]] = kv1[1]),
+              (kv1) => (era.data[kv[0]][dst][kv1[0]] = kv1[1]),
             ),
         );
       Object.entries(era.staticData)
@@ -142,22 +150,20 @@ module.exports = (
             Object.entries(kv[1])
               .filter((kv1) => typeof kv1[1] !== 'object')
               .forEach((kv1) => {
-                if (era.data[kv[0]][charaId][kv1[1]] === undefined) {
-                  era.data[kv[0]][charaId][kv1[1]] = 0;
+                if (era.data[kv[0]][dst][kv1[1]] === undefined) {
+                  era.data[kv[0]][dst][kv1[1]] = 0;
                 }
               }),
         );
       Object.values(era.staticData.cstr).forEach(
-        (v) => era.data.cstr[charaId][v] || (era.data.cstr[charaId][v] = ''),
+        (v) => era.data.cstr[dst][v] || (era.data.cstr[dst][v] = ''),
       );
-      era.data.callname[charaId][-2] = era.data.callname[charaId][-1] =
-        era.staticData.chara[charaId].name;
+      era.data.callname[dst][-2] = era.data.callname[dst][-1] =
+        era.staticData.chara[src].name;
       Object.entries(era.staticData.relationship).forEach((kv) =>
         Object.entries(kv[1])
           .filter(
-            (kv1) =>
-              kv1[0].startsWith(`${charaId}|`) ||
-              kv1[0].endsWith(`|${charaId}`),
+            (kv1) => kv1[0].startsWith(`${dst}|`) || kv1[0].endsWith(`|${dst}`),
           )
           .forEach((kv1) => {
             const idArr = kv1[0].split('|');
@@ -166,9 +172,9 @@ module.exports = (
             }
           }),
       );
-      era.data.amour[charaId] = 0;
-      Object.keys(era.data.base[charaId]).forEach(
-        (k) => (era.data.maxbase[charaId][k] = era.data.base[charaId][k]),
+      era.data.amour[dst] = 0;
+      Object.keys(era.data.base[dst]).forEach(
+        (k) => (era.data.maxbase[dst][k] = era.data.base[dst][k]),
       );
       return true;
     });
