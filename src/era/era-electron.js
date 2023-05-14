@@ -105,7 +105,7 @@ module.exports = (
       if (charaId.length === 2) {
         src = charaId[0];
         dst = charaId[1];
-      } else {
+      } else if (typeof src !== 'number') {
         return false;
       }
       if (!era.staticData.chara[src]) {
