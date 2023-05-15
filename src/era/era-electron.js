@@ -103,8 +103,8 @@ module.exports = (
       let src = charaId,
         dst = charaId;
       if (charaId.length === 2) {
-        src = charaId[0];
-        dst = charaId[1];
+        dst = charaId[0];
+        src = charaId[1];
       } else if (typeof src !== 'number') {
         return false;
       }
@@ -326,7 +326,9 @@ module.exports = (
           }
           return safeUndefinedCheck(
             era.data.callname[charaIndex][valueIndex],
-            era.staticData.chara[charaIndex].callname,
+            era.staticData.chara[charaIndex]
+              ? era.staticData.chara[charaIndex].callname
+              : '-',
           );
         }
         if (tableName === 'relation') {
