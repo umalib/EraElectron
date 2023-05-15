@@ -865,22 +865,38 @@ module.exports = (
             era.staticData.juel = {};
             era.fieldNames.juel = {};
             csv.forEach((a) => {
-              era.staticData.juel[a[1]] = a[0];
-              era.fieldNames.juel[a[0]] = a[1];
+              let numKey = a[0],
+                strKey = a[1];
+              while (era.fieldNames.juel[numKey]) {
+                numKey++;
+              }
+              era.staticData.juel[strKey] = numKey;
+              era.fieldNames.juel[numKey] = strKey;
             });
           } else if (k.startsWith('item')) {
             era.staticData.item = { name: {}, price: {} };
             era.fieldNames[k] = {};
             csv.forEach((a) => {
-              era.staticData.item.name[a[1]] = a[0];
-              era.staticData.item.price[a[0]] = a[2];
-              era.fieldNames[k][a[0]] = a[1];
+              let numKey = a[0],
+                strKey = a[1],
+                val = a[2];
+              while (era.fieldNames[k][numKey]) {
+                numKey++;
+              }
+              era.staticData.item.name[strKey] = numKey;
+              era.staticData.item.price[numKey] = val;
+              era.fieldNames[k][numKey] = strKey;
             });
           } else {
             era.fieldNames[k] = {};
             csv.forEach((a) => {
-              era.staticData[k][a[1]] = a[0];
-              era.fieldNames[k][a[0]] = a[1];
+              let numKey = a[0],
+                strKey = a[1];
+              while (era.fieldNames[k][numKey]) {
+                numKey++;
+              }
+              era.staticData[k][strKey] = numKey;
+              era.fieldNames[k][numKey] = strKey;
             });
           }
         }
