@@ -490,10 +490,12 @@ module.exports = (
         ) {
           error(`global.sav版本过低（${tmp.version}）！已重新生成`);
         } else {
-          Object.entries(tmp)
-            .filter((kv) => kv[0] !== 'version')
-            .forEach((kv) => (era.global[kv[0]] = kv[1]));
-          return true;
+          era.global = tmp;
+          era.global.version = era.staticData['gamebase']['version'];
+          Object.values(era.staticData.global).forEach(
+            (k) => !era.global[k] && (era.global[k] = 0),
+          );
+          return era.api.saveGlobal();
         }
       } catch (_) {
         // eslint-disable-next-line no-empty
@@ -665,10 +667,11 @@ module.exports = (
 
   era.api.resetGlobal = () => {
     era.global = {
-      version: era.staticData['gamebase'].version,
       saves: {},
+      version: era.staticData['gamebase'].version,
     };
     Object.values(era.staticData.global).forEach((k) => (era.global[k] = 0));
+    return era.api.saveGlobal();
   };
 
   era.api.rmData = (savId) => {
