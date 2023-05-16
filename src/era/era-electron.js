@@ -870,6 +870,15 @@ module.exports = (
               while (era.fieldNames.juel[numKey]) {
                 numKey++;
               }
+              if (a[0] !== numKey) {
+                log(
+                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
+                    a[0]
+                  } of ${strKey} has been allocated to ${
+                    era.fieldNames.juel[a[0]]
+                  }! reset to ${numKey}`,
+                );
+              }
               era.staticData.juel[strKey] = numKey;
               era.fieldNames.juel[numKey] = strKey;
             });
@@ -883,6 +892,15 @@ module.exports = (
               while (era.fieldNames[k][numKey]) {
                 numKey++;
               }
+              if (a[0] !== numKey) {
+                log(
+                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
+                    a[0]
+                  } of ${strKey} has been allocated to ${
+                    era.fieldNames[k][a[0]]
+                  }! reset to ${numKey}`,
+                );
+              }
               era.staticData.item.name[strKey] = numKey;
               era.staticData.item.price[numKey] = val;
               era.fieldNames[k][numKey] = strKey;
@@ -894,6 +912,15 @@ module.exports = (
                 strKey = a[1];
               while (era.fieldNames[k][numKey]) {
                 numKey++;
+              }
+              if (a[0] !== numKey) {
+                log(
+                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
+                    a[0]
+                  } of ${strKey} has been allocated to ${
+                    era.fieldNames[k][a[0]]
+                  }! reset to ${numKey}`,
+                );
               }
               era.staticData[k][strKey] = numKey;
               era.fieldNames[k][numKey] = strKey;
