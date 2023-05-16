@@ -505,22 +505,19 @@ module.exports = (
   };
 
   era.api.log = log;
-  era.api.log.debug = (info) => {
-    if (era.debug) {
-      log(
-        info,
-        new Error().stack.replace(
-          /^\s*Error\s*at era\.api\.log\s*\([^)]+\)\s*/,
-          '',
-        ),
-      );
-    }
-  };
-  era.api.log.error = error;
-  era.api.log.info = log;
 
   era.api.logData = () => {
     log({ data: era.data, global: era.global });
+  };
+
+  era.api.logger = {
+    debug(info) {
+      if (era.debug) {
+        log(info, new Error().stack.split('\n')[2]);
+      }
+    },
+    error,
+    info: log,
   };
 
   era.api.logStatic = () => {
