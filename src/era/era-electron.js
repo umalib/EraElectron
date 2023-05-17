@@ -15,7 +15,7 @@ const {
   toLowerCase,
 } = require('@/renderer/utils/value-utils');
 
-const nameMapping = require('@/era/nameMapping.json');
+const nameMapping = require('@/era/name-mapping.json');
 
 module.exports = (
   path,
