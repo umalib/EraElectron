@@ -263,6 +263,12 @@ module.exports = (
     const keyArr = key.split(':').map((x) => x.toLocaleLowerCase());
     let tableName, charaIndex, valueIndex;
     switch (keyArr.length) {
+      case 1:
+        tableName = keyArr[0];
+        if (tableName === 'no') {
+          return era.data.no;
+        }
+        break;
       case 2:
         tableName = keyArr[0];
         valueIndex = keyArr[1];
@@ -655,7 +661,7 @@ module.exports = (
       mark: {},
       maxbase: {},
       newCharaIndex: 0,
-      no: {},
+      no: [],
       relation: {},
       talent: {},
       version: era.staticData['gamebase'].version,
