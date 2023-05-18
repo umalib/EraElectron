@@ -517,6 +517,14 @@ module.exports = (
     log({ data: era.data, global: era.global });
   };
 
+  era.api.logStatic = () => {
+    log({
+      static: era.staticData,
+      names: era.fieldNames,
+      images: era.images,
+    });
+  };
+
   era.api.logger = {
     debug(info) {
       if (era.debug) {
@@ -525,14 +533,6 @@ module.exports = (
     },
     error,
     info: log,
-  };
-
-  era.api.logStatic = () => {
-    log({
-      static: era.staticData,
-      names: era.fieldNames,
-      images: era.images,
-    });
   };
 
   era.api.print = (content, config) => {
