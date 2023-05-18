@@ -403,15 +403,16 @@ module.exports = (
           }
           return era.data.maxbase[charaIndex][valueIndex];
         }
-        if (tableName === 'staticbase') {
-          if (!era.staticData.chara[charaIndex]) {
+        if (tableName.startsWith('static')) {
+          tableName = tableName.substring(6);
+          if (!era.staticData.chara[charaIndex] || !era.staticData[tableName]) {
             return undefined;
           }
           valueIndex = safeUndefinedCheck(
-            era.staticData.base[valueIndex],
+            era.staticData[tableName][valueIndex],
             valueIndex,
           );
-          return era.staticData.chara[charaIndex].base[valueIndex];
+          return era.staticData.chara[charaIndex][tableName][valueIndex];
         }
         if (!era.data[tableName] || !era.data[tableName][charaIndex]) {
           return undefined;
