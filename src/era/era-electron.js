@@ -1,4 +1,6 @@
+const { gzip } = require('compressing');
 const {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -8,6 +10,8 @@ const {
   writeFileSync,
 } = require('fs');
 const { dirname, extname, join, resolve } = require('path');
+const { tmpdir } = require('os');
+
 const parseCSV = require('@/era/csv-utils');
 const {
   getNumber,
@@ -22,6 +26,7 @@ module.exports = (
   connect,
   listen,
   cleanListener,
+  resizeWindow,
   logger,
   isDevelopment,
 ) => {
@@ -42,6 +47,9 @@ module.exports = (
   const era = {
     api: {},
     cache: {},
+    config: {
+      compressing: false,
+    },
     data: {},
     debug: false,
     fieldNames: {},
@@ -467,10 +475,18 @@ module.exports = (
     });
   };
 
-  era.api.loadData = (savId) => {
+  era.api.loadData = async (savId) => {
     const savPath = join(gamePath, `./sav/save${savId}.sav`);
     try {
-      const tmp = JSON.parse(readFileSync(savPath).toString('utf-8'));
+      let tmp;
+      if (era.config.system['saveCompressedData']) {
+        const tmpPath = join(tmpdir(), `ere-${new Date().getTime()}`);
+        await gzip.uncompress(savPath, tmpPath);
+        tmp = JSON.parse(readFileSync(tmpPath, 'utf-8'));
+        rmSync(tmpPath);
+      } else {
+        tmp = JSON.parse(readFileSync(savPath, 'utf-8'));
+      }
       if (
         !tmp.version ||
         tmp.version < era.staticData['gamebase']['lowestVersion']
@@ -490,7 +506,7 @@ module.exports = (
     const globalPath = join(gamePath, './sav/global.sav');
     if (existsSync(globalPath)) {
       try {
-        const tmp = JSON.parse(readFileSync(globalPath).toString('utf-8'));
+        const tmp = JSON.parse(readFileSync(globalPath, 'utf-8'));
         if (
           !tmp.version ||
           tmp.version < era.staticData['gamebase']['lowestVersion']
@@ -690,16 +706,19 @@ module.exports = (
     return true;
   };
 
-  era.api.saveData = (savId, comment) => {
+  era.api.saveData = async (savId, comment) => {
     const savDirPath = join(gamePath, './sav');
     if (!existsSync(savDirPath)) {
       mkdirSync(savDirPath);
     }
     try {
-      writeFileSync(
-        join(savDirPath, `./save${savId}.sav`),
-        JSON.stringify(era.data),
-      );
+      const data = JSON.stringify(era.data),
+        dataPath = join(savDirPath, `./save${savId}.sav`);
+      if (era.config.system['saveCompressedData']) {
+        await gzip.compressFile(Buffer.from(data, 'utf-8'), dataPath);
+      } else {
+        writeFileSync(dataPath, data);
+      }
       era.global.saves[savId] = comment;
       era.api.saveGlobal();
       return true;
@@ -786,6 +805,55 @@ module.exports = (
       era.api.print(`路径${gamePath}不正确！请选择待载入游戏文件夹！`);
       return;
     }
+
+    // load config file
+    if (!existsSync(join(gamePath, './ere.config.json'))) {
+      if (existsSync(join(gamePath, './csv/_config.json'))) {
+        try {
+          JSON.parse(
+            readFileSync(join(gamePath, './csv/_config.json'), 'utf-8'),
+          );
+          copyFileSync(
+            join(gamePath, './csv/_config.json'),
+            join(gamePath, './ere.config.json'),
+          );
+        } catch (_) {
+          // eslint-disable-next-line no-empty
+        }
+      } else {
+        writeFileSync(join(gamePath, './ere.config.json'), JSON.stringify({}));
+      }
+    }
+    era.config = JSON.parse(
+      readFileSync(join(gamePath, './ere.config.json'), 'utf-8'),
+    );
+    if (existsSync(join(gamePath, './csv/_fixed.json'))) {
+      try {
+        const tmp = JSON.parse(
+          readFileSync(join(gamePath, './csv/_fixed.json'), 'utf-8'),
+        );
+        Object.entries(tmp).forEach(
+          /** @param {[string, any]} kv */
+          (kv) => {
+            if (typeof kv[1] === 'object') {
+              Object.entries(kv[1]).forEach((kv1) => {
+                era.config[kv[0]][kv1[0]] = kv1[1];
+              });
+            } else {
+              era.config[kv[0]] = kv[1];
+            }
+          },
+        );
+        writeFileSync(
+          join(gamePath, './ere.config.json'),
+          JSON.stringify(era.config),
+        );
+      } catch (e) {
+        error(e.message);
+      }
+    }
+    resizeWindow();
+
     // load CSV
     let fileList = {};
     era.cache = {};
@@ -823,8 +891,8 @@ module.exports = (
     const charaReg = /chara[^/]+.csv/;
     // load _replace.csv
     Object.keys(fileList).forEach((x) => {
-      if (x.endsWith('_replace.csv')) {
-        const csv = parseCSV(readFileSync(x).toString('utf-8'));
+      if (x.endsWith('_replace.csv') && era.config.system._replace) {
+        const csv = parseCSV(readFileSync(x, 'utf-8'));
         era.staticData['_replace'] = {};
         csv.forEach(
           (a) =>
@@ -856,7 +924,7 @@ module.exports = (
       ) {
         showInfo && era.api.print(`loading ${k}`);
         era.staticData[k] = {};
-        let csv = parseCSV(readFileSync(p).toString('utf-8'));
+        let csv = parseCSV(readFileSync(p, 'utf-8'));
         if (k.startsWith('_rename') || k.startsWith('gamebase')) {
           csv.forEach(
             (a) =>
@@ -946,7 +1014,7 @@ module.exports = (
       showInfo && era.api.print(`loading ${k}`);
       const tmp = {};
       let tableName, valueIndex, value;
-      parseCSV(readFileSync(p).toString('utf-8')).forEach((a) => {
+      parseCSV(readFileSync(p, 'utf-8')).forEach((a) => {
         a = a.map(toLowerCase);
         switch (a.length) {
           case 2:
@@ -1004,7 +1072,7 @@ module.exports = (
     loadPath(join(gamePath, './resources'));
     Object.keys(fileList).forEach((_path) => {
       const parent = dirname(_path);
-      parseCSV(readFileSync(_path).toString('utf-8')).forEach((a) => {
+      parseCSV(readFileSync(_path, 'utf-8')).forEach((a) => {
         switch (a.length) {
           case 2:
             era.images[toLowerCase(a[0])] = join(parent, a[1]);

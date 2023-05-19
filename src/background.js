@@ -64,29 +64,6 @@ async function createWindow() {
     width: 1000,
   });
 
-  function connect(action, data) {
-    win.webContents.send('connector', { action, data });
-  }
-
-  function listen(key, cb) {
-    ipcMain.on(key, cb);
-  }
-
-  function cleanListener(key) {
-    ipcMain.removeAllListeners(key);
-  }
-
-  const era = createEra(
-    join(process.cwd(), './game'),
-    connect,
-    listen,
-    cleanListener,
-    engineLogger,
-    isDevelopment,
-  );
-
-  ipcMain.removeAllListeners();
-
   function setContentHeight() {
     win.webContents.send('engine', {
       action: engineCommand.resize,
@@ -94,19 +71,42 @@ async function createWindow() {
     });
   }
 
+  win.on('resize', setContentHeight);
+
+  const era = createEra(
+    join(process.cwd(), './game'),
+    (action, data) => {
+      win.webContents.send('connector', { action, data });
+    },
+    (key, cb) => {
+      ipcMain.on(key, cb);
+    },
+    (key) => {
+      ipcMain.removeAllListeners(key);
+    },
+    () => {
+      win.setSize(era.config.window.width, era.config.window.height);
+      setContentHeight();
+      if (era.config.window.width['autoMax']) {
+        win.maximize();
+      }
+    },
+    engineLogger,
+    isDevelopment,
+  );
+
+  ipcMain.removeAllListeners();
+
   ipcMain.on('engine', (_, action) => {
     switch (action) {
       case engineCommand.restart:
         era.restart();
         break;
       case engineCommand.start:
-        setContentHeight();
         era.start();
         break;
     }
   });
-
-  win.on('resize', setContentHeight);
 
   const template = [];
   if (process.platform === 'darwin') {
