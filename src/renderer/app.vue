@@ -96,7 +96,6 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
-import { useDark } from '@vueuse/core';
 
 import CopyrightDialog from '@/renderer/components/copyright-dialog.vue';
 import PrintBlock from '@/renderer/components/print-block.vue';
@@ -108,8 +107,6 @@ import {
   getValidValue,
   safeUndefinedCheck,
 } from '@/renderer/utils/value-utils';
-
-useDark();
 
 const lineType = embeddedData.lineType;
 

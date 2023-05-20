@@ -2,7 +2,6 @@
   "author": "WindyWisper <umalib629@outlook.com>",
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "@vueuse/core": "^10.0.2",
     "compressing": "^1.9.0",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.2",
