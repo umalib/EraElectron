@@ -85,9 +85,12 @@ async function createWindow() {
       ipcMain.removeAllListeners(key);
     },
     () => {
-      win.setSize(era.config.window.width, era.config.window.height);
+      win.setSize(
+        era.config.window.width || 880,
+        era.config.window.height || 1000,
+      );
       setContentHeight();
-      if (era.config.window.width['autoMax']) {
+      if (era.config.window.autoMax) {
         win.maximize();
       }
     },

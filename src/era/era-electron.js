@@ -21,6 +21,19 @@ const {
 
 const nameMapping = require('@/era/name-mapping.json');
 
+/**
+ * @param {string} path game path
+ * @param {function} connect callback
+ * @param {function} listen callback
+ * @param {function} cleanListener callback
+ * @param {function} resizeWindow callback
+ * @param {{debug:function,error:function,info:function}} logger logger
+ * @param {boolean} isDevelopment
+ * @returns {{config:{autoSaveOnShop:boolean,
+ * system:{_replace:boolean, saveCompressedData:boolean},
+ * window:{autoMax:boolean,height:number,width:number}},
+ * restart:function,setPath:function,start:function}}
+ */
 module.exports = (
   path,
   connect,
@@ -34,9 +47,9 @@ module.exports = (
     connect('log', { info, stack });
   }
 
-  function error(message) {
-    logger.error(message);
-    connect('error', message);
+  function error(message, stack) {
+    logger.error(`${message}${stack ? `\n${stack}` : ''}`);
+    connect('error', { message, stack });
   }
 
   let gamePath = resolve(path);
@@ -47,9 +60,7 @@ module.exports = (
   const era = {
     api: {},
     cache: {},
-    config: {
-      compressing: false,
-    },
+    config: {},
     data: {},
     debug: false,
     fieldNames: {},
@@ -700,7 +711,7 @@ module.exports = (
       delete era.global.saves[savId];
       era.api.saveGlobal();
     } catch (e) {
-      error(e.message);
+      error(e.message, e.stack);
       return false;
     }
     return true;
@@ -723,7 +734,7 @@ module.exports = (
       era.api.saveGlobal();
       return true;
     } catch (e) {
-      error(e.message);
+      error(e.message, e.stack);
       return false;
     }
   };
@@ -740,7 +751,7 @@ module.exports = (
       );
       return true;
     } catch (e) {
-      error(e.message);
+      error(e.message, e.stack);
     }
     return false;
   };
@@ -792,7 +803,7 @@ module.exports = (
     try {
       gameMain();
     } catch (e) {
-      error(e.message);
+      error(e.message, e.stack);
     }
   };
 
@@ -837,6 +848,9 @@ module.exports = (
           (kv) => {
             if (typeof kv[1] === 'object') {
               Object.entries(kv[1]).forEach((kv1) => {
+                if (!era.config[kv[0]]) {
+                  era.config[kv[0]] = {};
+                }
                 era.config[kv[0]][kv1[0]] = kv1[1];
               });
             } else {
@@ -849,7 +863,7 @@ module.exports = (
           JSON.stringify(era.config),
         );
       } catch (e) {
-        error(e.message);
+        error(e.message, e.stack);
       }
     }
     resizeWindow();
@@ -1145,7 +1159,7 @@ module.exports = (
       Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
       await era.api.printAndWait('\n加载完成');
     } catch (e) {
-      error(e.message);
+      error(e.message, e.stack);
     }
 
     era.restart();

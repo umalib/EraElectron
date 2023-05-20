@@ -415,10 +415,11 @@ function showInput(data) {
   inputParam.value.any = data.config.any;
 }
 
-function throwError(message) {
+function throwError(data) {
+  console.log(`${data.message}${data.stack ? `\n${data.stack}` : ''}`);
   ElNotification({
     title: '脚本错误',
-    message,
+    message: data.message,
     duration: 0,
     type: 'error',
   });
