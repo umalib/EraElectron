@@ -13,7 +13,7 @@
           :justify="line.justify"
           :key="`row-${i}`"
         >
-          <template v-if="line.type === lineType['multiRow']">
+          <template v-if="line.type === lineType['inColRows']">
             <el-col
               v-for="(col, j) in line.columns"
               :key="`col-${i}-${j}`"
@@ -183,10 +183,10 @@ function getDividerObject(data) {
   return {
     border: data.config.isSolid ? 'solid' : 'dashed',
     content: data.config.content || '',
+    offset: getValidOffset(data.config.offset),
     position: safeUndefinedCheck(data.config.position, 'center'),
     type: lineType.divider,
     width: getValidWidth(data.config.width),
-    offset: getValidOffset(data.config.offset),
   };
 }
 
@@ -237,13 +237,13 @@ function getMultiColumnObjects(data) {
   };
 }
 
-function getMultiRowObjects(data) {
+function getInColRowObject(data) {
   return {
     align: 'top',
     columns: data.columns.map(getMultiColumnObjects),
     gutter: defaultSetting.value['gutter'],
     justify: 'start',
-    type: lineType.multiRow,
+    type: lineType.inColRows,
   };
 }
 
@@ -275,10 +275,10 @@ function getTextObject(data) {
     contents: data.config.isList
       ? data.content
       : data.content.toString().split('\n'),
+    fontSize: safeUndefinedCheck(data.config.fontSize, '16px'),
     isList: data.config.isList,
     isParagraph: data.config.isParagraph,
     offset: getValidOffset(data.config.offset),
-    fontSize: safeUndefinedCheck(data.config.fontSize, '16px'),
     textAlign: safeUndefinedCheck(
       data.config.align,
       defaultSetting.value['textAlign'],
@@ -290,14 +290,14 @@ function getTextObject(data) {
 
 function getWholeImageObject(data) {
   return {
-    src: data.src,
-    type: lineType['image.whole'],
     fit: safeUndefinedCheck(data.config.fit, 'contain'),
+    offset: getValidOffset(data.config.offset),
+    src: data.src,
     textAlign: safeUndefinedCheck(
       data.config.align,
       defaultSetting.value['textAlign'],
     ),
-    offset: getValidOffset(data.config.offset),
+    type: lineType['image.whole'],
     width: getValidWidth(data.config.width),
   };
 }
@@ -319,9 +319,9 @@ function resetData() {
   defaultSetting.value = {
     colOffset: 0,
     colWidth: 24,
+    gutter: 0,
     height: 800,
     textAlign: 'left',
-    gutter: 0,
   };
   inputParam.value = {
     any: false,
@@ -347,15 +347,14 @@ function returnFromButton(val) {
         );
         return;
       }
-    } else if (inputParam.value['rule'].length > 0) {
-      if (inputParam.value['rule'].indexOf(Number(val)) === -1) {
-        ElMessage.error(
-          `输入不合法！请输入以下值之一：${inputParam.value['rule'].join(
-            ', ',
-          )}`,
-        );
-        return;
-      }
+    } else if (
+      inputParam.value['rule'].length > 0 &&
+      inputParam.value['rule'].indexOf(Number(val)) === -1
+    ) {
+      ElMessage.error(
+        `输入不合法！请输入以下值之一：${inputParam.value['rule'].join(', ')}`,
+      );
+      return;
     }
   }
   inputParam.value.any = false;
@@ -418,9 +417,9 @@ function showInput(data) {
 function throwError(data) {
   console.log(`${data.message}${data.stack ? `\n${data.stack}` : ''}`);
   ElNotification({
-    title: '脚本错误',
-    message: data.message,
     duration: 0,
+    message: data.message,
+    title: '脚本错误',
     type: 'error',
   });
 }
@@ -461,8 +460,8 @@ connector.register('printImage', (data) => handlePush(getImageObject(data)));
 connector.register('printMultiCols', (data) =>
   handlePush(getMultiColumnObjects(data)),
 );
-connector.register('printMultiRows', (data) =>
-  handlePush(getMultiRowObjects(data)),
+connector.register('printInColRows', (data) =>
+  handlePush(getInColRowObject(data)),
 );
 connector.register('println', () => handlePush({ type: lineType['lineUp'] }));
 connector.register('printProgress', (data) =>

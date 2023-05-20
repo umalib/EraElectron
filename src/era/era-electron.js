@@ -620,8 +620,8 @@ module.exports = (
     return totalLines++;
   };
 
-  era.api.printMultiRows = (...columnObjects) => {
-    connect('printMultiRows', {
+  era.api.printInColRows = (...columnObjects) => {
+    connect('printInColRows', {
       columns: columnObjects.map((x) => {
         return {
           columns: x.columns.map((y) => {
