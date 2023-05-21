@@ -64,7 +64,9 @@
       v-if="line.type === lineType['image.whole']"
       :fit="line.fit"
       :src="line.src"
-    />
+    >
+      <template #error><div></div></template>
+    </el-image>
     <el-row
       v-if="line.type === lineType['progress']"
       :gutter="10"
