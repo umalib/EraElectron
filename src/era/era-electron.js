@@ -694,6 +694,9 @@ module.exports = (
       talent: {},
       version: era.staticData['gamebase'].version,
     };
+    Object.values(era.staticData.flag).forEach(
+      (num) => (era.data.flag[num] = 0),
+    );
   };
 
   era.api.resetGlobal = () => {
