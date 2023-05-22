@@ -233,6 +233,7 @@ function getMultiColumnObjects(data) {
     ),
     justify: data.config.horizontalAlign || 'start',
     type: lineType.multiCol,
+    offset: data.config.offset || 0,
     width: data.config.width || 24,
   };
 }
