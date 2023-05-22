@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const { engineCommand } = require('@/renderer/utils/embedded.json');
+const { engineCommand } = require('@/renderer/utils/embedded');
 
 contextBridge.exposeInMainWorld('ipc', {
   listen(cb) {

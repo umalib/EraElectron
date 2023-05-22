@@ -105,12 +105,9 @@
 
 <script setup>
 import { toRefs } from 'vue';
-
 import TextBlock from '@/renderer/components/text-block.vue';
 
-import embeddedData from '@/renderer/utils/embedded.json';
-
-const lineType = embeddedData.lineType;
+import { lineType } from '@/renderer/utils/embedded';
 
 // eslint-disable-next-line no-undef
 const props = defineProps({

@@ -15,7 +15,7 @@ const { homedir } = require('os');
 const { existsSync, mkdirSync, readdirSync } = require('fs');
 const log4js = require('log4js');
 const createEra = require('@/era/era-electron');
-const { engineCommand } = require('@/renderer/utils/embedded.json');
+const { engineCommand } = require('@/renderer/utils/embedded');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -107,6 +107,10 @@ async function createWindow() {
         break;
       case engineCommand.start:
         era.start();
+        win.webContents.send('engine', {
+          action: engineCommand.version,
+          arg: app.getVersion(),
+        });
         break;
     }
   });

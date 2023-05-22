@@ -37,7 +37,9 @@
     <p>
       <el-descriptions size="large" title="引擎信息">
         <el-descriptions-item label="名称">ERA-Electron</el-descriptions-item>
-        <el-descriptions-item label="版本">0.9.0-gamma</el-descriptions-item>
+        <el-descriptions-item label="版本">
+          {{ appVersion }}
+        </el-descriptions-item>
         <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
         <el-descriptions-item label="开发">
           风之低吟
@@ -59,6 +61,7 @@ import { toRefs } from 'vue';
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
+  appVersion: String,
   gameBase: Object,
   visible: Boolean,
 });

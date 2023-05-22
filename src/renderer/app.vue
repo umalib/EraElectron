@@ -13,7 +13,7 @@
           :justify="line.justify"
           :key="`row-${i}`"
         >
-          <template v-if="line.type === lineType['inColRows']">
+          <template v-if="line.type === lineType.inColRows">
             <el-col
               v-for="(col, j) in line.columns"
               :key="`col-${i}-${j}`"
@@ -36,7 +36,7 @@
               </el-row>
             </el-col>
           </template>
-          <template v-else-if="line.type === lineType['multiCol']">
+          <template v-else-if="line.type === lineType.multiCol">
             <print-block
               v-for="(col, j) in line.columns"
               @value-return="returnFromButton"
@@ -46,9 +46,9 @@
               :line="col"
             />
           </template>
-          <br v-else-if="line.type === lineType['lineUp']" />
+          <br v-else-if="line.type === lineType.lineUp" />
           <el-col
-            v-else-if="line.type === lineType['dynamicText']"
+            v-else-if="line.type === lineType.dynamicText"
             :span="line.width || defaultSetting.colWidth"
             :style="styles[i]"
           >
@@ -85,6 +85,7 @@
         </el-row>
         <copyright-dialog
           @copyright-close="copyrightVisible = false"
+          :app-version="appVersion"
           :game-base="gameBase"
           :visible="copyrightVisible"
         />
@@ -102,14 +103,13 @@ import PrintBlock from '@/renderer/components/print-block.vue';
 import TextBlock from '@/renderer/components/text-block.vue';
 
 import connector from '@/renderer/utils/connector';
-import embeddedData from '@/renderer/utils/embedded.json';
+import { engineCommand, lineType } from '@/renderer/utils/embedded';
 import {
   getValidValue,
   safeUndefinedCheck,
 } from '@/renderer/utils/value-utils';
 
-const lineType = embeddedData.lineType;
-
+const appVersion = ref('');
 const buttonValCount = ref(0);
 const copyrightVisible = ref(false);
 const defaultSetting = ref({});
@@ -425,7 +425,6 @@ function throwError(data) {
 }
 
 resetData();
-const engineCommand = embeddedData.engineCommand;
 connector.registerMenu((command) => {
   switch (command.action) {
     case engineCommand.copyright:
@@ -437,6 +436,9 @@ connector.registerMenu((command) => {
     case engineCommand.restart:
       resetData();
       connector.restart();
+      break;
+    case engineCommand.version:
+      appVersion.value = command.arg;
       break;
     default:
       break;
@@ -463,7 +465,7 @@ connector.register('printMultiCols', (data) =>
 connector.register('printInColRows', (data) =>
   handlePush(getInColRowObject(data)),
 );
-connector.register('println', () => handlePush({ type: lineType['lineUp'] }));
+connector.register('println', () => handlePush({ type: lineType.lineUp }));
 connector.register('printProgress', (data) =>
   handlePush(getProgressObject(data)),
 );
