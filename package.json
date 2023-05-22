@@ -38,5 +38,5 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "version": "0.9.0-gamma"
+  "version": "0.9.0-tiga"
 }
