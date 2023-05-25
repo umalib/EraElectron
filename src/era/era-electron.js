@@ -396,12 +396,18 @@ module.exports = (
             } else {
               era.data.base[charaIndex][valueIndex] = val;
             }
-            if (
-              era.data.base[charaIndex][valueIndex] >
-              era.data.maxbase[charaIndex][valueIndex]
-            )
-              era.data.base[charaIndex][valueIndex] =
-                era.data.maxbase[charaIndex][valueIndex];
+            if (era.data.maxbase[charaIndex][valueIndex]) {
+              if (era.data.base[charaIndex][valueIndex] < 0) {
+                era.data.base[charaIndex][valueIndex] = 0;
+              }
+              if (
+                era.data.base[charaIndex][valueIndex] >
+                era.data.maxbase[charaIndex][valueIndex]
+              ) {
+                era.data.base[charaIndex][valueIndex] =
+                  era.data.maxbase[charaIndex][valueIndex];
+              }
+            }
           }
           return era.data.base[charaIndex][valueIndex];
         }
