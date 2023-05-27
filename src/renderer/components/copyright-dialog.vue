@@ -41,11 +41,7 @@
           {{ appVersion }}
         </el-descriptions-item>
         <el-descriptions-item label="发布时间">2023 ～</el-descriptions-item>
-        <el-descriptions-item label="开发">
-          风之低吟
-          <el-divider direction="vertical" />
-          无名路人
-        </el-descriptions-item>
+        <el-descriptions-item label="开发">风之低吟</el-descriptions-item>
         <el-descriptions-item label="例程 & 测试">
           无名路人
           <el-divider direction="vertical" />
