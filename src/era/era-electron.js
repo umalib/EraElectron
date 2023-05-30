@@ -143,6 +143,11 @@ module.exports = (
       era.data.juel[dst] = {};
       era.data.callname[dst] = {};
       era.data.relation[dst] = {};
+      era.config.system['extendedCharaTables'] &&
+        era.config.system['extendedCharaTables'].length &&
+        era.config.system['extendedCharaTables'].forEach(
+          (table) => (era.data[table.toLowerCase()][dst] = {}),
+        );
 
       // init
       Object.entries(era.staticData.chara[src])
@@ -703,6 +708,11 @@ module.exports = (
     Object.values(era.staticData.flag).forEach(
       (num) => (era.data.flag[num] = 0),
     );
+    era.config.system['extendedCharaTables'] &&
+      era.config.system['extendedCharaTables'].length &&
+      era.config.system['extendedCharaTables'].forEach(
+        (v) => (era.data[v.toLowerCase()] = {}),
+      );
   };
 
   era.api.resetGlobal = () => {
