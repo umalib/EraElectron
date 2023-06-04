@@ -209,43 +209,48 @@ module.exports = (
   };
 
   era.api.addCharacterForTrain = (...charaId) => {
-    if (charaId) {
-      charaId.forEach((id) => {
-        era.data.tequip[id] = {};
-        era.data.tcvar[id] = {};
-        era.data.palam[id] = {};
-        era.data.gotjuel[id] = {};
-        era.data.stain[id] = {};
-        era.data.ex[id] = {};
-        era.data.nowex[id] = {};
-        Object.values(era.staticData.tcvar).forEach(
-          (v) => (era.data.tcvar[id][v] = 0),
-        );
-        Object.values(era.staticData.juel).forEach(
-          (v) => (era.data.palam[id][v] = era.data.gotjuel[id][v] = 0),
-        );
-        Object.values(era.staticData.stain).forEach(
-          (v) => (era.data.stain[id][v] = 0),
-        );
-        Object.values(era.staticData.ex).forEach(
-          (v) => (era.data.ex[id][v] = era.data.nowex[id][v] = 0),
-        );
-      });
+    if (charaId.length) {
+      charaId
+        .filter((id) => !era.data.tequip[id])
+        .forEach((id) => {
+          era.data.tequip[id] = {};
+          era.data.tcvar[id] = {};
+          era.data.palam[id] = {};
+          era.data.gotjuel[id] = {};
+          era.data.stain[id] = {};
+          era.data.ex[id] = {};
+          era.data.nowex[id] = {};
+          Object.values(era.staticData.tcvar).forEach(
+            (v) => (era.data.tcvar[id][v] = 0),
+          );
+          Object.values(era.staticData.juel).forEach(
+            (v) => (era.data.palam[id][v] = era.data.gotjuel[id][v] = 0),
+          );
+          Object.values(era.staticData.stain).forEach(
+            (v) => (era.data.stain[id][v] = 0),
+          );
+          Object.values(era.staticData.ex).forEach(
+            (v) => (era.data.ex[id][v] = era.data.nowex[id][v] = 0),
+          );
+        });
     }
   };
 
   era.api.beginTrain = (...charaId) => {
-    era.data.tequip = {};
-    era.data.tflag = {};
-    era.data.tcvar = {};
-    era.data.palam = {};
-    era.data.gotjuel = {};
-    era.data.stain = {};
-    era.data.ex = {};
-    era.data.nowex = {};
+    if (!era.data.tequip) {
+      era.data.tequip = {};
+      era.data.tflag = {};
+      era.data.tcvar = {};
+      era.data.palam = {};
+      era.data.gotjuel = {};
+      era.data.stain = {};
+      era.data.ex = {};
+      era.data.nowex = {};
 
-    Object.values(era.staticData.tflag).forEach((v) => (era.data.tflag[v] = 0));
-
+      Object.values(era.staticData.tflag).forEach(
+        (v) => (era.data.tflag[v] = 0),
+      );
+    }
     era.api.addCharacterForTrain(...charaId);
   };
 
