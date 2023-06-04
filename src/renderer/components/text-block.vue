@@ -9,7 +9,7 @@
   </template>
   <template v-else>
     <template v-for="(content, i) in contents" :key="content">
-      <br v-if="i !== 0" />
+      <br v-if="i" />
       {{ content }}
     </template>
   </template>

@@ -10,6 +10,7 @@ module.exports = {
   /**
    * add some characters
    * @param {number | number[]} charaId REQUIRED id of the character defined in chara*.csv
+   *     <br>if it is an array, is means add the character charaId[0] with the data of the character charaId[1]
    * @returns {boolean | boolean[]}
    */
   // eslint-disable-next-line no-unused-vars
@@ -213,6 +214,7 @@ module.exports = {
   /**
    * reset the data of a character
    * @param {number | number[]} charaId REQUIRED id of the character defined in chara*.csv
+   *     <br>if it is an array, is means reset the character charaId[0] with the data of the character charaId[1]
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars

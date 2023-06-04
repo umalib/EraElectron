@@ -22,7 +22,7 @@
             v-for="(content, index) in line.contents"
             :key="`button-${index}`"
           >
-            <br v-if="index !== 0" />
+            <br v-if="index" />
             {{ content }}
           </template>
         </span>
