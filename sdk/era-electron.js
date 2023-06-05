@@ -303,4 +303,5 @@ module.exports = {
    * @returns {Promise<void>} a promise of nothing, please use await
    */
   async waitAnyKey() {},
+  isEra: true,
 };

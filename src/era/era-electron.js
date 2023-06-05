@@ -29,10 +29,11 @@ const nameMapping = require('@/era/name-mapping.json');
  * @param {function} resizeWindow callback
  * @param {{debug:function,error:function,info:function}} logger logger
  * @param {boolean} isDevelopment
- * @returns {{config:{autoSaveOnShop:boolean,
- * system:{_replace:boolean, saveCompressedData:boolean},
- * window:{autoMax:boolean,height:number,width:number}},
- * restart:function,setPath:function,start:function}}
+ * @returns {{cache: {}, images: {}, debug: boolean, data: {}, fieldNames: {}, global: {}, api: {},
+ * config:{[autoSaveOnShop]:boolean,
+ * [system]:{_replace:boolean, saveCompressedData:boolean},
+ * [window]:{autoMax:boolean,height:number,width:number}}, staticData: {},
+ * [restart]:function,[setPath]:function,[start]:function}}
  */
 module.exports = (
   path,
@@ -1110,7 +1111,14 @@ module.exports = (
     loadPath(join(gamePath, './resources'));
     Object.keys(fileList).forEach((_path) => {
       const parent = dirname(_path);
-      parseCSV(readFileSync(_path, 'utf-8')).forEach((a) => {
+      parseCSV(readFileSync(_path, 'utf-8')).forEach((a, i) => {
+        if (a[0] && era.images[toLowerCase(a[0])]) {
+          log(
+            `[WARNING (ENGINE)]\n\tduplicate key ${toLowerCase(a[0])} of line ${
+              i + 1
+            } in ${_path}!`,
+          );
+        }
         switch (a.length) {
           case 2:
             era.images[toLowerCase(a[0])] = join(parent, a[1]);
@@ -1173,11 +1181,7 @@ module.exports = (
         .filter(x => x.startsWith('${gamePath}'))
         .forEach(x => delete require.cache[x]);
       gameMain = require('#/main');
-      eraModule = require.cache[Object.keys(require.cache)
-        .filter(x => x.startsWith('${gamePath.replace(
-          /\\/g,
-          '\\\\',
-        )}') && x.endsWith('era-electron.js'))];`);
+      eraModule = Object.values(require.cache).filter(m => m.exports.isEra)[0];`);
 
       // inject era.api
       Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
