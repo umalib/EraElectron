@@ -836,6 +836,10 @@ module.exports = (
     gamePath = resolve(_path);
   };
 
+  const module = require('module');
+  const include = module.prototype.require;
+  let oldPath = 'old-path';
+
   era.start = async () => {
     if (!existsSync(gamePath)) {
       era.api.print(`路径${gamePath}不正确！请选择待载入游戏文件夹！`);
@@ -1162,8 +1166,6 @@ module.exports = (
     try {
       showInfo && era.api.print(`\nloading game: ${gamePath} ...`);
 
-      const module = require('module');
-      const include = module.prototype.require;
       const erePath = join(gamePath, 'ere');
       module.prototype.require = function (path) {
         let dir = path;
@@ -1178,13 +1180,22 @@ module.exports = (
 
       // clear cache, load game, and find era module
       eval(`Object.keys(require.cache)
-        .filter(x => x.startsWith('${gamePath}'))
-        .forEach(x => delete require.cache[x]);
-      gameMain = require('#/main');
-      eraModule = Object.values(require.cache).filter(m => m.exports.isEra)[0];`);
+          .filter(x => x.startsWith('${oldPath}'))
+          .forEach(x => {
+            logger.debug('delete cache: ' + x)
+            delete require.cache[x];
+          });
+        gameMain = require('#/main');
+        eraModule = Object.values(require.cache).filter(m => m.exports.isEra)[0];
+        oldPath = dirname(Object.keys(require.cache).filter(x => x.endsWith('ere/main.js') || x.endsWith('ere\\\\main.js'))[0])`);
+      logger.info(`load game from ${oldPath}`);
 
-      // inject era.api
-      Object.keys(era.api).forEach((k) => (eraModule.exports[k] = era.api[k]));
+      if (eraModule) {
+        // inject era.api
+        Object.keys(era.api).forEach(
+          (k) => (eraModule.exports[k] = era.api[k]),
+        );
+      }
       await era.api.printAndWait('\n加载完成');
     } catch (e) {
       error(e.message, e.stack);
