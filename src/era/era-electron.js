@@ -952,7 +952,10 @@ module.exports = (
       }
     });
     let showInfo = true;
-    if (era.staticData['_replace']['briefInformationOnLoading']) {
+    if (
+      era.staticData['_replace'] &&
+      era.staticData['_replace']['briefInformationOnLoading']
+    ) {
       era.api.print(era.staticData['_replace']['briefInformationOnLoading']);
       showInfo = false;
     }
