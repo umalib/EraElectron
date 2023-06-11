@@ -96,19 +96,35 @@ module.exports = (
     }
     return names
       .map((n) => {
-        if (era.images[n]) {
-          return {
-            src: checkImageCache(era.images[n].path),
-            x: era.images[n].x,
-            y: era.images[n].y,
-            width: era.images[n].width,
-            height: era.images[n].height,
-            posX: era.images[n].posX,
-            posY: era.images[n].posY,
-          };
+        const altImages = n.split('\t');
+        for (const img of altImages) {
+          if (era.images[img]) {
+            return {
+              src: checkImageCache(era.images[img].path),
+              x: era.images[img].x,
+              y: era.images[img].y,
+              width: era.images[img].width,
+              height: era.images[img].height,
+              posX: era.images[img].posX,
+              posY: era.images[img].posY,
+            };
+          }
         }
       })
       .filter((x) => x);
+  }
+
+  function getWholeImageFromCache(name) {
+    if (!name) {
+      return '';
+    }
+    const altImages = name.split('\t');
+    for (const img of altImages) {
+      if (era.images[img]) {
+        return checkImageCache(era.images[img]);
+      }
+    }
+    return '';
   }
 
   era.api.add = (key, val) => {
@@ -650,7 +666,7 @@ module.exports = (
             } else if (y.type === 'image.whole') {
               return {
                 type: 'image.whole',
-                src: checkImageCache(era.images[y.src]),
+                src: getWholeImageFromCache(y.src),
                 config: y.config || {},
               };
             }
@@ -676,7 +692,7 @@ module.exports = (
   era.api.printWholeImage = (name, config) => {
     connect('printWholeImage', {
       config: config || {},
-      src: checkImageCache(era.images[name]),
+      src: getWholeImageFromCache(name),
     });
     return totalLines++;
   };
