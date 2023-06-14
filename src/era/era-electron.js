@@ -507,6 +507,13 @@ module.exports = (
     return Object.keys(era.data.base).map(Number);
   };
 
+  era.api.getCharactersInTrain = () => {
+    if (!era.data.tequip) {
+      return [];
+    }
+    return Object.keys(era.data.tequip).map(Number);
+  };
+
   era.api.input = async (config) => {
     inputKey = new Date().getTime().toString();
     connect('input', { config: config || {}, inputKey });

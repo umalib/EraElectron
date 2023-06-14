@@ -71,6 +71,11 @@ module.exports = {
    */
   getAllCharacters() {},
   /**
+   * get characters added in train
+   * @returns {array<number>} ids of characters in train
+   */
+  getCharactersInTrain() {},
+  /**
    * wait for use's input, the engine will try to return number
    * @param {{[disableBefore]: boolean, [rule]: string, [useRule]: boolean}} [config] config of input, like rule
    * @returns {Promise<any>} a promise of the user input, please use await
