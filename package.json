@@ -38,5 +38,5 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "version": "1.0.0-satu"
+  "version": "1.0.0-dua"
 }
