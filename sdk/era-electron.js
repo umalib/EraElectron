@@ -82,6 +82,7 @@ module.exports = {
    */
   // eslint-disable-next-line no-unused-vars
   async input(config) {},
+  isEra: true,
   /**
    * load a save file
    * @param {number} savIndex REQUIRED the index of the save file
@@ -170,6 +171,13 @@ module.exports = {
   // eslint-disable-next-line no-unused-vars
   printImage(...names) {},
   /**
+   *
+   * @param {...{columns: [{type: 'button'|'divider'|'image'|'image.whole'|'progress'|'text', [config]: {}}], [config]: {}}} columnObjects
+   * @returns {number} line number of the printed
+   */
+  // eslint-disable-next-line no-unused-vars
+  printInColRows(...columnObjects) {},
+  /**
    * print multiple columns into a row, excluding inputs
    * @param {Array<{type: 'button'|'divider'|'image'|'progress'|'text', [config]: {}}>} columnObjects the array of settings of columns, like print, printButton, printImage and printProgress
    * @param {{[horizontalAlign]: 'start'|'center'|'end'|'space-between'|'space-around'|'space-evenly', [verticalAlign]: 'top'|'middle'|'bottom'}} [config] config of the row
@@ -182,18 +190,11 @@ module.exports = {
   // eslint-disable-next-line no-unused-vars
   printMultiColumns(columnObjects, config) {},
   /**
-   *
-   * @param {...{columns: [{type: 'button'|'divider'|'image'|'image.whole'|'progress'|'text', [config]: {}}], [config]: {}}} columnObjects
-   * @returns {number} line number of the printed
-   */
-  // eslint-disable-next-line no-unused-vars
-  printInColRows(...columnObjects) {},
-  /**
    * print a progress bar
    * @param {number} percentage REQUIRED the percentage of the progress bar, float, 0-100
    * @param {string} inContent REQUIRED the text shown in the progress bar
    * @param {string} outContent REQUIRED the text shown next to the progress bar
-   * @param {{[align]: 'left'|'center'|'right', [barRatio]: number, [color]: string, [fontColor]: string, [height]: number, [offset]: number, [width]: number}} [config] config of the printed progress
+   * @param {{[align]: 'left'|'center'|'right', [barWidth]: number, [color]: string, [fontColor]: string, [height]: number, [offset]: number, [width]: number}} [config] config of the printed progress
    * @returns {number} line number of the printed
    */
   // eslint-disable-next-line no-unused-vars
@@ -308,5 +309,4 @@ module.exports = {
    * @returns {Promise<void>} a promise of nothing, please use await
    */
   async waitAnyKey() {},
-  isEra: true,
 };

@@ -251,10 +251,9 @@ function getInColRowObject(data) {
 function getProgressObject(data) {
   const percentage = getValidValue(data.percentage, 0, 100, 100);
   const height = getValidValue(data.config.height, 6, 30, 24);
-  const ratio = getValidValue(data.config.barRatio, 0, 1, 0.96);
   return {
     barColor: data.config.color,
-    barWidth: Math.floor(24 * ratio),
+    barWidth: data.config.barWidth,
     fontColor: data.config.fontColor,
     height,
     inContent: data.inContent,
