@@ -320,7 +320,7 @@ function resetData() {
     colOffset: 0,
     colWidth: 24,
     gutter: 0,
-    height: 800,
+    height: defaultSetting.value['height'],
     textAlign: 'left',
   };
   inputParam.value = {
@@ -431,6 +431,7 @@ connector.registerMenu((command) => {
       copyrightVisible.value = true;
       break;
     case engineCommand.resize:
+      console.log(command.arg);
       defaultSetting.value.height = command.arg - 20 * 2 - 8 * 2;
       break;
     case engineCommand.restart:
