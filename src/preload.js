@@ -19,3 +19,15 @@ contextBridge.exposeInMainWorld('ipc', {
   },
   version: '1.0',
 });
+
+contextBridge.exposeInMainWorld('era', {
+  get(key) {
+    ipcRenderer.send('era', { action: 'get', key });
+  },
+  set(key, val) {
+    ipcRenderer.send('era', { action: 'set', key, val });
+  },
+  add(key, val) {
+    ipcRenderer.send('era', { action: 'add', key, val });
+  },
+});

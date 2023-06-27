@@ -112,6 +112,30 @@ async function createWindow() {
           arg: app.getVersion(),
         });
         break;
+      default:
+    }
+  });
+
+  ipcMain.on('era', (_, msg) => {
+    switch (msg.action) {
+      case 'get':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.api.get(msg.key) },
+        });
+        break;
+      case 'set':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.api.set(msg.key, msg.val) },
+        });
+        break;
+      case 'add':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.api.add(msg.key, msg.val) },
+        });
+        break;
     }
   });
 

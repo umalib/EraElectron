@@ -431,7 +431,6 @@ connector.registerMenu((command) => {
       copyrightVisible.value = true;
       break;
     case engineCommand.resize:
-      console.log(command.arg);
       defaultSetting.value.height = command.arg - 20 * 2 - 8 * 2;
       break;
     case engineCommand.restart:
@@ -442,7 +441,6 @@ connector.registerMenu((command) => {
       appVersion.value = command.arg;
       break;
     default:
-      break;
   }
 });
 connector.register('clear', clear);
