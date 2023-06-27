@@ -328,11 +328,6 @@ module.exports = (
               }
             }
             return era.data.amour[valueIndex];
-          case 'bought':
-            return safeUndefinedCheck(
-              era.staticData.item.name[era.data.item.bought],
-              era.data.item.bought,
-            );
           case 'global':
             valueIndex = safeUndefinedCheck(
               era.staticData.global[valueIndex],
@@ -355,6 +350,12 @@ module.exports = (
                 return era.fieldNames[tableName][valueIndex];
               }
             } else if (tableName.startsWith('item')) {
+              if (valueIndex === 'bought') {
+                return safeUndefinedCheck(
+                  era.staticData.item.name[era.data.item.bought],
+                  era.data.item.bought,
+                );
+              }
               valueIndex = safeUndefinedCheck(
                 era.staticData.item.name[valueIndex],
                 valueIndex,
