@@ -318,181 +318,214 @@ module.exports = (
       case 2:
         tableName = keyArr[0];
         valueIndex = keyArr[1];
-        if (tableName === 'amour') {
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data.amour[valueIndex] += val;
-            } else {
-              era.data.amour[valueIndex] = val;
+        switch (tableName) {
+          case 'amour':
+            if (val !== undefined) {
+              if (isAdd) {
+                era.data.amour[valueIndex] += val;
+              } else {
+                era.data.amour[valueIndex] = val;
+              }
             }
-          }
-          return era.data.amour[valueIndex];
-        }
-        if (tableName === 'global') {
-          valueIndex = safeUndefinedCheck(
-            era.staticData.global[valueIndex],
-            valueIndex,
-          );
-          if (val !== undefined) {
-            if (isAdd) {
-              era.global[valueIndex] += val;
-            } else {
-              era.global[valueIndex] = val;
+            return era.data.amour[valueIndex];
+          case 'bought':
+            return safeUndefinedCheck(
+              era.staticData.item.name[era.data.item.bought],
+              era.data.item.bought,
+            );
+          case 'global':
+            valueIndex = safeUndefinedCheck(
+              era.staticData.global[valueIndex],
+              valueIndex,
+            );
+            if (val !== undefined) {
+              if (isAdd) {
+                era.global[valueIndex] += val;
+              } else {
+                era.global[valueIndex] = val;
+              }
             }
-          }
-          return era.global[valueIndex];
-        }
-        if (tableName === 'palamname') {
-          return era.fieldNames.juel[valueIndex];
-        }
-        if (tableName.endsWith('name')) {
-          tableName = tableName.substring(0, tableName.length - 4);
-          if (era.fieldNames[tableName]) {
-            return era.fieldNames[tableName][valueIndex];
-          }
-        } else if (era.data[tableName]) {
-          valueIndex = safeUndefinedCheck(
-            era.staticData[tableName][valueIndex],
-            valueIndex,
-          );
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data[tableName][valueIndex] += val;
-            } else {
-              era.data[tableName][valueIndex] = val;
+            return era.global[valueIndex];
+          case 'palamname':
+            return era.fieldNames.juel[valueIndex];
+          default:
+            if (tableName.endsWith('name')) {
+              tableName = tableName.substring(0, tableName.length - 4);
+              if (era.fieldNames[tableName]) {
+                return era.fieldNames[tableName][valueIndex];
+              }
+            } else if (tableName.startsWith('item')) {
+              valueIndex = safeUndefinedCheck(
+                era.staticData.item.name[valueIndex],
+                valueIndex,
+              );
+              switch (tableName.substring(4)) {
+                case 'price':
+                  tableName = 'price';
+                  break;
+                case 'sales':
+                  tableName = 'sales';
+                  break;
+                default:
+                  tableName = 'hold';
+              }
+              if (val !== undefined) {
+                if (isAdd) {
+                  era.data.item[tableName][valueIndex] += val;
+                } else {
+                  era.data.item[tableName][valueIndex] = val;
+                }
+              }
+              return era.data.item[tableName][valueIndex];
+            } else if (era.data[tableName]) {
+              valueIndex = safeUndefinedCheck(
+                era.staticData[tableName][valueIndex],
+                valueIndex,
+              );
+              if (val !== undefined) {
+                if (isAdd) {
+                  era.data[tableName][valueIndex] += val;
+                } else {
+                  era.data[tableName][valueIndex] = val;
+                }
+              }
+              return era.data[tableName][valueIndex];
             }
-          }
-          return era.data[tableName][valueIndex];
         }
         break;
       case 3:
         tableName = keyArr[0];
         charaIndex = keyArr[1];
         valueIndex = keyArr[2];
-        if (tableName === 'callname') {
-          if (!era.data.callname[charaIndex]) {
-            return '-';
-          }
-          if (val !== undefined) {
-            era.data.callname[charaIndex][valueIndex] = val;
-          }
-          return safeUndefinedCheck(
-            era.data.callname[charaIndex][valueIndex],
-            era.staticData.chara[charaIndex]
-              ? era.staticData.chara[charaIndex].callname
-              : '-',
-          );
-        }
-        if (tableName === 'relation') {
-          if (!era.data.relation[charaIndex]) {
-            return undefined;
-          }
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data.relation[charaIndex][valueIndex] += val;
-            } else {
-              era.data.relation[charaIndex][valueIndex] = val;
+        switch (tableName) {
+          case 'callname':
+            if (!era.data.callname[charaIndex]) {
+              return '-';
             }
-          }
-          return era.data.relation[charaIndex][valueIndex];
-        }
-        if (tableName === 'global') {
-          if (!era.global[charaIndex]) {
-            return undefined;
-          }
-          if (val !== undefined) {
-            if (isAdd) {
-              era.global[charaIndex][valueIndex] += val;
-            } else {
-              era.global[charaIndex][valueIndex] = val;
+            if (val !== undefined) {
+              era.data.callname[charaIndex][valueIndex] = val;
             }
-          }
-          return era.global[charaIndex][valueIndex];
-        }
-        if (tableName === 'base') {
-          if (!era.data.base[charaIndex]) {
-            return undefined;
-          }
-          valueIndex = safeUndefinedCheck(
-            era.staticData.base[valueIndex],
-            valueIndex,
-          );
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data.base[charaIndex][valueIndex] += val;
-            } else {
-              era.data.base[charaIndex][valueIndex] = val;
+            return safeUndefinedCheck(
+              era.data.callname[charaIndex][valueIndex],
+              era.staticData.chara[charaIndex]
+                ? era.staticData.chara[charaIndex].callname
+                : '-',
+            );
+          case 'relation':
+            if (!era.data.relation[charaIndex]) {
+              return undefined;
             }
-            if (era.data.maxbase[charaIndex][valueIndex]) {
-              if (era.data.base[charaIndex][valueIndex] < 0) {
-                era.data.base[charaIndex][valueIndex] = 0;
+            if (val !== undefined) {
+              if (isAdd) {
+                era.data.relation[charaIndex][valueIndex] += val;
+              } else {
+                era.data.relation[charaIndex][valueIndex] = val;
               }
+            }
+            return era.data.relation[charaIndex][valueIndex];
+          case 'global':
+            if (!era.global[charaIndex]) {
+              return undefined;
+            }
+            if (val !== undefined) {
+              if (isAdd) {
+                era.global[charaIndex][valueIndex] += val;
+              } else {
+                era.global[charaIndex][valueIndex] = val;
+              }
+            }
+            return era.global[charaIndex][valueIndex];
+          case 'base':
+            if (!era.data.base[charaIndex]) {
+              return undefined;
+            }
+            valueIndex = safeUndefinedCheck(
+              era.staticData.base[valueIndex],
+              valueIndex,
+            );
+            if (val !== undefined) {
+              if (isAdd) {
+                era.data.base[charaIndex][valueIndex] += val;
+              } else {
+                era.data.base[charaIndex][valueIndex] = val;
+              }
+              if (era.data.maxbase[charaIndex][valueIndex]) {
+                if (era.data.base[charaIndex][valueIndex] < 0) {
+                  era.data.base[charaIndex][valueIndex] = 0;
+                }
+                if (
+                  era.data.base[charaIndex][valueIndex] >
+                  era.data.maxbase[charaIndex][valueIndex]
+                ) {
+                  era.data.base[charaIndex][valueIndex] =
+                    era.data.maxbase[charaIndex][valueIndex];
+                }
+              }
+            }
+            return era.data.base[charaIndex][valueIndex];
+          case 'maxbase':
+            if (!era.data.maxbase[charaIndex]) {
+              return undefined;
+            }
+            valueIndex = safeUndefinedCheck(
+              era.staticData.base[valueIndex],
+              valueIndex,
+            );
+            if (val !== undefined) {
+              if (isAdd) {
+                era.data.maxbase[charaIndex][valueIndex] += val;
+              } else {
+                era.data.maxbase[charaIndex][valueIndex] = val;
+              }
+            }
+            return era.data.maxbase[charaIndex][valueIndex];
+          default:
+            if (tableName.startsWith('static')) {
+              tableName = tableName.substring(6);
               if (
-                era.data.base[charaIndex][valueIndex] >
-                era.data.maxbase[charaIndex][valueIndex]
+                !era.staticData.chara[charaIndex] ||
+                !era.staticData[tableName]
               ) {
-                era.data.base[charaIndex][valueIndex] =
-                  era.data.maxbase[charaIndex][valueIndex];
+                return undefined;
+              }
+              valueIndex = safeUndefinedCheck(
+                era.staticData[tableName][valueIndex],
+                valueIndex,
+              );
+              return era.staticData.chara[charaIndex][tableName][valueIndex];
+            }
+            if (!era.data[tableName] || !era.data[tableName][charaIndex]) {
+              return undefined;
+            }
+            switch (tableName) {
+              case 'palam':
+              case 'gotjuel':
+                valueIndex = safeUndefinedCheck(
+                  era.staticData.juel[valueIndex],
+                  valueIndex,
+                );
+                break;
+              case 'nowex':
+                valueIndex = safeUndefinedCheck(
+                  era.staticData.ex[valueIndex],
+                  valueIndex,
+                );
+                break;
+              default:
+                valueIndex = safeUndefinedCheck(
+                  era.staticData[tableName][valueIndex],
+                  valueIndex,
+                );
+            }
+            if (val !== undefined) {
+              if (isAdd) {
+                era.data[tableName][charaIndex][valueIndex] += val;
+              } else {
+                era.data[tableName][charaIndex][valueIndex] = val;
               }
             }
-          }
-          return era.data.base[charaIndex][valueIndex];
+            return era.data[tableName][charaIndex][valueIndex];
         }
-        if (tableName === 'maxbase') {
-          if (!era.data.maxbase[charaIndex]) {
-            return undefined;
-          }
-          valueIndex = safeUndefinedCheck(
-            era.staticData.base[valueIndex],
-            valueIndex,
-          );
-          if (val !== undefined) {
-            if (isAdd) {
-              era.data.maxbase[charaIndex][valueIndex] += val;
-            } else {
-              era.data.maxbase[charaIndex][valueIndex] = val;
-            }
-          }
-          return era.data.maxbase[charaIndex][valueIndex];
-        }
-        if (tableName.startsWith('static')) {
-          tableName = tableName.substring(6);
-          if (!era.staticData.chara[charaIndex] || !era.staticData[tableName]) {
-            return undefined;
-          }
-          valueIndex = safeUndefinedCheck(
-            era.staticData[tableName][valueIndex],
-            valueIndex,
-          );
-          return era.staticData.chara[charaIndex][tableName][valueIndex];
-        }
-        if (!era.data[tableName] || !era.data[tableName][charaIndex]) {
-          return undefined;
-        }
-        if (tableName === 'palam' || tableName === 'gotjuel') {
-          valueIndex = safeUndefinedCheck(
-            era.staticData.juel[valueIndex],
-            valueIndex,
-          );
-        } else if (tableName === 'nowex') {
-          valueIndex = safeUndefinedCheck(
-            era.staticData.ex[valueIndex],
-            valueIndex,
-          );
-        } else {
-          valueIndex = safeUndefinedCheck(
-            era.staticData[tableName][valueIndex],
-            valueIndex,
-          );
-        }
-        if (val !== undefined) {
-          if (isAdd) {
-            era.data[tableName][charaIndex][valueIndex] += val;
-          } else {
-            era.data[tableName][charaIndex][valueIndex] = val;
-          }
-        }
-        return era.data[tableName][charaIndex][valueIndex];
       default:
         break;
     }
@@ -725,6 +758,12 @@ module.exports = (
       equip: {},
       exp: {},
       flag: {},
+      item: {
+        bought: -1,
+        hold: {},
+        price: {},
+        sales: {},
+      },
       juel: {},
       mark: {},
       maxbase: {},
@@ -737,6 +776,12 @@ module.exports = (
     Object.values(era.staticData.flag).forEach(
       (num) => (era.data.flag[num] = 0),
     );
+    era.staticData.item &&
+      Object.values(era.staticData.item.name).forEach((num) => {
+        era.data.item.hold[num] = 0;
+        era.data.item.sales[num] = 0;
+        era.data.item.price[num] = era.staticData.item.price[num];
+      });
     era.config.system['extendedCharaTables'] &&
       era.config.system['extendedCharaTables'].length &&
       era.config.system['extendedCharaTables'].forEach(
@@ -984,6 +1029,20 @@ module.exports = (
     }
     // load normal csv
     showInfo && era.api.print('loading csv files ...');
+
+    function generateUniqueKey(table, originKey, tableName, strKey) {
+      let key = originKey;
+      while (table[key]) {
+        key++;
+      }
+      if (originKey !== key) {
+        log(
+          `[WARNING (ENGINE)]\n\tduplicate key in ${tableName}.csv! index ${originKey} of ${strKey} has been allocated to ${table[originKey]}! reset to ${key}`,
+        );
+      }
+      return key;
+    }
+
     normalCSVList.forEach((p) => {
       const k = fileList[p].toLowerCase();
       if (
@@ -1011,18 +1070,12 @@ module.exports = (
             csv.forEach((a) => {
               let numKey = a[0],
                 strKey = a[1];
-              while (era.fieldNames.juel[numKey]) {
-                numKey++;
-              }
-              if (a[0] !== numKey) {
-                log(
-                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
-                    a[0]
-                  } of ${strKey} has been allocated to ${
-                    era.fieldNames.juel[a[0]]
-                  }! reset to ${numKey}`,
-                );
-              }
+              numKey = generateUniqueKey(
+                era.fieldNames.juel,
+                numKey,
+                k,
+                strKey,
+              );
               era.staticData.juel[strKey] = numKey;
               era.fieldNames.juel[numKey] = strKey;
             });
@@ -1033,18 +1086,7 @@ module.exports = (
               let numKey = a[0],
                 strKey = a[1],
                 val = a[2];
-              while (era.fieldNames[k][numKey]) {
-                numKey++;
-              }
-              if (a[0] !== numKey) {
-                log(
-                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
-                    a[0]
-                  } of ${strKey} has been allocated to ${
-                    era.fieldNames[k][a[0]]
-                  }! reset to ${numKey}`,
-                );
-              }
+              numKey = generateUniqueKey(era.fieldNames[k], numKey, k, strKey);
               era.staticData.item.name[strKey] = numKey;
               era.staticData.item.price[numKey] = val;
               era.fieldNames[k][numKey] = strKey;
@@ -1054,18 +1096,7 @@ module.exports = (
             csv.forEach((a) => {
               let numKey = a[0],
                 strKey = a[1];
-              while (era.fieldNames[k][numKey]) {
-                numKey++;
-              }
-              if (a[0] !== numKey) {
-                log(
-                  `[WARNING (ENGINE)]\n\tduplicate key in ${k}.csv! index ${
-                    a[0]
-                  } of ${strKey} has been allocated to ${
-                    era.fieldNames[k][a[0]]
-                  }! reset to ${numKey}`,
-                );
-              }
+              numKey = generateUniqueKey(era.fieldNames[k], numKey, k, strKey);
               era.staticData[k][strKey] = numKey;
               era.fieldNames[k][numKey] = strKey;
             });
