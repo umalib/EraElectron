@@ -140,7 +140,7 @@ module.exports = {
   /**
    * print some text and wait any key from user
    * @param {string} content REQUIRED the text to be printed
-   * @param {{[align]: 'left'|'center'|'right', [color]: string, [isParagraph]: boolean, [offset]: number, [width]: number}} [config] config of the printed line   * @returns {Promise<void>} the same with waitAnyKey, please use await
+   * @param {{[align]: 'left'|'center'|'right', [color]: string, [isList]: boolean, [isParagraph]: boolean, [offset]: number, [width]: number}} [config] config of the printed line   * @returns {Promise<void>} the same with waitAnyKey, please use await
    * @returns {Promise<number>} line number of the printed
    */
   // eslint-disable-next-line no-unused-vars
