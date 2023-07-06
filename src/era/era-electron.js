@@ -27,6 +27,7 @@ const nameMapping = require('@/era/name-mapping.json');
  * @param {function} listen callback
  * @param {function} cleanListener callback
  * @param {function} resizeWindow callback
+ * @param {function} configPath callback
  * @param {{debug:function,error:function,info:function}} logger logger
  * @param {boolean} isDevelopment
  * @returns {{cache: {}, images: {}, debug: boolean, data: {}, fieldNames: {}, global: {}, api: {},
@@ -41,6 +42,7 @@ module.exports = (
   listen,
   cleanListener,
   resizeWindow,
+  configPath,
   logger,
   isDevelopment,
 ) => {
@@ -53,10 +55,11 @@ module.exports = (
     connect('error', { message, stack });
   }
 
-  let gamePath = resolve(path);
-  let gameMain = () => {};
-  let inputKey = undefined;
-  let totalLines = 0;
+  let gamePath = resolve(path),
+    oldPath = 'old-path',
+    gameMain = () => {};
+  let inputKey = undefined,
+    totalLines = 0;
 
   const era = {
     api: {},
@@ -893,6 +896,7 @@ module.exports = (
     }
     era.api.resetData();
     era.api.loadGlobal();
+    configPath(dirname(oldPath));
 
     try {
       gameMain();
@@ -907,7 +911,6 @@ module.exports = (
 
   const module = require('module');
   const include = module.prototype.require;
-  let oldPath = 'old-path';
 
   era.start = async () => {
     if (!existsSync(gamePath)) {

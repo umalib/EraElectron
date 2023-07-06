@@ -19,6 +19,8 @@ const { engineCommand } = require('@/renderer/utils/embedded');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+const configStore = new (require('electron-store'))();
+
 const logPath = join(app.getPath('userData'), './logs');
 if (!existsSync(logPath)) {
   mkdirSync(logPath);
@@ -74,7 +76,7 @@ async function createWindow() {
   win.on('resize', setContentHeight);
 
   const era = createEra(
-    join(process.cwd(), './game'),
+    configStore.get('last') || join(process.cwd(), './game'),
     (action, data) => {
       win.webContents.send('connector', { action, data });
     },
@@ -93,6 +95,9 @@ async function createWindow() {
       if (era.config.window.autoMax) {
         win.maximize();
       }
+    },
+    (_path) => {
+      configStore.set('last', _path);
     },
     engineLogger,
     isDevelopment,
