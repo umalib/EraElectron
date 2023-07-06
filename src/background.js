@@ -118,22 +118,34 @@ async function createWindow() {
 
   ipcMain.on('era', (_, msg) => {
     switch (msg.action) {
+      case 'add':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.api.add(msg.key, msg.val) },
+        });
+        break;
       case 'get':
         win.webContents.send('connector', {
           action: 'log',
           data: { info: era.api.get(msg.key) },
         });
         break;
+      case 'logData':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.data },
+        });
+        break;
+      case 'logStatic':
+        win.webContents.send('connector', {
+          action: 'log',
+          data: { info: era.staticData },
+        });
+        break;
       case 'set':
         win.webContents.send('connector', {
           action: 'log',
           data: { info: era.api.set(msg.key, msg.val) },
-        });
-        break;
-      case 'add':
-        win.webContents.send('connector', {
-          action: 'log',
-          data: { info: era.api.add(msg.key, msg.val) },
         });
         break;
     }

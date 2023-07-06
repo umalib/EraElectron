@@ -21,13 +21,19 @@ contextBridge.exposeInMainWorld('ipc', {
 });
 
 contextBridge.exposeInMainWorld('era', {
+  add(key, val) {
+    ipcRenderer.send('era', { action: 'add', key, val });
+  },
+  logData() {
+    ipcRenderer.send('era', { action: 'logData' });
+  },
+  logStatic() {
+    ipcRenderer.send('era', { action: 'logStatic' });
+  },
   get(key) {
     ipcRenderer.send('era', { action: 'get', key });
   },
   set(key, val) {
     ipcRenderer.send('era', { action: 'set', key, val });
-  },
-  add(key, val) {
-    ipcRenderer.send('era', { action: 'add', key, val });
   },
 });

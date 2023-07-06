@@ -1,11 +1,10 @@
 <template>
-  <el-container>
+  <el-container
+    @click.left="returnFromInput()"
+    @click.right="continueReturning()"
+  >
     <el-main>
-      <el-scrollbar
-        @click="!inputParam.any || returnFromInput(inputParam.key)"
-        :height="`${defaultSetting.height}px`"
-        ref="mainScrollbar"
-      >
+      <el-scrollbar :height="`${defaultSetting.height}px`" ref="mainScrollbar">
         <el-row
           v-for="(line, i) in lines"
           :align="line.align"
@@ -133,6 +132,11 @@ function clear(count) {
     }
     lines.value.splice(lines.value.length - lineCount, lines.value.length);
   }
+}
+
+function continueReturning() {
+  inputParam.value['continue'] = true;
+  returnFromDefault();
 }
 
 function getValidOffset(offset, defVal) {
@@ -325,6 +329,7 @@ function resetData() {
   };
   inputParam.value = {
     any: false,
+    continue: false,
     disableBefore: true,
     key: '',
     rule: [],
@@ -367,6 +372,16 @@ function returnFromButton(val) {
     inputParam.value.disableBefore = true;
   }
   connector.returnInput(inputParam.value['key'], val);
+}
+
+function returnFromDefault() {
+  if (inputParam.value['any']) {
+    returnFromInput();
+  } else if (inputParam.value['rule'].length === 1) {
+    returnFromButton(inputParam.value['rule'][0]);
+  } else {
+    inputParam.value['continue'] = false;
+  }
 }
 
 function returnFromInput() {
@@ -412,6 +427,9 @@ function showInput(data) {
   }
   inputParam.value.useRule = safeUndefinedCheck(data.config.useRule, true);
   inputParam.value.any = data.config.any;
+  if (inputParam.value['continue']) {
+    returnFromDefault();
+  }
 }
 
 function throwError(data) {
