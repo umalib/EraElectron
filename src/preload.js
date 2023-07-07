@@ -36,4 +36,7 @@ contextBridge.exposeInMainWorld('era', {
   set(key, val) {
     ipcRenderer.send('era', { action: 'set', key, val });
   },
+  cleanSave(val) {
+    ipcRenderer.send('era', { action: 'cleanSave', val });
+  },
 });

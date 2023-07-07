@@ -129,6 +129,9 @@ async function createWindow() {
           data: { info: era.api.add(msg.key, msg.val) },
         });
         break;
+      case 'cleanSave':
+        logger.info(era.api.rmData(msg.val));
+        break;
       case 'get':
         win.webContents.send('connector', {
           action: 'log',
