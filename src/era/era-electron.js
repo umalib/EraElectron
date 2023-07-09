@@ -30,11 +30,10 @@ const nameMapping = require('@/era/name-mapping.json');
  * @param {function} configPath callback
  * @param {{debug:function,error:function,info:function}} logger logger
  * @param {boolean} isDevelopment
- * @returns {{cache: {}, images: {}, debug: boolean, data: {}, fieldNames: {}, global: {}, api: {},
- * config:{[autoSaveOnShop]:boolean,
- * [system]:{_replace:boolean, saveCompressedData:boolean},
- * [window]:{autoMax:boolean,height:number,width:number}}, staticData: {},
- * [restart]:function,[setPath]:function,[start]:function}}
+ * @returns {{api: {}, cache: {}, images: {}, debug: boolean, data: {}, fieldNames: {}, global: {}, staticData: {},
+ * config: {[system]: {_replace: boolean, saveCompressedData: boolean},
+ * [window]: {autoMax: boolean, height: number, width: number}},
+ * [restart]: function, [setPath]: function, [start]: function}}
  */
 module.exports = (
   path,
