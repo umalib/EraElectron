@@ -2,7 +2,7 @@
   <template v-if="isList">
     <template v-for="span in contents" :key="span.content">
       <br v-if="span['isBr']" />
-      <span v-else :style="{ color: span.color }">
+      <span v-else :style="{ color: span.color, opacity: span.opacity || 1 }">
         {{ span.content }}
       </span>
     </template>
