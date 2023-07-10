@@ -17,7 +17,7 @@
         :link="!line.isButton"
         :type="line.buttonType"
       >
-        <span :style="{ fontSize: '16px', textAlign: line.inTextAlign }">
+        <span :style="getButtonStyle(line)">
           <template
             v-for="(content, index) in line.contents"
             :key="`button-${index}`"
@@ -91,10 +91,7 @@
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
-    <div
-      v-if="line.type === lineType.text"
-      :style="{ color: line.color, fontSize: line.fontSize }"
-    >
+    <div v-if="line.type === lineType.text" :style="getTextStyle(line)">
       <p v-if="line.isParagraph">
         <text-block :contents="line.contents" :is-list="line.isList" />
       </p>
@@ -116,6 +113,14 @@ const props = defineProps({
   buttonValCount: Number,
 });
 const { line, defaultSetting, buttonValCount } = toRefs(props);
+
+function getButtonStyle(line) {
+  return { fontSize: '16px', textAlign: line.inTextAlign };
+}
+
+function getTextStyle(line) {
+  return { color: line.color, fontSize: line.fontSize };
+}
 
 // eslint-disable-next-line no-undef
 const emit = defineEmits(['value-return']);
