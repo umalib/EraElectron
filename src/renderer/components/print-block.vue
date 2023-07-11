@@ -2,7 +2,7 @@
   <el-col
     :offset="line.offset || defaultSetting.colOffset"
     :span="line.width || defaultSetting.colWidth"
-    :style="{ textAlign: line.textAlign || defaultSetting.textAlign }"
+    :style="getBlockStyle()"
   >
     <el-badge
       v-if="line.type === lineType.button"
@@ -17,7 +17,7 @@
         :link="!line.isButton"
         :type="line.buttonType"
       >
-        <span :style="getButtonStyle(line)">
+        <span :style="getButtonStyle()">
           <template
             v-for="(content, index) in line.contents"
             :key="`button-${index}`"
@@ -37,11 +37,7 @@
     </el-divider>
     <el-container
       v-if="line.type === lineType['image']"
-      :style="{
-        textAlign: 'center',
-        width: `${line.width}px`,
-        height: `${line.height}px`,
-      }"
+      :style="getImageStyle()"
     >
       <img
         v-for="(img, i) in line['images']"
@@ -84,14 +80,11 @@
           </span>
         </el-progress>
       </el-col>
-      <el-col
-        :span="24 - line.barWidth"
-        :style="{ color: line.fontColor, textAlign: line.textAlign }"
-      >
+      <el-col :span="24 - line.barWidth" :style="getOutStyleInProgress()">
         <span>{{ line.outContent }}</span>
       </el-col>
     </el-row>
-    <div v-if="line.type === lineType.text" :style="getTextStyle(line)">
+    <div v-if="line.type === lineType.text" :style="getTextStyle()">
       <p v-if="line.isParagraph">
         <text-block :contents="line.contents" :is-list="line.isList" />
       </p>
@@ -114,15 +107,31 @@ const props = defineProps({
 });
 const { line, defaultSetting, buttonValCount } = toRefs(props);
 
-function getButtonStyle(line) {
-  return { fontSize: '16px', textAlign: line.inTextAlign };
+function getBlockStyle() {
+  return { textAlign: line.value.textAlign || defaultSetting.value.textAlign };
 }
 
-function getTextStyle(line) {
+function getButtonStyle() {
+  return { fontSize: '16px', textAlign: line.value.inTextAlign };
+}
+
+function getImageStyle() {
   return {
-    color: line.color,
-    fontSize: line.fontSize,
-    fontWeight: line.fontWeight,
+    textAlign: 'center',
+    width: `${line.value.width}px`,
+    height: `${line.value.height}px`,
+  };
+}
+
+function getOutStyleInProgress() {
+  return { color: line.value.fontColor, textAlign: line.value.textAlign };
+}
+
+function getTextStyle() {
+  return {
+    color: line.value.color,
+    fontSize: line.value.fontSize,
+    fontWeight: line.value.fontWeight,
   };
 }
 
