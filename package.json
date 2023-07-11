@@ -39,5 +39,5 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "version": "1.0.0-tiga"
+  "version": "1.0.1-lipiah"
 }
