@@ -280,6 +280,7 @@ function getTextObject(data) {
       ? data.content
       : data.content.toString().split('\n'),
     fontSize: safeUndefinedCheck(data.config.fontSize, '16px'),
+    fontWeight: data.config.fontWeight,
     isList: data.config.isList,
     isParagraph: data.config.isParagraph,
     offset: getValidOffset(data.config.offset),

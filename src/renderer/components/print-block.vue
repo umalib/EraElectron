@@ -119,7 +119,11 @@ function getButtonStyle(line) {
 }
 
 function getTextStyle(line) {
-  return { color: line.color, fontSize: line.fontSize };
+  return {
+    color: line.color,
+    fontSize: line.fontSize,
+    fontWeight: line.fontWeight,
+  };
 }
 
 // eslint-disable-next-line no-undef
